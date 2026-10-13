@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Create a CastFan Member account.">
+    <title>Create account | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="auth-page">
+<main class="auth-layout">
+    <a class="brand auth-brand" th:href="@{/}" aria-label="CastFan home">
+        <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+        <span>CastFan</span>
+    </a>
+
+    <section class="auth-panel" aria-labelledby="signup-heading">
+        <div class="auth-heading">
+            <p class="eyebrow">Member registration</p>
+            <h1 id="signup-heading">Create your account</h1>
+            <p>Follow Cast schedules, events, and membership content.</p>
+        </div>
+
+        <form class="auth-form" th:action="@{/signup}" th:object="${form}" method="post" novalidate>
+            <label class="form-field" for="displayName">
+                <span>Display name</span>
+                <input id="displayName" type="text" th:field="*{displayName}" autocomplete="name" maxlength="80" th:classappend="${#fields.hasErrors('displayName')} ? 'is-invalid'" required autofocus>
+                <small class="field-error" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}">Display name error</small>
+            </label>
+            <label class="form-field" for="email">
+                <span>Email</span>
+                <input id="email" type="email" th:field="*{email}" autocomplete="email" maxlength="254" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
+                <small class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email error</small>
+            </label>
+            <label class="form-field" for="password">
+                <span>Password</span>
+                <input id="password" type="password" th:field="*{password}" autocomplete="new-password" minlength="8" maxlength="72" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required>
+                <small class="field-hint" th:unless="${#fields.hasErrors('password')}">Use 8 to 72 characters.</small>
+                <small class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</small>
+            </label>
+            <label class="form-field" for="confirmPassword">
+                <span>Confirm password</span>
+                <input id="confirmPassword" type="password" th:field="*{confirmPassword}" autocomplete="new-password" maxlength="72" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'" required>
+                <small class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Confirmation error</small>
+            </label>
+            <button class="primary-button" type="submit">Create account</button>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a th:href="@{/login}">Sign in</a></p>
+    </section>
+</main>
+</body>
+</html>

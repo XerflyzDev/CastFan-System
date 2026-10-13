@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="CastFan brings Cast schedules, events, and membership access together in one place.">
+    <title th:text="${pageTitle} + ' | Home'">CastFan | Home</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+    <header class="app-header">
+        <div class="page-container header-content">
+            <a class="brand" th:href="@{/}" aria-label="CastFan home">
+                <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+                <span>CastFan</span>
+            </a>
+            <div class="header-actions">
+                <button class="icon-button" type="button" data-toast="You have no new notifications" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </button>
+                <a class="profile-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in" title="Sign in">
+                    <span>CF</span>
+                </a>
+                <a class="profile-button" sec:authorize="isAuthenticated()" th:href="@{/account}" aria-label="Open account" title="Open account">
+                    <i class="bi bi-person-fill" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-container page-content">
+        <label class="search-field home-search" for="cast-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input id="cast-search" type="search" placeholder="Search Cast or cafe" autocomplete="off">
+            <button class="search-clear" type="button" aria-label="Clear search" title="Clear search" hidden>
+                <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+            </button>
+        </label>
+
+        <div class="dashboard-grid">
+            <div class="primary-column">
+                <section class="content-section" aria-labelledby="working-heading">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">Daily schedule</p>
+                            <h2 id="working-heading">Cast Working Today</h2>
+                        </div>
+                        <a class="text-action" sec:authorize="hasRole('MEMBER')" th:href="@{/member/casts}">Discover</a>
+                        <a class="text-action" sec:authorize="isAnonymous()" th:href="@{/login}">Sign in</a>
+                    </div>
+
+                    <div class="cast-strip" id="working-cast-list">
+                        <button class="cast-preview" type="button" th:each="cast : ${home.workingToday}" th:attr="data-search-item=${cast.name + ' ' + cast.cafeName},data-toast=${cast.name + ' is working ' + cast.shiftTime}">
+                            <span class="avatar avatar-large" th:classappend="${'tone-' + cast.avatarTone}">
+                                <span th:text="${cast.initials}">MN</span>
+                                <i th:if="${cast.workingNow}" class="online-dot" aria-label="Working now"></i>
+                            </span>
+                            <strong th:text="${cast.name}">Mina</strong>
+                            <small th:text="${cast.shiftTime}">14:00 - 20:00</small>
+                        </button>
+                    </div>
+                    <p class="search-empty" id="working-empty" hidden>No working Cast matches your search.</p>
+                </section>
+
+                <section class="content-section" aria-labelledby="event-heading">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">Featured event</p>
+                            <h2 id="event-heading">A Special Moment</h2>
+                        </div>
+                    </div>
+
+                    <article class="event-card">
+                        <img th:src="@{${home.featuredEvent.imageUrl}}" alt="A table of strawberry desserts and tea in an evening cafe">
+                        <div class="event-content">
+                            <span class="event-label">Special event</span>
+                            <h3 th:text="${home.featuredEvent.title}">Autumn Sweet Night</h3>
+                            <p class="event-meta">
+                                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                <span th:text="${home.featuredEvent.date}">October 31, 2026</span>
+                                <span aria-hidden="true">·</span>
+                                <span th:text="${home.featuredEvent.time}">16:00 - 21:00</span>
+                            </p>
+                            <p class="event-description" th:text="${home.featuredEvent.description}">A special evening with strawberry desserts.</p>
+                            <button class="event-action" type="button" data-toast="Event details will be available soon">
+                                View details
+                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </article>
+                </section>
+            </div>
+
+            <aside class="content-section following-section" aria-labelledby="following-heading">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Following</p>
+                        <h2 id="following-heading">Your Cast</h2>
+                    </div>
+                    <span class="count-label" th:text="${home.followedCast.size() + ' Cast'}">3 Cast</span>
+                </div>
+
+                <div class="following-list" id="following-cast-list">
+                    <article class="cast-row" th:each="cast : ${home.followedCast}" th:attr="data-search-item=${cast.name + ' ' + cast.cafeName}">
+                        <button class="cast-row-main" type="button" th:attr="data-toast=${'Open ' + cast.name + ' profile'}">
+                            <span class="avatar" th:classappend="${'tone-' + cast.avatarTone}">
+                                <span th:text="${cast.initials}">MN</span>
+                                <i th:if="${cast.workingNow}" class="online-dot" aria-label="Working now"></i>
+                            </span>
+                            <span class="cast-details">
+                                <strong th:text="${cast.name}">Mina</strong>
+                                <small>
+                                    <span th:text="${cast.cafeName}">Hoshi Cafe</span>
+                                    <span aria-hidden="true">·</span>
+                                    <span th:text="${cast.shiftTime}">14:00 - 20:00</span>
+                                </small>
+                            </span>
+                        </button>
+                        <button class="follow-button is-following" type="button" aria-pressed="true" th:attr="aria-label=${'Unfollow ' + cast.name},data-cast-name=${cast.name}">
+                            <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            <span>Following</span>
+                        </button>
+                    </article>
+                </div>
+                <p class="search-empty" id="following-empty" hidden>No followed Cast matches your search.</p>
+            </aside>
+        </div>
+    </main>
+
+    <nav class="bottom-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
+        <div class="bottom-nav-content">
+            <a class="nav-item active" th:href="@{/}" aria-current="page">
+                <i class="bi bi-house-fill" aria-hidden="true"></i>
+                <span>Home</span>
+            </a>
+            <button class="nav-item" type="button" data-toast="The schedule page is coming next">
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                <span>Schedule</span>
+            </button>
+            <a class="nav-item" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}">
+                <i class="bi bi-heart" aria-hidden="true"></i>
+                <span>Following</span>
+            </a>
+            <a class="nav-item" sec:authorize="isAnonymous()" th:href="@{/login}">
+                <i class="bi bi-heart" aria-hidden="true"></i>
+                <span>Following</span>
+            </a>
+            <a class="nav-item" sec:authorize="isAnonymous()" th:href="@{/login}">
+                <i class="bi bi-person" aria-hidden="true"></i>
+                <span>Profile</span>
+            </a>
+            <a class="nav-item" sec:authorize="isAuthenticated()" th:href="@{/account}">
+                <i class="bi bi-person-fill" aria-hidden="true"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+    </nav>
+</div>
+
+<div class="app-toast" id="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

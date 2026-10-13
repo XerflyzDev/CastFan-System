@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Manage CastFan stores, Cast, and schedules.">
+    <title>Owner workspace | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="workspace-page">
+<header class="workspace-header">
+    <div class="workspace-container workspace-header-content">
+        <a class="brand" th:href="@{/owner}" aria-label="Owner workspace home">
+            <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+            <span>CastFan</span>
+        </a>
+        <a class="icon-button" th:href="@{/account}" aria-label="Open account" title="Account">
+            <i class="bi bi-person-fill" aria-hidden="true"></i>
+        </a>
+    </div>
+</header>
+<main class="workspace-container workspace-content">
+    <div class="workspace-title">
+        <div>
+            <p class="eyebrow">Owner workspace</p>
+            <h1>Welcome, <span th:text="${account.displayName}">Owner</span></h1>
+        </div>
+        <span class="role-badge owner">OWNER</span>
+    </div>
+    <div class="workspace-grid">
+        <section class="workspace-section" aria-labelledby="store-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Operations</p>
+                    <h2 id="store-heading">Stores</h2>
+                </div>
+            </div>
+            <div class="workspace-empty">
+                <i class="bi bi-shop" aria-hidden="true"></i>
+                <p>No stores assigned.</p>
+            </div>
+        </section>
+        <section class="workspace-section" aria-labelledby="review-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Approvals</p>
+                    <h2 id="review-heading">Schedule requests</h2>
+                </div>
+            </div>
+            <div class="workspace-empty">
+                <i class="bi bi-check2-square" aria-hidden="true"></i>
+                <p>No requests need review.</p>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

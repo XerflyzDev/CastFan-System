@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Manage CastFan membership tiers.">
+    <title>Memberships | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="app-shell">
+<header class="app-header">
+    <div class="page-container header-content">
+        <a class="brand" th:href="@{/}" aria-label="CastFan home">
+            <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+            <span>CastFan</span>
+        </a>
+        <a class="profile-button" th:href="@{/account}" aria-label="Open account" title="Account">
+            <i class="bi bi-person-fill" aria-hidden="true"></i>
+        </a>
+    </div>
+</header>
+
+<main class="page-container directory-content">
+    <div class="directory-heading">
+        <p class="eyebrow">Member access</p>
+        <h1>Memberships</h1>
+        <p>Manage your active Cast tiers and explore available memberships.</p>
+    </div>
+
+    <div class="form-alert success" th:if="${membershipSuccess}" th:text="${membershipSuccess}" role="status">Membership activated.</div>
+    <div class="form-alert" th:if="${membershipError}" th:text="${membershipError}" role="alert">Membership conflict.</div>
+    <div class="form-alert neutral" th:if="${param.cancelled}" role="status">Membership cancelled.</div>
+
+    <section class="membership-section" aria-labelledby="active-memberships-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Current access</p>
+                <h2 id="active-memberships-heading">Active memberships</h2>
+            </div>
+            <span class="count-label" th:text="${memberships.size()}">0</span>
+        </div>
+        <div class="tier-list" th:if="${!memberships.empty}">
+            <article class="tier-row" th:each="membership : ${memberships}">
+                <div class="tier-rank"><i class="bi bi-star-fill" aria-hidden="true"></i></div>
+                <div class="tier-copy">
+                    <p class="tier-cast-name" th:text="${membership.castStageName}">Cast name</p>
+                    <h3 th:text="${membership.tierName}">Tier name</h3>
+                    <strong><span th:text="${#numbers.formatDecimal(membership.monthlyPrice, 1, 2)}">0.00</span> THB / month</strong>
+                </div>
+                <form th:action="@{/member/memberships/{id}/cancel(id=${membership.id})}" method="post">
+                    <button class="secondary-button compact-button" type="submit">Cancel</button>
+                </form>
+            </article>
+        </div>
+        <div class="directory-empty compact-empty" th:if="${memberships.empty}">
+            <i class="bi bi-star" aria-hidden="true"></i>
+            <h2>No active memberships</h2>
+            <p>Available Cast tiers appear below.</p>
+        </div>
+    </section>
+
+    <section class="membership-section" aria-labelledby="available-tiers-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Explore</p>
+                <h2 id="available-tiers-heading">Available tiers</h2>
+            </div>
+        </div>
+        <div class="membership-tier-grid" th:if="${!availableTiers.empty}">
+            <article class="membership-tier" th:each="tier : ${availableTiers}">
+                <div class="tier-name-line">
+                    <div>
+                        <p class="tier-cast-name" th:text="${tier.castStageName}">Cast name</p>
+                        <h3 th:text="${tier.name}">Tier name</h3>
+                    </div>
+                    <span class="tier-rank-label">Rank <strong th:text="${tier.rank}">1</strong></span>
+                </div>
+                <p th:text="${tier.description != null ? tier.description : 'No description.'}">Description</p>
+                <div class="tier-footer">
+                    <strong><span th:text="${#numbers.formatDecimal(tier.monthlyPrice, 1, 2)}">0.00</span> THB</strong>
+                    <span th:if="${tier.current}" class="status-label">Current</span>
+                    <span th:if="${tier.anotherActiveTier}" class="status-label inactive">Another tier active</span>
+                    <form th:if="${!tier.current and !tier.anotherActiveTier}" th:action="@{/member/tiers/{id}/subscribe(id=${tier.id})}" method="post">
+                        <button class="primary-button compact-button" type="submit">Join tier</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+        <div class="directory-empty compact-empty" th:if="${availableTiers.empty}">
+            <i class="bi bi-stars" aria-hidden="true"></i>
+            <h2>No tiers available</h2>
+            <p>Active Cast membership tiers will appear here.</p>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-nav" aria-label="Member navigation">
+    <div class="bottom-nav-content">
+        <a class="nav-item" th:href="@{/}"><i class="bi bi-house" aria-hidden="true"></i><span>Home</span></a>
+        <a class="nav-item" th:href="@{/member/casts}"><i class="bi bi-search" aria-hidden="true"></i><span>Discover</span></a>
+        <a class="nav-item" th:href="@{/member/following}"><i class="bi bi-heart" aria-hidden="true"></i><span>Following</span></a>
+        <a class="nav-item active" th:href="@{/member/memberships}" aria-current="page"><i class="bi bi-star-fill" aria-hidden="true"></i><span>Memberships</span></a>
+    </div>
+</nav>
+</body>
+</html>

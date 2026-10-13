@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Access to this CastFan page is restricted.">
+    <title>Access denied | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="auth-page">
+<main class="auth-layout">
+    <a class="brand auth-brand" th:href="@{/}" aria-label="CastFan home">
+        <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+        <span>CastFan</span>
+    </a>
+    <section class="auth-panel" aria-labelledby="denied-heading">
+        <div class="account-avatar" aria-hidden="true"><i class="bi bi-lock-fill"></i></div>
+        <div class="auth-heading">
+            <p class="eyebrow">403</p>
+            <h1 id="denied-heading">Access denied</h1>
+            <p>Your account does not have permission to open this workspace.</p>
+        </div>
+        <a class="primary-button" th:href="@{/account}">Return to account</a>
+    </section>
+</main>
+</body>
+</html>

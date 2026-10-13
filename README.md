@@ -1,59 +1,65 @@
 # CastFan System
 
-CastFan System คือ Web Application สำหรับบริหารจัดการร้าน Maid Cafe หรือ Concept Cafe และเชื่อมต่อการใช้งานระหว่างเจ้าของร้าน (`Owner`), พนักงาน (`Cast`) และลูกค้าสมาชิก (`Member`) ภายในระบบเดียว
+CastFan System is a web application for managing a maid cafe or concept cafe. It connects store owners (`Owner`), staff members (`Cast`), and customers (`Member`) in one system.
 
-โปรเจกต์นี้จัดทำสำหรับรายวิชา **Web Application Development** และเริ่มพัฒนาใหม่ตั้งแต่ต้น โดยใช้ Spring Boot, Spring Data JPA และฐานข้อมูล H2/MySQL ตามข้อกำหนดของรายวิชา
+This project is being built from scratch for the **Web Application Development** course. It uses Spring Boot, Spring Data JPA, and H2/MySQL as required by the course.
+
+## Project Language
+
+English is the primary language for the user interface, system messages, documentation, source-code identifiers, and future project content. Localized languages may be added later as optional translations.
 
 ## Project Status
 
-> **Planning and initial development**
+> **Foundation development**
 
-ขณะนี้โปรเจกต์อยู่ในช่วงเริ่มต้น กำลังออกแบบ architecture, database schema, user flow และขอบเขตของ Minimum Viable Product (MVP)
+The project currently includes the Spring Boot foundation, Maven Wrapper, database profiles, the first mobile-first Member Home interface, the initial database design, and database-backed Member registration and authentication. The next step is to implement role profiles and the Store domain.
 
 ## Objectives
 
-- ลดความซับซ้อนในการจัดและอนุมัติตารางงานของ Cast
-- ช่วยให้ Member ตรวจสอบตารางและติดตาม Cast ที่สนใจได้สะดวก
-- สนับสนุนการจัดการกิจกรรม โปรโมชัน และข้อมูลภายในร้าน
-- จัดการระดับสมาชิกและสิทธิ์เข้าถึงคอนเทนต์ของแต่ละ Cast
-- พัฒนา Mobile-first UI ที่สวยงาม ใช้งานง่าย และ responsive
+- Simplify Cast shift submission and approval.
+- Help Members find schedules and follow their favorite Cast.
+- Support store events, promotions, and public information.
+- Manage membership tiers and access to Cast content.
+- Deliver an attractive, accessible, and responsive mobile-first interface.
 
 ## User Roles
 
 ### Member
 
-- สมัครสมาชิกและเข้าสู่ระบบ
-- ดูรายชื่อและโปรไฟล์ Cast
-- ติดตาม Cast ที่สนใจ
-- ดูตารางเข้างานของ Cast
-- ดูกิจกรรมและโปรโมชันของร้าน
-- เข้าถึงคอนเทนต์ตามระดับสมาชิก
+- Register and sign in.
+- Browse Cast profiles.
+- Follow favorite Cast members.
+- View Cast work schedules.
+- View store events and promotions.
+- Access content based on membership tier.
 
 ### Cast
 
-- จัดการโปรไฟล์ของตนเอง
-- ส่งและแก้ไขตารางเวลาเข้างาน
-- สร้างระดับสมาชิกสำหรับผู้ติดตาม
-- จัดการสมาชิกในแต่ละระดับ
-- สร้างคอนเทนต์และกำหนดสิทธิ์การเข้าถึง
+- Manage their profile.
+- Submit and update work schedules.
+- Create membership tiers for followers.
+- Manage members in each tier.
+- Publish content and define access permissions.
 
 ### Owner
 
-- ดูภาพรวม Cast และตารางงานของร้าน
-- อนุมัติหรือปฏิเสธตารางงาน
-- สร้างและจัดการกิจกรรม
-- สร้างและจัดการโปรโมชัน
-- จัดการแบนเนอร์และข้อมูลที่แสดงบนหน้าเว็บไซต์
+- View an overview of Cast members and store schedules.
+- Approve or reject submitted schedules.
+- Create and manage events.
+- Create and manage promotions.
+- Manage banners and public store information.
 
 ## Technology Stack
 
 | Layer | Technology |
 | --- | --- |
 | Backend | Java, Spring Boot |
-| Web | Spring MVC |
+| Web | Spring MVC, Thymeleaf |
 | Persistence | Spring Data JPA |
 | Development Database | Embedded H2 Database |
 | Deployment Database | Cloud SQL for MySQL |
+| Application Hosting | Google Cloud Run |
+| Secret Storage | Google Cloud Secret Manager |
 | Frontend | HTML, JavaScript, Bootstrap, Custom CSS |
 | Build Tool | Maven |
 | Testing | JUnit, Spring Boot Test |
@@ -62,6 +68,9 @@ CastFan System คือ Web Application สำหรับบริหารจ
 
 ```text
 Client / Mobile Browser
+          |
+          v
+Google Cloud Run
           |
           v
 Spring MVC Controller
@@ -77,62 +86,116 @@ Spring Data JPA Repository
           `-- Cloud SQL MySQL (deployment)
 ```
 
-Backend จะจัดโครงสร้างตามหน้าที่ ได้แก่ `Controller`, `Service`, `Repository`, `Entity`, `DTO`, configuration และ security เพื่อให้ดูแลรักษาและทดสอบระบบได้ง่าย
+The backend will be organized by responsibility into `Controller`, `Service`, `Repository`, `Entity`, `DTO`, configuration, and security packages to keep the system maintainable and testable.
 
 ## Database Environments
 
-- `dev` - ใช้ Embedded H2 สำหรับการพัฒนาในเครื่อง
-- `test` - ใช้ H2 แบบ isolated สำหรับ automated tests
-- `prod` - ใช้ Cloud SQL for MySQL และรับค่าการเชื่อมต่อผ่าน environment variables หรือ secret manager
+- `dev` - Embedded H2 for local development.
+- `test` - Isolated H2 database for automated tests.
+- `prod` - Cloud SQL for MySQL, configured through environment variables or a secret manager.
 
-ข้อมูลสำคัญ เช่น database password, API secret และ service-account key ต้องไม่ถูก commit ลง repository
+Sensitive data such as database passwords, API secrets, and service-account keys must never be committed to the repository.
+
+Public registration always creates a `MEMBER`. Privileged `CAST` and `OWNER` accounts are created only through the internal provisioning service; there is no public role-selection or privileged-account endpoint.
 
 ## Core Data Model
 
-Entity หลักที่วางแผนไว้:
+Planned entities:
 
-- `User`
+- `UserAccount`
 - `MemberProfile`
 - `CastProfile`
+- `Store`
+- `StoreCast`
 - `ShiftSchedule`
 - `MemberTier`
-- `CastFollower`
+- `TierMembership`
+- `CastFollow`
 - `Content`
 - `StoreEvent`
 - `StorePromotion`
 
-รายละเอียดของ Entity และความสัมพันธ์จะถูกปรับปรุงหลังจากสรุป requirements และออกแบบ ER Diagram
+Entity details, relationships, constraints, and implementation order are documented in [docs/database-design.md](docs/database-design.md).
+
+The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
+
+The approved visual language, color tokens, components, and responsive UI rules are documented in [docs/ui-design-system.md](docs/ui-design-system.md).
 
 ## Development Roadmap
 
-- [ ] สรุป functional requirements และ acceptance criteria
-- [ ] ออกแบบ wireframe และ user flow
-- [ ] ออกแบบ ER Diagram และ database schema
-- [ ] สร้าง Spring Boot project
-- [ ] ตั้งค่า Spring Data JPA และ H2
-- [ ] พัฒนา authentication และ role-based authorization
-- [ ] พัฒนา workflow ของ Member
-- [ ] พัฒนา workflow ของ Cast
-- [ ] พัฒนา workflow ของ Owner
-- [ ] เชื่อมต่อ Cloud SQL for MySQL
-- [ ] เพิ่ม validation, error handling และ automated tests
-- [ ] ตรวจ security และ responsive UI
-- [ ] เตรียม deployment และสาธิตระบบ
+- [ ] Finalize functional requirements and acceptance criteria.
+- [x] Design the first Member Home interface.
+- [ ] Complete wireframes and user flows for all roles.
+- [x] Design the ER diagram and database schema.
+- [x] Create the Spring Boot project.
+- [x] Configure Spring Data JPA and H2.
+- [x] Implement Member registration and database-backed authentication.
+- [x] Implement the initial Member, Cast, and Store domain model.
+- [x] Implement Store-Cast assignments and the Shift approval domain workflow.
+- [x] Add role-based route and method authorization for Cast and Owner workspaces.
+- [x] Implement Cast discovery and Member follow/unfollow workflow.
+- [x] Implement Cast membership tiers and Member tier access checks.
+- [ ] Complete the remaining Member workflow.
+- [ ] Implement the Cast workflow.
+- [ ] Implement the Owner workflow.
+- [ ] Connect Cloud SQL for MySQL.
+- [ ] Deploy the Spring Boot service to Google Cloud Run.
+- [ ] Store production credentials in Google Cloud Secret Manager.
+- [ ] Add validation, error handling, and broader automated tests.
+- [ ] Complete security and responsive UI reviews.
+- [ ] Prepare deployment and the project demonstration.
 
 ## Security Requirements
 
-- ตรวจสอบ authentication และ authorization ที่ backend ทุก endpoint
-- จำกัดข้อมูลและ action ตาม role และ resource ownership
-- Hash password ด้วยวิธีที่ปลอดภัย
-- Validate input ทุกจุดก่อนบันทึกลงฐานข้อมูล
-- ป้องกัน IDOR, XSS, CSRF, SQL injection และ brute-force login
-- ไม่เก็บ credential หรือ secret ไว้ใน source code
-- ตรวจสอบชนิดและขนาดของไฟล์ที่ผู้ใช้อัปโหลด
-- บันทึก audit log สำหรับ action สำคัญ
+- Enforce authentication and authorization on every protected backend endpoint.
+- Restrict data and actions by role and resource ownership.
+- Hash passwords with a secure password encoder.
+- Validate all input before saving it to the database.
+- Protect against IDOR, XSS, CSRF, SQL injection, and brute-force sign-in attempts.
+- Keep credentials and secrets out of source control.
+- Validate the type and size of uploaded files.
+- Record audit logs for important actions.
 
 ## Getting Started
 
-โปรเจกต์ยังอยู่ในช่วงเริ่มต้น ขั้นตอนติดตั้งและคำสั่ง run จะเพิ่มหลังจากสร้าง Spring Boot project structure แล้ว
+### Prerequisites
+
+- JDK 21
+- Maven does not need to be installed separately because the repository includes Maven Wrapper.
+
+### Run with H2
+
+Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+macOS or Linux:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Open [http://localhost:8080](http://localhost:8080).
+
+The development H2 Console is available at [http://localhost:8080/h2-console](http://localhost:8080/h2-console). Use JDBC URL `jdbc:h2:mem:castfan`, username `sa`, and an empty password.
+
+### Run Tests
+
+```powershell
+.\mvnw.cmd test
+```
+
+### Production Database
+
+Set `SPRING_PROFILES_ACTIVE=prod` and the following environment variables before connecting to Cloud SQL for MySQL:
+
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+
+Production will run on Google Cloud Run and connect to Cloud SQL for MySQL. Credentials must be provided from Secret Manager rather than committed files. See [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md) for the planned deployment process.
 
 ## Repository
 
@@ -140,4 +203,4 @@ Entity หลักที่วางแผนไว้:
 
 ## Academic Context
 
-โปรเจกต์นี้จัดทำเพื่อการศึกษาในรายวิชา **Web Application Development** โดยเน้นการประยุกต์ใช้ Spring Boot, Spring Data JPA, database connectivity และการออกแบบ UI ด้วย Bootstrap หรือ Custom CSS
+This project is developed for the **Web Application Development** course. It demonstrates Spring Boot, Spring Data JPA, database connectivity, and interface design with Bootstrap and custom CSS.

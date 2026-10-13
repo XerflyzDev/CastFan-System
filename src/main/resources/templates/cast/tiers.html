@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Manage Cast membership tiers.">
+    <title>Membership tiers | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="workspace-page">
+<header class="workspace-header">
+    <div class="workspace-container workspace-header-content">
+        <a class="brand" th:href="@{/cast}" aria-label="Cast workspace home">
+            <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+            <span>CastFan</span>
+        </a>
+        <a class="icon-button" th:href="@{/account}" aria-label="Open account" title="Account">
+            <i class="bi bi-person-fill" aria-hidden="true"></i>
+        </a>
+    </div>
+</header>
+
+<main class="workspace-container workspace-content">
+    <div class="workspace-title">
+        <div>
+            <p class="eyebrow">Cast workspace</p>
+            <h1>Membership tiers</h1>
+        </div>
+        <a class="secondary-button compact-button" th:href="@{/cast}" aria-label="Back to workspace" title="Back to workspace">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <div class="form-alert success" th:if="${param.created}" role="status">Membership tier created.</div>
+    <div class="form-alert neutral" th:if="${param.deactivated}" role="status">Membership tier deactivated.</div>
+
+    <div class="tier-layout">
+        <section class="workspace-section" aria-labelledby="create-tier-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">New tier</p>
+                    <h2 id="create-tier-heading">Create membership tier</h2>
+                </div>
+            </div>
+
+            <form class="auth-form" th:action="@{/cast/tiers}" th:object="${form}" method="post">
+                <div class="form-alert" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Tier conflict</div>
+                <label class="form-field" for="tier-name">
+                    <span>Name</span>
+                    <input id="tier-name" type="text" th:field="*{name}" maxlength="80" required>
+                    <span class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</span>
+                </label>
+                <label class="form-field" for="tier-description">
+                    <span>Description</span>
+                    <textarea id="tier-description" th:field="*{description}" maxlength="500" rows="4"></textarea>
+                    <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description error</span>
+                </label>
+                <div class="form-split">
+                    <label class="form-field" for="tier-rank">
+                        <span>Rank</span>
+                        <input id="tier-rank" type="number" th:field="*{rank}" min="1" max="100" required>
+                        <span class="field-error" th:if="${#fields.hasErrors('rank')}" th:errors="*{rank}">Rank error</span>
+                    </label>
+                    <label class="form-field" for="tier-price">
+                        <span>Monthly price (THB)</span>
+                        <input id="tier-price" type="number" th:field="*{monthlyPrice}" min="0" max="99999999.99" step="0.01" required>
+                        <span class="field-error" th:if="${#fields.hasErrors('monthlyPrice')}" th:errors="*{monthlyPrice}">Price error</span>
+                    </label>
+                </div>
+                <button class="primary-button" type="submit">Create tier</button>
+            </form>
+        </section>
+
+        <section class="workspace-section" aria-labelledby="current-tier-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Current setup</p>
+                    <h2 id="current-tier-heading">Your tiers</h2>
+                </div>
+                <span class="count-label" th:text="${tiers.size()}">0</span>
+            </div>
+
+            <div class="tier-list" th:if="${!tiers.empty}">
+                <article class="tier-row" th:each="tier : ${tiers}">
+                    <div class="tier-rank" th:text="${tier.rank}">1</div>
+                    <div class="tier-copy">
+                        <div class="tier-name-line">
+                            <h3 th:text="${tier.name}">Tier name</h3>
+                            <span class="status-label" th:classappend="${!tier.active} ? ' inactive'" th:text="${tier.active ? 'Active' : 'Inactive'}">Active</span>
+                        </div>
+                        <p th:text="${tier.description != null ? tier.description : 'No description.'}">Description</p>
+                        <strong><span th:text="${#numbers.formatDecimal(tier.monthlyPrice, 1, 2)}">0.00</span> THB / month</strong>
+                    </div>
+                    <form th:if="${tier.active}" th:action="@{/cast/tiers/{id}/deactivate(id=${tier.id})}" method="post">
+                        <button class="icon-button" type="submit" aria-label="Deactivate tier" title="Deactivate tier">
+                            <i class="bi bi-archive" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </article>
+            </div>
+            <div class="workspace-empty" th:if="${tiers.empty}">
+                <i class="bi bi-stars" aria-hidden="true"></i>
+                <p>No membership tiers.</p>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

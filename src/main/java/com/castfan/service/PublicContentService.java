@@ -9,11 +9,10 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.castfan.dto.PublicCastProfileView;
+import com.castfan.dto.PublicContentDetailView;
 import com.castfan.dto.PublicEventView;
-import com.castfan.entity.ContentAudience;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
-import com.castfan.entity.MembershipStatus;
 import com.castfan.entity.ShiftStatus;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -25,7 +24,6 @@ import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
-import com.castfan.repository.TierMembershipRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -51,7 +49,7 @@ public class PublicContentService {
 	private final MemberProfileRepository memberProfileRepository;
 	private final StoreEventRepository storeEventRepository;
 	private final CastContentRepository castContentRepository;
-	private final TierMembershipRepository tierMembershipRepository;
+	private final ContentAccessService contentAccessService;
 
 	public PublicContentService(
 		CastProfileRepository castProfileRepository,
@@ -63,7 +61,7 @@ public class PublicContentService {
 		MemberProfileRepository memberProfileRepository,
 		StoreEventRepository storeEventRepository,
 		CastContentRepository castContentRepository,
-		TierMembershipRepository tierMembershipRepository
+		ContentAccessService contentAccessService
 	) {
 		this.castProfileRepository = castProfileRepository;
 		this.storeCastRepository = storeCastRepository;
@@ -74,7 +72,7 @@ public class PublicContentService {
 		this.memberProfileRepository = memberProfileRepository;
 		this.storeEventRepository = storeEventRepository;
 		this.castContentRepository = castContentRepository;
-		this.tierMembershipRepository = tierMembershipRepository;
+		this.contentAccessService = contentAccessService;
 	}
 
 	@Transactional(readOnly = true)
@@ -105,25 +103,13 @@ public class PublicContentService {
 		var isFollowed = viewer
 			.map(member -> castFollowRepository.existsByMemberProfileIdAndCastProfileId(member.getId(), castProfileId))
 			.orElse(false);
-		var memberRank = viewer.flatMap(member -> tierMembershipRepository.findActiveForCast(
-			member.getId(), castProfileId, MembershipStatus.ACTIVE
-		)).map(membership -> membership.getMemberTier().getRank()).orElse(0);
-		var ownsProfile = authenticatedEmail != null
-			&& profile.getUserAccount().getEmail().equalsIgnoreCase(authenticatedEmail);
 		var content = castContentRepository.findPublishedForProfile(castProfileId, ContentStatus.PUBLISHED).stream()
 			.map(post -> {
-				var accessible = ownsProfile || post.getAudience() == ContentAudience.PUBLIC
-					|| (post.getAudience() == ContentAudience.FOLLOWERS && isFollowed)
-					|| (post.getAudience() == ContentAudience.MEMBERS && memberRank >= post.getMinimumTier().getRank());
-				var audience = switch (post.getAudience()) {
-					case PUBLIC -> "Public";
-					case FOLLOWERS -> "Followers";
-					case MEMBERS -> post.getMinimumTier().getName() + "+ members";
-				};
+				var access = contentAccessService.access(post, authenticatedEmail);
 				return new PublicCastProfileView.ContentSummary(
-					post.getId(), post.getTitle(), accessible ? post.getBody() : null,
-					accessible ? post.getImageUrl() : null, audience,
-					SHORT_DATE.format(post.getPublishedAt().atZone(DEFAULT_ZONE)), accessible
+					post.getId(), post.getTitle(), access.accessible() ? post.getBody() : null,
+					access.accessible() ? post.getImageUrl() : null, contentAccessService.audienceLabel(post),
+					SHORT_DATE.format(post.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
 				);
 			}).toList();
 
@@ -133,6 +119,21 @@ public class PublicContentService {
 			assignment.map(value -> value.getStore().getName()).orElse("CastFan"),
 			castFollowRepository.countByCastProfileId(castProfileId), isFollowed,
 			nextShift, tiers, content
+		);
+	}
+
+	@Transactional(readOnly = true)
+	public PublicContentDetailView content(Long castProfileId, Long contentId, String authenticatedEmail) {
+		var content = castContentRepository.findPublishedByIdForProfile(
+			contentId, castProfileId, ContentStatus.PUBLISHED, UserStatus.ACTIVE
+		).orElseThrow(() -> notFound("Content not found"));
+		var access = contentAccessService.access(content, authenticatedEmail);
+		var profile = content.getCastProfile();
+		return new PublicContentDetailView(
+			content.getId(), profile.getId(), profile.getStageName(), initials(profile.getStageName()),
+			profile.getAvatarUrl(), content.getTitle(), access.accessible() ? content.getBody() : null,
+			access.accessible() ? content.getImageUrl() : null, contentAccessService.audienceLabel(content),
+			DATE.format(content.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
 		);
 	}
 

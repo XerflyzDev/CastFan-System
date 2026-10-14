@@ -10,11 +10,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.castfan.dto.HomeViewModel;
+import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.ShiftStatus;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
+import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreEventRepository;
@@ -39,6 +41,8 @@ public class HomeService {
 	private final UserAccountRepository userAccountRepository;
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastFollowRepository castFollowRepository;
+	private final CastContentRepository castContentRepository;
+	private final ContentAccessService contentAccessService;
 
 	public HomeService(
 		StoreRepository storeRepository,
@@ -46,7 +50,9 @@ public class HomeService {
 		StoreEventRepository storeEventRepository,
 		UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository,
-		CastFollowRepository castFollowRepository
+		CastFollowRepository castFollowRepository,
+		CastContentRepository castContentRepository,
+		ContentAccessService contentAccessService
 	) {
 		this.storeRepository = storeRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
@@ -54,6 +60,8 @@ public class HomeService {
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castFollowRepository = castFollowRepository;
+		this.castContentRepository = castContentRepository;
+		this.contentAccessService = contentAccessService;
 	}
 
 	@Transactional(readOnly = true)
@@ -103,14 +111,35 @@ public class HomeService {
 				event.getImageUrl()
 			))
 			.toList();
+		var member = activeMember(authenticatedEmail);
+		var feed = member.map(profile -> castContentRepository.findFeedForMember(
+			profile.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE, PageRequest.of(0, 6)
+		).stream().map(content -> {
+			var access = contentAccessService.access(content, authenticatedEmail);
+			var castProfile = content.getCastProfile();
+			return new HomeViewModel.FeedItem(
+				content.getId(), castProfile.getId(), castProfile.getStageName(), initials(castProfile.getStageName()),
+				castProfile.getAvatarUrl(), content.getTitle(), access.accessible() ? preview(content.getBody()) : null,
+				access.accessible() ? content.getImageUrl() : null, contentAccessService.audienceLabel(content),
+				EVENT_DATE_FORMAT.format(content.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
+			);
+		}).toList()).orElseGet(java.util.List::of);
 
 		return new HomeViewModel(
 			memberName(authenticatedEmail),
 			DAY_FORMAT.format(today),
 			store.map(value -> value.getName()).orElse("CastFan"),
 			cast,
-			events
+			events,
+			feed
 		);
+	}
+
+	private java.util.Optional<com.castfan.entity.MemberProfile> activeMember(String email) {
+		if (email == null) return java.util.Optional.empty();
+		return userAccountRepository.findByEmailIgnoreCase(email)
+			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));
 	}
 
 	private Set<Long> followedIds(String email, java.util.List<Long> profileIds) {
@@ -156,5 +185,10 @@ public class HomeService {
 			.limit(2)
 			.map(part -> part.substring(0, 1).toUpperCase(Locale.ENGLISH))
 			.collect(Collectors.joining());
+	}
+
+	private String preview(String body) {
+		var clean = body.replaceAll("\\s+", " ").trim();
+		return clean.length() <= 140 ? clean : clean.substring(0, 137) + "...";
 	}
 }

@@ -1,0 +1,28 @@
+.notification-content { padding-top: 17px; }
+.notification-heading { margin: 22px 0 18px; }
+.notification-heading p,
+.notification-heading h1 { margin: 0; }
+.notification-heading p { margin-bottom: 3px; color: var(--muted); font-size: 0.7rem; }
+.notification-heading > div { display: flex; align-items: center; justify-content: space-between; }
+.notification-heading h1 { font-size: 1.75rem; line-height: 1; }
+.notification-heading > div > span { display: grid; min-width: 28px; height: 28px; place-items: center; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.58rem; font-weight: 700; }
+.notification-section { margin-top: 20px; }
+.notification-section .section-title > a { padding: 5px 9px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.52rem; font-weight: 700; text-decoration: none; }
+.notification-list { display: grid; gap: 8px; }
+.notification-card { display: grid; grid-template-columns: 42px minmax(0, 1fr) 12px; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; color: var(--ink); background: #fff; box-shadow: var(--shadow); text-decoration: none; }
+.notification-card.locked { background: rgba(255, 255, 255, 0.76); }
+.notification-avatar,
+.event-icon,
+.event-notification > img { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 13px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.62rem; font-weight: 700; object-fit: cover; }
+.notification-avatar { border-radius: 50%; }
+.notification-copy { display: grid; gap: 2px; min-width: 0; }
+.notification-copy small,
+.notification-copy > span { overflow: hidden; color: var(--muted); font-size: 0.52rem; text-overflow: ellipsis; white-space: nowrap; }
+.notification-copy strong { overflow: hidden; font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+.notification-copy .locked-copy { display: flex; align-items: center; gap: 5px; color: var(--rose-dark); }
+.notification-card > .bi-chevron-right { color: var(--muted); font-size: 0.6rem; }
+.notification-empty { display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.7); }
+.notification-empty > i { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; color: var(--rose-dark); background: var(--rose-soft); }
+.notification-empty > div { display: grid; gap: 2px; }
+.notification-empty strong { font-size: 0.65rem; }
+.notification-empty span { color: var(--muted); font-size: 0.54rem; }

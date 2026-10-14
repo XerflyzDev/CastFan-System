@@ -8,8 +8,13 @@ public record MemberScheduleView(
 	String selectedDateLabel,
 	String monthLabel,
 	String closingTime,
+	int visibleShiftCount,
+	boolean weekView,
+	String previousWeekDate,
+	String nextWeekDate,
 	List<ScheduleDay> days,
 	List<ShiftItem> shifts,
+	List<ScheduleGroup> weekSchedule,
 	UpcomingEvent upcomingEvent
 ) {
 
@@ -18,9 +23,12 @@ public record MemberScheduleView(
 		String dayLabel,
 		String dayNumber,
 		boolean selected,
-		boolean today
+		boolean today,
+		int shiftCount
 	) {
 	}
+
+	public record ScheduleGroup(String isoDate, String dateLabel, boolean today, List<ShiftItem> shifts) { }
 
 	public record ShiftItem(
 		Long id,

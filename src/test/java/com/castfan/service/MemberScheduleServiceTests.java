@@ -84,6 +84,29 @@ class MemberScheduleServiceTests {
 			.hasMessageContaining("400 BAD_REQUEST");
 	}
 
+	@Test
+	void weekViewGroupsApprovedShiftsAcrossSevenDays() {
+		var owner = account("week-owner@test.local", "Week Owner", UserRole.OWNER);
+		var store = storeRepository.save(new Store(
+			owner, "Week Cafe", "week-cafe", null, null, STORE_ZONE.getId(), true
+		));
+		var selectedDate = LocalDate.of(2026, 10, 14);
+		var minaAssignment = assignment(store, "week-mina@test.local", "Week Mina");
+		var yukiAssignment = assignment(store, "week-yuki@test.local", "Week Yuki");
+		approvedShift(minaAssignment, owner, selectedDate, 14, 20);
+		approvedShift(yukiAssignment, owner, selectedDate.plusDays(2), 16, 22);
+
+		var schedule = memberScheduleService.load(selectedDate, true);
+
+		assertThat(schedule.weekView()).isTrue();
+		assertThat(schedule.visibleShiftCount()).isEqualTo(2);
+		assertThat(schedule.weekSchedule()).hasSize(7);
+		assertThat(schedule.weekSchedule()).filteredOn(day -> !day.shifts().isEmpty())
+			.extracting(day -> day.isoDate()).containsExactly("2026-10-14", "2026-10-16");
+		assertThat(schedule.previousWeekDate()).isEqualTo("2026-10-04");
+		assertThat(schedule.nextWeekDate()).isEqualTo("2026-10-18");
+	}
+
 	private UserAccount account(String email, String name, UserRole role) {
 		return userAccountRepository.save(new UserAccount(email, "encoded", name, role, UserStatus.ACTIVE));
 	}

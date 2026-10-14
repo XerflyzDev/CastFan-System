@@ -36,6 +36,12 @@ public class MemberProfile {
 	@Column(name = "avatar_url", length = 2048)
 	private String avatarUrl;
 
+	@Column(name = "cast_update_notifications", nullable = false)
+	private boolean castUpdateNotifications = true;
+
+	@Column(name = "event_notifications", nullable = false)
+	private boolean eventNotifications = true;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
@@ -78,6 +84,17 @@ public class MemberProfile {
 	public String getAvatarUrl() {
 		return avatarUrl;
 	}
+
+	public void updateDetails(String bio, String avatarUrl, boolean castUpdateNotifications,
+		boolean eventNotifications) {
+		this.bio = bio;
+		this.avatarUrl = avatarUrl;
+		this.castUpdateNotifications = castUpdateNotifications;
+		this.eventNotifications = eventNotifications;
+	}
+
+	public boolean isCastUpdateNotifications() { return castUpdateNotifications; }
+	public boolean isEventNotifications() { return eventNotifications; }
 
 	public Instant getCreatedAt() {
 		return createdAt;

@@ -69,6 +69,13 @@ class RoleAuthorizationTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("member/schedule"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Approved Shifts")));
+		mockMvc.perform(get("/member/schedule").param("view", "week")
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Previous week")));
+		mockMvc.perform(get("/member/schedule").param("view", "year")
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(status().isBadRequest());
 		mockMvc.perform(get("/member/schedule").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isForbidden());
 	}

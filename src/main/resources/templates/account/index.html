@@ -22,7 +22,7 @@
         <div class="screen-content profile-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
-                <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></button>
+                <a class="round-button" th:if="${account.role == 'MEMBER'}" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
             </div>
 
             <header class="profile-heading">
@@ -30,11 +30,14 @@
                 <h1>Profile</h1>
             </header>
 
+            <div class="profile-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle"></i>Profile saved.</div>
+
             <section class="member-overview" aria-labelledby="member-name">
-                <span class="member-avatar" th:text="${account.initials}">AR</span>
+                <img class="member-avatar member-avatar-photo" th:if="${memberProfile != null and memberProfile.avatarUrl != null}" th:src="${memberProfile.avatarUrl}" th:alt="${account.displayName}">
+                <span class="member-avatar" th:unless="${memberProfile != null and memberProfile.avatarUrl != null}" th:text="${account.initials}">AR</span>
                 <div>
                     <h2 id="member-name" th:text="${account.displayName}">Member</h2>
-                    <p th:text="${account.role == 'MEMBER' ? 'Hoshi Cafe Member' : account.role + ' account'}">Hoshi Cafe Member</p>
+                    <p th:text="${memberProfile != null and memberProfile.bio != null ? memberProfile.bio : (account.role == 'MEMBER' ? 'Hoshi Cafe Member' : account.role + ' account')}">Hoshi Cafe Member</p>
                     <small th:text="${'Joined ' + account.joinedLabel}">Joined October 2026</small>
                 </div>
                 <span class="verified-icon" aria-label="Active account" title="Active account"><i class="bi bi-check2" aria-hidden="true"></i></span>
@@ -61,6 +64,7 @@
             <section class="profile-section" aria-labelledby="account-details-heading">
                 <div class="profile-section-title compact-title">
                     <div><small>Account</small><h2 id="account-details-heading">Details</h2></div>
+                    <a th:if="${account.role == 'MEMBER'}" th:href="@{/member/profile}">Edit</a>
                 </div>
                 <div class="setting-row">
                     <span><i class="bi bi-envelope" aria-hidden="true"></i></span>
@@ -70,6 +74,11 @@
                 <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/following}">
                     <span><i class="bi bi-heart" aria-hidden="true"></i></span>
                     <span><strong>Following</strong><small>Manage followed Cast profiles</small></span>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/profile}">
+                    <span><i class="bi bi-bell" aria-hidden="true"></i></span>
+                    <span><strong>Notifications</strong><small th:text="${memberProfile.castUpdateNotifications or memberProfile.eventNotifications ? 'Choose Cast updates and event reminders' : 'All notifications are paused'}">Choose notification preferences</small></span>
                     <i class="bi bi-chevron-right" aria-hidden="true"></i>
                 </a>
                 <a class="setting-row" th:if="${account.role == 'CAST'}" th:href="@{/cast/profile}">

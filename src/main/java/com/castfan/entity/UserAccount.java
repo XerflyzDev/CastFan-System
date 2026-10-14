@@ -98,4 +98,8 @@ public class UserAccount {
 	public Instant getUpdatedAt() {
 		return updatedAt;
 	}
+
+	public void updateDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 }

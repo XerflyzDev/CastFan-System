@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Edit your CastFan Member profile.">
+    <title>Edit Profile | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/member-profile.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="Member profile settings">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-person-check" aria-hidden="true"></i>Profile settings</span></header>
+        <div class="screen-content profile-content">
+            <div class="top-actions"><a class="round-button" th:href="@{/account}" aria-label="Back to Profile"><i class="bi bi-arrow-left"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+            <header class="profile-heading"><p>Your public details</p><h1>Edit profile</h1></header>
+
+            <div class="profile-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle"></i>Profile saved.</div>
+
+            <section class="member-overview edit-preview" aria-label="Current profile">
+                <img class="member-avatar member-avatar-photo" th:if="${profile.avatarUrl != null}" th:src="${profile.avatarUrl}" th:alt="${profile.displayName}">
+                <span class="member-avatar" th:unless="${profile.avatarUrl != null}" th:text="${profile.initials}">AR</span>
+                <div><h2 th:text="${profile.displayName}">Member</h2><p th:text="${profile.bio != null ? profile.bio : 'CastFan Member'}">CastFan Member</p></div>
+                <span class="verified-icon" aria-label="Active Member"><i class="bi bi-check2"></i></span>
+            </section>
+
+            <section class="profile-form-card" aria-labelledby="member-profile-form-heading">
+                <div class="profile-section-title"><div><small>Public information</small><h2 id="member-profile-form-heading">Profile details</h2></div></div>
+                <form class="member-profile-form" th:action="@{/member/profile}" th:object="${form}" method="post">
+                    <div class="profile-alert error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Profile error</div>
+                    <label><span>Display name</span><input type="text" th:field="*{displayName}" maxlength="80" required><small class="field-error" th:if="${#fields.hasErrors('displayName')}" th:errors="*{displayName}">Name error</small></label>
+                    <label><span>Bio</span><textarea th:field="*{bio}" maxlength="500" rows="4" placeholder="Tell Cast and other Members a little about you"></textarea><small class="field-error" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}">Bio error</small></label>
+                    <label><span>Avatar URL</span><input type="url" th:field="*{avatarUrl}" maxlength="2048" placeholder="https://example.com/photo.jpg"><small>Use http, https, or a local /images path.</small><small class="field-error" th:if="${#fields.hasErrors('avatarUrl')}" th:errors="*{avatarUrl}">Avatar error</small></label>
+                    <fieldset class="notification-preferences"><legend>Notification preferences</legend>
+                        <label class="preference-toggle"><span><strong>Cast updates</strong><small>Show new posts from Cast you follow.</small></span><input type="checkbox" th:field="*{castUpdateNotifications}"><i aria-hidden="true"></i></label>
+                        <label class="preference-toggle"><span><strong>Event reminders</strong><small>Show upcoming published store events.</small></span><input type="checkbox" th:field="*{eventNotifications}"><i aria-hidden="true"></i></label>
+                    </fieldset>
+                    <button class="save-profile-button" type="submit"><i class="bi bi-check2"></i>Save profile</button>
+                </form>
+            </section>
+        </div>
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" th:href="@{/}"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" th:href="@{/member/following}"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button active" th:href="@{/account}" aria-current="page"><i class="bi bi-person-fill"></i><span>Profile</span></a>
+        </nav>
+    </section>
+</main>
+<script th:src="@{/js/member-profile.js}" defer></script>
+</body>
+</html>

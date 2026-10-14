@@ -156,10 +156,15 @@ When adding a new page, reuse the existing tokens and component classes before i
 
 - [x] Member Home concept and JPA-backed production route
 - [x] Member Schedule concept and JPA-backed production route
+- [x] Member Schedule day/week modes and week navigation
+- [x] Member Notification Center backed by followed Cast content and published events
+- [x] Persisted Member notification preferences in Profile settings
 - [x] Member Following concept and JPA-backed production route
 - [x] Member Profile concept and JPA-backed production route
+- [x] Member Profile edit form with persisted bio and avatar
 - [x] Cast Profile concept and JPA-backed production route
 - [x] Event Detail concept and JPA-backed production route
+- [x] Member followed-Cast content feed and access-controlled Content Detail
 - [x] Authentication and account pages
 - [x] Cast discovery and following pages
 - [x] Member membership pages
@@ -176,7 +181,7 @@ When adding a new page, reuse the existing tokens and component classes before i
 
 The persistent Member navigation contains four destinations in this order:
 
-1. `Home` - published events, today's approved shifts, and summary information.
+1. `Home` - followed-Cast updates, published events, today's approved shifts, and summary information.
 2. `Schedule` - approved Cast shifts by day or week.
 3. `Following` - Cast profiles followed by the authenticated Member.
 4. `Profile` - account information, memberships, notification preferences, and sign out.

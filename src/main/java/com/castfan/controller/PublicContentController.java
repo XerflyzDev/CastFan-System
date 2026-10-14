@@ -30,6 +30,15 @@ public class PublicContentController {
 		return "public/cast-profile";
 	}
 
+	@GetMapping("/casts/{castProfileId}/content/{contentId}")
+	public String content(@PathVariable Long castProfileId, @PathVariable Long contentId,
+		Principal principal, Model model) {
+		model.addAttribute("content", publicContentService.content(
+			castProfileId, contentId, principal == null ? null : principal.getName()
+		));
+		return "public/content-detail";
+	}
+
 	@GetMapping("/events/{eventId}")
 	public String event(@PathVariable Long eventId, Model model) {
 		model.addAttribute("event", publicContentService.event(eventId));

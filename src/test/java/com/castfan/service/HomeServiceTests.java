@@ -6,7 +6,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import com.castfan.entity.CastFollow;
+import com.castfan.entity.CastContent;
 import com.castfan.entity.CastProfile;
+import com.castfan.entity.ContentAudience;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.MemberProfile;
 import com.castfan.entity.ShiftSchedule;
@@ -17,6 +19,7 @@ import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
+import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
@@ -46,6 +49,7 @@ class HomeServiceTests {
 	@Autowired private ShiftScheduleRepository shiftScheduleRepository;
 	@Autowired private StoreEventRepository storeEventRepository;
 	@Autowired private CastFollowRepository castFollowRepository;
+	@Autowired private CastContentRepository castContentRepository;
 
 	@Test
 	void homeUsesApprovedPublicDatabaseRecordsAndMemberFollowState() {
@@ -74,6 +78,18 @@ class HomeServiceTests {
 			today.atTime(22, 0).atZone(STORE_ZONE).toInstant()
 		));
 		castFollowRepository.save(new CastFollow(memberProfile, mina));
+		var followedPost = new CastContent(
+			mina, "Mina update", "A new update for everyone following Mina", null,
+			ContentAudience.FOLLOWERS, null
+		);
+		followedPost.publish();
+		castContentRepository.save(followedPost);
+		var unrelatedPost = new CastContent(
+			yuki, "Yuki update", "This must not appear in Mina's feed", null,
+			ContentAudience.PUBLIC, null
+		);
+		unrelatedPost.publish();
+		castContentRepository.save(unrelatedPost);
 
 		var eventStartsAt = today.plusDays(2).atTime(16, 0).atZone(STORE_ZONE).toInstant();
 		storeEventRepository.save(new StoreEvent(
@@ -96,6 +112,12 @@ class HomeServiceTests {
 		});
 		assertThat(home.featuredEvents()).extracting(event -> event.title())
 			.containsExactly("Published Night");
+		assertThat(home.followingContent()).singleElement().satisfies(item -> {
+			assertThat(item.castProfileId()).isEqualTo(mina.getId());
+			assertThat(item.title()).isEqualTo("Mina update");
+			assertThat(item.bodyPreview()).contains("following Mina");
+			assertThat(item.accessible()).isTrue();
+		});
 	}
 
 	private UserAccount account(String email, String name, UserRole role) {

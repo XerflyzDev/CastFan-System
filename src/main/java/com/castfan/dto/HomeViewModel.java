@@ -7,7 +7,8 @@ public record HomeViewModel(
 	String dateLabel,
 	String storeName,
 	List<CastSummary> workingToday,
-	List<FeaturedEvent> featuredEvents
+	List<FeaturedEvent> featuredEvents,
+	List<FeedItem> followingContent
 ) {
 
 	public record CastSummary(
@@ -31,4 +32,18 @@ public record HomeViewModel(
 		String imageUrl
 	) {
 	}
+
+	public record FeedItem(
+		Long id,
+		Long castProfileId,
+		String castName,
+		String castInitials,
+		String castAvatarUrl,
+		String title,
+		String bodyPreview,
+		String imageUrl,
+		String audience,
+		String publishedLabel,
+		boolean accessible
+	) { }
 }

@@ -73,3 +73,23 @@
 .public-content-copy p { color: #5e6066; font-size: 0.58rem; line-height: 1.5; white-space: pre-line; }
 .public-content-card.locked { background: rgba(255, 255, 255, 0.72); }
 .public-content-copy .locked-copy { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.content-read { display: inline-flex; align-items: center; gap: 5px; color: var(--rose-dark) !important; font-size: 0.53rem !important; font-weight: 700; text-decoration: none; }
+.content-detail-phone { background: var(--screen); }
+.content-detail-content { height: 100%; overflow-y: auto; padding: 58px 15px 112px; }
+.back-to-cast { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; color: var(--muted); font-size: 0.59rem; font-weight: 700; text-decoration: none; }
+.content-author { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 10px; margin-bottom: 12px; }
+.content-author img,
+.content-author > span:first-child { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.66rem; font-weight: 700; object-fit: cover; }
+.content-author > div { display: grid; gap: 2px; }
+.content-author strong { font-size: 0.72rem; }
+.content-author small { color: var(--muted); font-size: 0.52rem; }
+.content-detail-image { width: 100%; max-height: 250px; margin-bottom: 10px; border-radius: 16px; object-fit: cover; box-shadow: var(--shadow); }
+.content-detail-card { padding: 16px; border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
+.content-audience { display: inline-flex; padding: 5px 8px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.5rem; font-weight: 700; }
+.content-detail-card h1 { margin: 12px 0 8px; font-size: 1.22rem; line-height: 1.2; }
+.content-detail-card > p { margin: 0; color: #55575d; font-size: 0.66rem; line-height: 1.65; white-space: pre-line; }
+.content-lock-panel { display: grid; justify-items: center; gap: 8px; padding: 28px 18px; color: var(--muted); text-align: center; }
+.content-lock-panel > i { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 14px; color: var(--rose-dark); background: var(--rose-soft); }
+.content-lock-panel strong { color: var(--ink); font-size: 0.78rem; }
+.content-lock-panel p { margin: 0; font-size: 0.58rem; line-height: 1.5; }
+.content-lock-panel a { display: inline-flex; min-height: 36px; align-items: center; padding: 0 14px; border-radius: 11px; color: #fff; background: var(--ink); font-size: 0.58rem; font-weight: 700; text-decoration: none; }

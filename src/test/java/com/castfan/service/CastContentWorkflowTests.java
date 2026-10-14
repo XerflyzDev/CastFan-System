@@ -78,18 +78,23 @@ class CastContentWorkflowTests {
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published=true"));
 		mockMvc.perform(get("/casts/{id}", castProfileId))
 			.andExpect(status().isOk()).andExpect(content().string(containsString("Public content body")));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()))
+			.andExpect(status().isOk()).andExpect(view().name("public/content-detail"))
+			.andExpect(content().string(containsString("Public content body")));
 
 		mockMvc.perform(post("/cast/content/{id}/archive", post.getId()).with(castUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?archived=true"));
 		mockMvc.perform(get("/casts/{id}", castProfileId))
 			.andExpect(content().string(not(containsString("Public content body"))));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()))
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
 	void followerAndMemberContentIsLockedUntilViewerQualifies() throws Exception {
 		var followerPost = createAndPublish("Follower Note", "Follower secret", ContentAudience.FOLLOWERS, null);
 		var tier = membershipService.createTier(castAccount.getEmail(), tierForm("Gold", 2));
-		createAndPublish("Gold Note", "Gold secret", ContentAudience.MEMBERS, tier.id());
+		var goldPost = createAndPublish("Gold Note", "Gold secret", ContentAudience.MEMBERS, tier.id());
 		var member = saveAccount("content-member-" + System.nanoTime() + "@castfan.test", UserRole.MEMBER);
 		profileService.createMemberProfile(member);
 
@@ -97,16 +102,43 @@ class CastContentWorkflowTests {
 			.andExpect(content().string(containsString("Follower Note")))
 			.andExpect(content().string(not(containsString("Follower secret"))))
 			.andExpect(content().string(not(containsString("Gold secret"))));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId()))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("This update is locked")))
+			.andExpect(content().string(not(containsString("Follower secret"))));
 
 		memberCastService.follow(member.getEmail(), castProfileId);
 		mockMvc.perform(get("/casts/{id}", castProfileId).with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(content().string(containsString("Follower secret")))
 			.andExpect(content().string(not(containsString("Gold secret"))));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId())
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(status().isOk()).andExpect(content().string(containsString("Follower secret")));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, goldPost.getId())
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(content().string(containsString("This update is locked")))
+			.andExpect(content().string(not(containsString("Gold secret"))));
 
 		membershipService.subscribe(member.getEmail(), tier.id());
 		mockMvc.perform(get("/casts/{id}", castProfileId).with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(content().string(containsString("Gold secret")));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, goldPost.getId())
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(content().string(containsString("Gold secret")));
 		assertThat(followerPost.getStatus()).isEqualTo(ContentStatus.PUBLISHED);
+	}
+
+	@Test
+	void contentDetailDoesNotAllowCrossProfileIdLookup() throws Exception {
+		var post = createAndPublish("Private Route", "Route body", ContentAudience.PUBLIC, null);
+		var other = saveAccount("detail-other-cast-" + System.nanoTime() + "@castfan.test", UserRole.CAST);
+		var otherProfileId = profileService.createCastProfile(
+			other, "Detail Other " + System.nanoTime(), null, null, true
+		).getId();
+
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", otherProfileId, post.getId()))
+			.andExpect(status().isNotFound())
+			.andExpect(content().string(not(containsString("Route body"))));
 	}
 
 	@Test

@@ -30,7 +30,9 @@ Constraints:
 
 Member-specific public information. Each user can have at most one Member profile.
 
-Constraint: unique `userId`.
+Key fields: `bio`, `avatarUrl`, `castUpdateNotifications`, `eventNotifications`.
+
+Constraint: unique `userId`. Notification preferences default to enabled for new Member profiles.
 
 ### CastProfile
 

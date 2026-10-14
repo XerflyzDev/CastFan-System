@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" th:content="${content.title + ' by ' + content.castName}"><title th:text="${content.title + ' | CastFan'}">Content | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet"><link th:href="@{/css/cast-profile.css}" rel="stylesheet">
+</head>
+<body><main class="concept-stage"><section class="phone content-detail-phone" aria-label="Cast content detail">
+    <div class="ambient-top" aria-hidden="true"></div>
+    <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-stars"></i>Cast update</span></header>
+    <div class="screen-content content-detail-content">
+        <div class="top-actions"><a class="round-button" th:href="@{/casts/{id}(id=${content.castProfileId})}" aria-label="Back to Cast profile"><i class="bi bi-arrow-left"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+        <header class="content-author"><img th:if="${content.castAvatarUrl != null}" th:src="${content.castAvatarUrl}" th:alt="${content.castName}"><span th:unless="${content.castAvatarUrl != null}" th:text="${content.castInitials}">MN</span><div><strong th:text="${content.castName}">Mina</strong><small th:text="${content.publishedLabel}">Tuesday, 14 October</small></div></header>
+        <img class="content-detail-image" th:if="${content.imageUrl != null}" th:src="${content.imageUrl}" th:alt="${content.title}">
+        <article class="content-detail-card" th:classappend="${!content.accessible} ? ' locked'">
+            <span class="content-audience"><i class="bi" th:classappend="${content.accessible ? 'bi-unlock' : 'bi-lock'}"></i><span th:text="${content.audience}">Public</span></span>
+            <h1 th:text="${content.title}">Update title</h1>
+            <p th:if="${content.accessible}" th:text="${content.body}">Content body</p>
+            <div class="content-lock-panel" th:unless="${content.accessible}"><i class="bi bi-lock-fill"></i><strong>This update is locked</strong><p>Join the required audience to read the full update.</p><a sec:authorize="isAnonymous()" th:href="@{/login}">Sign in</a><a sec:authorize="hasRole('MEMBER')" th:href="@{/member/memberships}">View memberships</a></div>
+        </article>
+        <a class="back-to-cast" th:href="@{/casts/{id}(id=${content.castProfileId})}"><i class="bi bi-person"></i>View <span th:text="${content.castName}">Cast</span>'s profile</a>
+    </div>
+    <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation"><a class="nav-button" th:href="@{/}"><i class="bi bi-house"></i><span>Home</span></a><a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a><a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-calendar3"></i><span>Schedule</span></a><a class="nav-button active" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}"><i class="bi bi-heart-fill"></i><span>Following</span></a><a class="nav-button active" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-heart"></i><span>Following</span></a><a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/account}"><i class="bi bi-person"></i><span>Profile</span></a><a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-person"></i><span>Profile</span></a></nav>
+</section></main><script th:src="@{/js/public-detail.js}" defer></script></body></html>

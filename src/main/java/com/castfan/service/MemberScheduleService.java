@@ -33,6 +33,7 @@ public class MemberScheduleService {
 	private static final DateTimeFormatter DAY_NAME = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH);
 	private static final DateTimeFormatter DAY_NUMBER = DateTimeFormatter.ofPattern("d", Locale.ENGLISH);
 	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.ENGLISH);
+	private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.ENGLISH);
 	private static final DateTimeFormatter MONTH = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
 	private static final DateTimeFormatter EVENT_DATE = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
@@ -54,6 +55,11 @@ public class MemberScheduleService {
 
 	@Transactional(readOnly = true)
 	public MemberScheduleView load(LocalDate requestedDate) {
+		return load(requestedDate, false);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberScheduleView load(LocalDate requestedDate, boolean weekView) {
 		var now = Instant.now();
 		var store = storeRepository.findFirstByActiveTrueOrderByIdAsc();
 		var zone = store.map(value -> safeZone(value.getTimezone())).orElse(DEFAULT_ZONE);
@@ -63,46 +69,45 @@ public class MemberScheduleService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Schedule date is outside the supported range");
 		}
 		var selectedDate = requestedDate == null ? today : requestedDate;
-		var dayStartsAt = selectedDate.atStartOfDay(zone).toInstant();
-		var dayEndsAt = selectedDate.plusDays(1).atStartOfDay(zone).toInstant();
+		var weekStartsOn = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+		var rangeStartsOn = weekView ? weekStartsOn : selectedDate;
+		var rangeEndsOn = weekView ? weekStartsOn.plusDays(7) : selectedDate.plusDays(1);
+		var rangeStartsAt = rangeStartsOn.atStartOfDay(zone).toInstant();
+		var rangeEndsAt = rangeEndsOn.atStartOfDay(zone).toInstant();
 
 		var schedules = store.map(value -> shiftScheduleRepository.findPublicShiftsInRange(
-			value.getId(), ShiftStatus.APPROVED, UserStatus.ACTIVE, dayStartsAt, dayEndsAt
+			value.getId(), ShiftStatus.APPROVED, UserStatus.ACTIVE, rangeStartsAt, rangeEndsAt
 		)).orElseGet(List::of);
-		var shifts = schedules.stream().map(schedule -> {
-			var profile = schedule.getStoreCast().getCastProfile();
-			var startsSoon = !now.isAfter(schedule.getStartsAt())
-				&& now.plusSeconds(2 * 60 * 60).isAfter(schedule.getStartsAt());
-			return new MemberScheduleView.ShiftItem(
-				schedule.getId(),
-				profile.getId(),
-				profile.getStageName(),
-				initials(profile.getStageName()),
-				avatarTone(profile.getId()),
-				profile.getAvatarUrl(),
-				TIME.format(schedule.getStartsAt().atZone(zone)),
-				formatRange(schedule.getStartsAt(), schedule.getEndsAt(), zone),
-				!now.isBefore(schedule.getStartsAt()) && now.isBefore(schedule.getEndsAt()),
-				startsSoon
-			);
-		}).toList();
+		var selectedSchedules = schedules.stream()
+			.filter(schedule -> LocalDate.ofInstant(schedule.getStartsAt(), zone).equals(selectedDate))
+			.toList();
+		var shifts = selectedSchedules.stream().map(schedule -> shiftItem(schedule, now, zone)).toList();
 
-		var weekStartsOn = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
 		var days = IntStream.range(0, 7)
 			.mapToObj(weekStartsOn::plusDays)
 			.map(date -> new MemberScheduleView.ScheduleDay(
 				date.toString(), DAY_NAME.format(date), DAY_NUMBER.format(date),
-				date.equals(selectedDate), date.equals(today)
+				date.equals(selectedDate), date.equals(today),
+				(int) schedules.stream().filter(schedule -> LocalDate.ofInstant(schedule.getStartsAt(), zone).equals(date)).count()
 			))
 			.toList();
+		var weekSchedule = days.stream().map(day -> {
+			var date = LocalDate.parse(day.isoDate());
+			var dayShifts = schedules.stream()
+				.filter(schedule -> LocalDate.ofInstant(schedule.getStartsAt(), zone).equals(date))
+				.map(schedule -> shiftItem(schedule, now, zone)).toList();
+			return new MemberScheduleView.ScheduleGroup(
+				day.isoDate(), FULL_DATE.format(date), day.today(), dayShifts
+			);
+		}).toList();
 
 		var upcomingEvent = storeEventRepository.findUpcomingPublicEvents(
-			EventStatus.PUBLISHED, dayStartsAt, PageRequest.of(0, 1)
+			EventStatus.PUBLISHED, selectedDate.atStartOfDay(zone).toInstant(), PageRequest.of(0, 1)
 		).stream().findFirst().map(event -> new MemberScheduleView.UpcomingEvent(
 			event.getId(), event.getTitle(), EVENT_DATE.format(event.getStartsAt().atZone(zone))
 		)).orElse(null);
 
-		var closingTime = schedules.stream()
+		var closingTime = selectedSchedules.stream()
 			.map(schedule -> schedule.getEndsAt().atZone(zone).toLocalTime())
 			.max(java.time.LocalTime::compareTo)
 			.map(TIME::format)
@@ -111,12 +116,29 @@ public class MemberScheduleService {
 		return new MemberScheduleView(
 			store.map(value -> value.getName()).orElse("CastFan"),
 			selectedDate.toString(),
-			FULL_DATE.format(selectedDate),
+			weekView ? SHORT_DATE.format(weekStartsOn) + " - " + SHORT_DATE.format(weekStartsOn.plusDays(6)) : FULL_DATE.format(selectedDate),
 			MONTH.format(selectedDate),
 			closingTime,
+			schedules.size(),
+			weekView,
+			weekStartsOn.minusWeeks(1).toString(),
+			weekStartsOn.plusWeeks(1).toString(),
 			days,
 			shifts,
+			weekSchedule,
 			upcomingEvent
+		);
+	}
+
+	private MemberScheduleView.ShiftItem shiftItem(com.castfan.entity.ShiftSchedule schedule, Instant now, ZoneId zone) {
+		var profile = schedule.getStoreCast().getCastProfile();
+		var startsSoon = !now.isAfter(schedule.getStartsAt())
+			&& now.plusSeconds(2 * 60 * 60).isAfter(schedule.getStartsAt());
+		return new MemberScheduleView.ShiftItem(
+			schedule.getId(), profile.getId(), profile.getStageName(), initials(profile.getStageName()),
+			avatarTone(profile.getId()), profile.getAvatarUrl(), TIME.format(schedule.getStartsAt().atZone(zone)),
+			formatRange(schedule.getStartsAt(), schedule.getEndsAt(), zone),
+			!now.isBefore(schedule.getStartsAt()) && now.isBefore(schedule.getEndsAt()), startsSoon
 		);
 	}
 

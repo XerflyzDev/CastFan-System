@@ -13,6 +13,9 @@ public interface MemberProfileRepository extends JpaRepository<MemberProfile, Lo
 
 	Optional<MemberProfile> findByUserAccountId(Long userAccountId);
 
+	@Query("select profile from MemberProfile profile join fetch profile.userAccount account where lower(account.email) = lower(:email)")
+	Optional<MemberProfile> findByUserAccountEmailIgnoreCase(@Param("email") String email);
+
 	boolean existsByUserAccountId(Long userAccountId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -10,9 +10,9 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Owner workflow integration**
+> **Member notification preferences integration**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Schedule, Following, Profile, public Cast Profile, and public Event Detail use Spring Data JPA. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, and publish events through ownership-protected routes. Published events also provide downloadable iCalendar files.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, and publish events through ownership-protected routes. Published events also provide downloadable iCalendar files.
 
 ## Objectives
 
@@ -141,7 +141,12 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Connect the protected Member Schedule to approved shifts with date selection.
 - [x] Connect Member Following and Profile to the existing follow and membership workflows.
 - [x] Connect public Cast Profile and Event Detail, including calendar export.
-- [ ] Complete the remaining Member workflow.
+- [x] Add the followed-Cast content feed and access-controlled Content Detail route.
+- [x] Add Member profile editing with server-side validation and ownership protection.
+- [x] Add the Member weekly schedule view with real approved-shift data and week navigation.
+- [x] Add the Member Notification Center for followed-Cast updates and upcoming events.
+- [x] Add persisted Member preferences for Cast-update and event notifications.
+- [x] Complete the remaining Member workflow.
 - [x] Implement the Cast profile, shift submission, cancellation, and membership tier workflow.
 - [x] Implement Cast content publishing and tier-based visibility.
 - [x] Implement the Owner Dashboard, daily schedule, and shift approval workflow.

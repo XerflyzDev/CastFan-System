@@ -3,6 +3,8 @@ package com.castfan.service;
 import java.text.Normalizer;
 import java.util.Locale;
 
+import com.castfan.dto.MemberProfileForm;
+import com.castfan.dto.MemberProfileView;
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.MemberProfile;
 import com.castfan.entity.UserAccount;
@@ -40,6 +42,37 @@ public class ProfileService {
 		} catch (DataIntegrityViolationException exception) {
 			throw new DomainConflictException("This account already has a Member profile.");
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public MemberProfileView memberProfile(String email) {
+		return MemberProfileView.from(requireMemberProfile(email));
+	}
+
+	@Transactional(readOnly = true)
+	public MemberProfileForm memberProfileForm(String email) {
+		var profile = requireMemberProfile(email);
+		var form = new MemberProfileForm();
+		form.setDisplayName(profile.getUserAccount().getDisplayName());
+		form.setBio(profile.getBio());
+		form.setAvatarUrl(profile.getAvatarUrl());
+		form.setCastUpdateNotifications(profile.isCastUpdateNotifications());
+		form.setEventNotifications(profile.isEventNotifications());
+		return form;
+	}
+
+	@Transactional
+	public MemberProfileView updateMemberProfile(String email, MemberProfileForm form) {
+		var profile = requireMemberProfile(email);
+		var displayName = requireText(form.getDisplayName(), "Display name", 80);
+		var bio = cleanOptionalText(form.getBio(), "Bio", 500);
+		var avatarUrl = cleanOptionalText(form.getAvatarUrl(), "Avatar URL", 2048);
+		if (avatarUrl != null && !avatarUrl.matches("^(?:https?://[^\\s]+|/images/[^\\s]+)$")) {
+			throw new DomainRuleViolationException("Avatar URL must use http, https, or a local /images path.");
+		}
+		profile.getUserAccount().updateDisplayName(displayName);
+		profile.updateDetails(bio, avatarUrl, form.isCastUpdateNotifications(), form.isEventNotifications());
+		return MemberProfileView.from(memberProfileRepository.saveAndFlush(profile));
 	}
 
 	@Transactional
@@ -119,6 +152,13 @@ public class ProfileService {
 		if (account.getRole() != requiredRole) {
 			throw new DomainRuleViolationException("The account does not have the required role.");
 		}
+	}
+
+	private MemberProfile requireMemberProfile(String email) {
+		return memberProfileRepository.findByUserAccountEmailIgnoreCase(email)
+			.filter(profile -> profile.getUserAccount().getRole() == UserRole.MEMBER
+				&& profile.getUserAccount().getStatus() == UserStatus.ACTIVE)
+			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
 	}
 
 	private String normalizeKey(String value) {

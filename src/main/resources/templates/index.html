@@ -23,9 +23,8 @@
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
                 <div class="action-group">
-                    <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
-                        <i class="bi bi-bell" aria-hidden="true"></i>
-                    </button>
+                    <a class="round-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                    <a class="round-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in for notifications" title="Sign in"><i class="bi bi-bell" aria-hidden="true"></i></a>
                 </div>
             </div>
 
@@ -93,6 +92,19 @@
                     <div><strong>No approved shifts today</strong><span>Check another day in Schedule.</span></div>
                 </div>
                 <p class="search-empty" id="working-search-empty" hidden>No Cast match your search.</p>
+            </section>
+
+            <section class="content-block following-updates" sec:authorize="hasRole('MEMBER')" aria-labelledby="updates-title">
+                <div class="section-title"><h2 id="updates-title">Following updates</h2><a th:href="@{/member/following}" aria-label="Open Following"><i class="bi bi-arrow-right"></i></a></div>
+                <div class="home-content-feed" th:if="${!home.followingContent.empty}">
+                    <a class="home-content-card" th:each="post : ${home.followingContent}" th:href="@{/casts/{castId}/content/{contentId}(castId=${post.castProfileId},contentId=${post.id})}" th:classappend="${!post.accessible} ? ' locked'" th:attr="data-search-item=${post.castName + ' ' + post.title}">
+                        <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" th:alt="${post.title}">
+                        <span class="feed-avatar" th:if="${post.imageUrl == null and post.castAvatarUrl == null}" th:text="${post.castInitials}">MN</span>
+                        <img class="feed-avatar" th:if="${post.imageUrl == null and post.castAvatarUrl != null}" th:src="${post.castAvatarUrl}" th:alt="${post.castName}">
+                        <span class="feed-copy"><span><strong th:text="${post.castName}">Mina</strong><small th:text="${post.publishedLabel}">14 Oct</small></span><b th:text="${post.title}">Update title</b><em th:if="${post.accessible}" th:text="${post.bodyPreview}">Preview</em><em th:unless="${post.accessible}"><i class="bi bi-lock"></i> <span th:text="${post.audience}">Members</span></em></span>
+                    </a>
+                </div>
+                <div class="home-empty" th:if="${home.followingContent.empty}"><i class="bi bi-heart"></i><div><strong>No following updates</strong><span>Follow Cast to see their latest posts here.</span></div></div>
             </section>
 
             <section class="current-shift" th:if="${!home.workingToday.empty}" aria-labelledby="current-shift-title">

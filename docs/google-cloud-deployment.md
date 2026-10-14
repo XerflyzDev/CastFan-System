@@ -64,6 +64,8 @@ gcloud run deploy castfan \
   --project PROJECT_ID \
   --region REGION \
   --allow-unauthenticated \
+  --startup-probe httpGet.path=/actuator/health,initialDelaySeconds=10,failureThreshold=20,timeoutSeconds=5,periodSeconds=5 \
+  --liveness-probe httpGet.path=/actuator/health/liveness,initialDelaySeconds=30,failureThreshold=3,timeoutSeconds=3,periodSeconds=10 \
   --set-env-vars SPRING_PROFILES_ACTIVE=prod,DB_URL=JDBC_URL \
   --set-secrets DB_USERNAME=castfan-db-username:VERSION,DB_PASSWORD=castfan-db-password:VERSION \
   --service-account castfan-runtime@PROJECT_ID.iam.gserviceaccount.com
@@ -71,7 +73,7 @@ gcloud run deploy castfan \
 
 Pin secret environment variables to a numbered version for predictable releases. Rotate by creating a new secret version and deploying a new Cloud Run revision.
 
-The `prod` profile denies `/h2-console/**` and `/concepts/**`, requires HTTPS using forwarded proxy headers, enables restrictive browser security headers, and issues secure session cookies. Do not override these controls in a deployed revision.
+The `prod` profile denies `/h2-console/**`, `/concepts/**`, and every non-health Actuator route; requires HTTPS using forwarded proxy headers; enables restrictive browser security headers; and issues secure session cookies. `/actuator/health` and `/actuator/health/liveness` are public for Cloud Run probes but expose only aggregate status. Do not override these controls in a deployed revision.
 
 ## Production Readiness Gates
 
@@ -82,7 +84,7 @@ The application is not ready for production deployment until all of these are co
 - Production session settings are implemented.
 - Authentication rate limiting is configured at the edge and an account recovery process is available.
 - Owner and Cast authorization tests pass.
-- A health endpoint and post-deployment smoke test are available.
+- A post-deployment smoke test is available and verifies the deployed health endpoint.
 - Logs contain no passwords, tokens, personal data, or JDBC credentials.
 - Cloud SQL backups and cost alerts are enabled.
 

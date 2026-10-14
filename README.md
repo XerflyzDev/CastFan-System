@@ -10,7 +10,7 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Production database migration and schema validation**
+> **Cloud Run health checks and production readiness**
 
 The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, publish events, and schedule promotion banners through ownership-protected routes. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
 
@@ -159,6 +159,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
 - [x] Add the initial Flyway production schema and validate it against H2 MySQL mode and MySQL 8.4.
+- [x] Add restricted production health and liveness endpoints for Cloud Run probes.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.
@@ -199,6 +200,8 @@ macOS or Linux:
 ```
 
 Open [http://localhost:8080](http://localhost:8080).
+
+Application health is available at [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health). The public response exposes only the aggregate status.
 
 The development H2 Console is available at [http://localhost:8080/h2-console](http://localhost:8080/h2-console). Use JDBC URL `jdbc:h2:mem:castfan`, username `sa`, and an empty password.
 

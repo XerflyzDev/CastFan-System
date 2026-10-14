@@ -18,12 +18,13 @@ Review date: 15 October 2026
 - Automated tests for role boundaries, ownership boundaries, CSRF-sensitive workflows, content visibility, and production browser headers.
 - Flyway version 1 production schema with migration naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
 - Opt-in integration coverage that applies Flyway and runs Hibernate schema validation against real MySQL; version 1 passed on MySQL 8.4.11 on 15 October 2026.
+- Public aggregate health and liveness endpoints for Cloud Run probes, with component details hidden and every non-health Actuator route denied.
 
 ## Remaining Production Gates
 
 - Add login rate limiting at the edge with Google Cloud Armor or an equivalent shared store. Per-instance memory counters are not sufficient when Cloud Run scales horizontally.
 - Add an account recovery process before accepting real users.
-- Add a dedicated health endpoint and a post-deployment smoke test.
+- Add a post-deployment smoke test once the Cloud Run service URL is available.
 - Review personal data retention and audit logging requirements with the stakeholder.
 - Run dependency and container image vulnerability scanning in CI.
 - Verify responsive layouts and accessibility with production-like data.

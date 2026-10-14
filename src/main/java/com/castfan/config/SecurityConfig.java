@@ -30,8 +30,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(authorize -> {
 				authorize.requestMatchers(
 					"/", "/login", "/signup", "/casts/**", "/events/**",
-					"/css/**", "/js/**", "/images/**", "/fonts/**", "/error"
+					"/css/**", "/js/**", "/images/**", "/fonts/**", "/error",
+					"/actuator/health", "/actuator/health/**"
 				).permitAll();
+				authorize.requestMatchers("/actuator/**").denyAll();
 				if (developmentEndpoints) {
 					authorize.requestMatchers("/concepts/**", "/h2-console/**").permitAll();
 				} else {

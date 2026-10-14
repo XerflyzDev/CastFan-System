@@ -77,7 +77,7 @@ The `prod` profile denies `/h2-console/**` and `/concepts/**`, requires HTTPS us
 
 The application is not ready for production deployment until all of these are complete:
 
-- The version 1 Flyway migration is verified against MySQL, not only the automated H2 MySQL-mode test.
+- The version 1 Flyway migration must continue to pass the opt-in MySQL integration test before every production schema release. It was first verified against MySQL 8.4.11 on 15 October 2026.
 - The Cloud SQL connector and connection pool limits are configured for Cloud Run.
 - Production session settings are implemented.
 - Authentication rate limiting is configured at the edge and an account recovery process is available.

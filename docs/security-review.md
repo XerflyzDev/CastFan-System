@@ -17,10 +17,10 @@ Review date: 15 October 2026
 - Production connection-pool limits suitable for an initial Cloud Run deployment.
 - Automated tests for role boundaries, ownership boundaries, CSRF-sensitive workflows, content visibility, and production browser headers.
 - Flyway version 1 production schema with migration naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
+- Opt-in integration coverage that applies Flyway and runs Hibernate schema validation against real MySQL; version 1 passed on MySQL 8.4.11 on 15 October 2026.
 
 ## Remaining Production Gates
 
-- Run the committed Flyway migration and Hibernate schema validation against a disposable MySQL database before Cloud SQL deployment.
 - Add login rate limiting at the edge with Google Cloud Armor or an equivalent shared store. Per-instance memory counters are not sufficient when Cloud Run scales horizontally.
 - Add an account recovery process before accepting real users.
 - Add a dedicated health endpoint and a post-deployment smoke test.

@@ -158,7 +158,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Implement Owner Store Management and permanent Cast roster controls.
 - [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
-- [x] Add the initial Flyway production schema and automated schema validation test.
+- [x] Add the initial Flyway production schema and validate it against H2 MySQL mode and MySQL 8.4.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.

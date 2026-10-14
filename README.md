@@ -119,6 +119,8 @@ Entity details, relationships, constraints, and implementation order are documen
 
 The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
 
+The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
+
 The approved visual language, color tokens, components, and responsive UI rules are documented in [docs/ui-design-system.md](docs/ui-design-system.md).
 
 ## Development Roadmap
@@ -153,6 +155,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Implement Owner Event Management with draft, publish, and archive states.
 - [x] Implement Owner Store Management and permanent Cast roster controls.
 - [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
+- [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.

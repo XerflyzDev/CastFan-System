@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <title>Something went wrong | CastFan</title>
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="auth-page">
+<main class="auth-layout">
+    <a class="brand auth-brand" th:href="@{/}"><span>CastFan</span></a>
+    <section class="auth-panel" aria-labelledby="server-error-heading">
+        <div class="auth-heading"><p class="eyebrow">Temporary issue</p>
+        <h1 id="server-error-heading">Something went wrong</h1>
+        <p>Please try again. No action was completed if you did not see a confirmation.</p></div>
+        <a class="primary-button" th:href="@{/}">Return home</a>
+    </section>
+</main>
+</body>
+</html>

@@ -33,6 +33,8 @@ The Cloud Run service must receive these values:
 | `DB_URL` | Environment variable or Secret Manager | Cloud SQL JDBC URL |
 | `DB_USERNAME` | Secret Manager | MySQL application user |
 | `DB_PASSWORD` | Secret Manager | MySQL application password |
+| `SESSION_TIMEOUT` | Environment variable | Optional session lifetime; defaults to `30m` |
+| `DB_POOL_MAX_SIZE` | Environment variable | Optional per-instance database pool cap; defaults to `5` |
 
 Cloud Run provides `PORT` automatically. The application reads it through `server.port=${PORT:8080}` and falls back to port `8080` for local development.
 
@@ -69,17 +71,22 @@ gcloud run deploy castfan \
 
 Pin secret environment variables to a numbered version for predictable releases. Rotate by creating a new secret version and deploying a new Cloud Run revision.
 
+The `prod` profile denies `/h2-console/**` and `/concepts/**`, requires HTTPS using forwarded proxy headers, enables restrictive browser security headers, and issues secure session cookies. Do not override these controls in a deployed revision.
+
 ## Production Readiness Gates
 
 The application is not ready for production deployment until all of these are complete:
 
 - Database migrations work against MySQL, not only H2.
 - The Cloud SQL connector and connection pool limits are configured for Cloud Run.
-- Authentication rate limiting, account recovery, and production session settings are implemented.
+- Production session settings are implemented.
+- Authentication rate limiting is configured at the edge and an account recovery process is available.
 - Owner and Cast authorization tests pass.
 - A health endpoint and post-deployment smoke test are available.
 - Logs contain no passwords, tokens, personal data, or JDBC credentials.
 - Cloud SQL backups and cost alerts are enabled.
+
+See [security-review.md](security-review.md) for the current control inventory and remaining release blockers.
 
 ## Official References
 

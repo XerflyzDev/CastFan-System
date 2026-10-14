@@ -183,4 +183,5 @@ Recommended index: `(storeId, active, startsAt, endsAt)`.
 4. `CastFollow` and Member discovery queries.
 5. `MemberTier`, `TierMembership`, and access checks.
 6. `CastContent`, `StoreEvent`, and `StorePromotion`.
-7. Database migrations, integration tests, and production MySQL validation.
+7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed for schema version 1.
+8. Run the migration and Hibernate validation against a disposable MySQL database before the first Cloud SQL deployment.

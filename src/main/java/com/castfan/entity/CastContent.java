@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -17,7 +18,13 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "cast_content")
+@Table(
+	name = "cast_content",
+	indexes = @Index(
+		name = "idx_content_cast_status_published",
+		columnList = "cast_profile_id, status, published_at"
+	)
+)
 public class CastContent {
 
 	@Id

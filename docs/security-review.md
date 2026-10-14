@@ -1,6 +1,6 @@
 # Security and Production Readiness Review
 
-Review date: 14 October 2026
+Review date: 15 October 2026
 
 ## Implemented Controls
 
@@ -16,10 +16,11 @@ Review date: 14 October 2026
 - Production Content Security Policy, clickjacking protection, MIME sniffing protection, referrer policy, and browser permissions policy.
 - Production connection-pool limits suitable for an initial Cloud Run deployment.
 - Automated tests for role boundaries, ownership boundaries, CSRF-sensitive workflows, content visibility, and production browser headers.
+- Flyway version 1 production schema with migration naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
 
 ## Remaining Production Gates
 
-- Add Flyway migrations and verify the complete schema against MySQL.
+- Run the committed Flyway migration and Hibernate schema validation against a disposable MySQL database before Cloud SQL deployment.
 - Add login rate limiting at the edge with Google Cloud Armor or an equivalent shared store. Per-instance memory counters are not sufficient when Cloud Run scales horizontally.
 - Add an account recovery process before accepting real users.
 - Add a dedicated health endpoint and a post-deployment smoke test.

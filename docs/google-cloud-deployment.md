@@ -46,7 +46,7 @@ Never commit service-account keys, database passwords, `.env` files, or producti
 2. Enable Cloud Run, Cloud Build, Artifact Registry, Cloud SQL Admin, and Secret Manager APIs.
 3. Select one region for both Cloud Run and Cloud SQL.
 4. Create a Cloud SQL for MySQL instance, database, and least-privilege application user.
-5. Add a schema migration tool and apply the production schema before starting the service. Hibernate must remain set to `validate` in production.
+5. Run the committed Flyway migrations against a disposable MySQL database, then allow the service to apply them to Cloud SQL before Hibernate validates the schema.
 6. Configure the Cloud SQL Java Connector and grant the Cloud Run service account the Cloud SQL Client role.
 7. Store the database username and password in Secret Manager and grant the service account access only to those secrets.
 8. Deploy the service from source to Cloud Run with the `prod` profile.
@@ -77,7 +77,7 @@ The `prod` profile denies `/h2-console/**` and `/concepts/**`, requires HTTPS us
 
 The application is not ready for production deployment until all of these are complete:
 
-- Database migrations work against MySQL, not only H2.
+- The version 1 Flyway migration is verified against MySQL, not only the automated H2 MySQL-mode test.
 - The Cloud SQL connector and connection pool limits are configured for Cloud Run.
 - Production session settings are implemented.
 - Authentication rate limiting is configured at the edge and an account recovery process is available.

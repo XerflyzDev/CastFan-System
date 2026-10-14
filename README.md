@@ -10,9 +10,9 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Owner promotion and banner management**
+> **Production database migration and schema validation**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, publish events, and schedule promotion banners through ownership-protected routes. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, publish events, and schedule promotion banners through ownership-protected routes. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
 
 ## Objectives
 
@@ -121,6 +121,8 @@ The production deployment target and release checklist are documented in [docs/g
 
 The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
 
+The production schema migration workflow is documented in [docs/database-migrations.md](docs/database-migrations.md).
+
 The approved visual language, color tokens, components, and responsive UI rules are documented in [docs/ui-design-system.md](docs/ui-design-system.md).
 
 ## Development Roadmap
@@ -156,6 +158,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Implement Owner Store Management and permanent Cast roster controls.
 - [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
+- [x] Add the initial Flyway production schema and automated schema validation test.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.

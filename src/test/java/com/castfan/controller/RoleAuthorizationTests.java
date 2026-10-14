@@ -11,6 +11,7 @@ import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.UserAccountRepository;
+import com.castfan.service.PrivilegedAccountProvisioningService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,8 +32,15 @@ class RoleAuthorizationTests {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
+	@Autowired
+	private PrivilegedAccountProvisioningService provisioningService;
+
 	@Test
 	void anonymousUsersAreSentToSignIn() throws Exception {
+		mockMvc.perform(get("/member/schedule"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/login"));
+
 		mockMvc.perform(get("/cast"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"));
@@ -53,13 +61,28 @@ class RoleAuthorizationTests {
 	}
 
 	@Test
+	void memberCanOpenScheduleButCastCannot() throws Exception {
+		var member = saveAccount("member-schedule@castfan.test", UserRole.MEMBER);
+		var cast = saveAccount("cast-schedule@castfan.test", UserRole.CAST);
+
+		mockMvc.perform(get("/member/schedule").with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/schedule"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Approved Shifts")));
+		mockMvc.perform(get("/member/schedule").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
 	void castCanOpenOnlyTheCastWorkspace() throws Exception {
-		var cast = saveAccount("cast-role@castfan.test", UserRole.CAST);
+		var cast = provisioningService.provisionCast(
+			"cast-role@castfan.test", "secure-cast-pass-123", "Cast Role", "Role Cast"
+		);
 
 		mockMvc.perform(get("/cast").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
-			.andExpect(view().name("workspace/cast"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Cast workspace")));
+			.andExpect(view().name("cast/dashboard"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Role Cast")));
 		mockMvc.perform(get("/owner").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isForbidden());
 	}
@@ -70,8 +93,8 @@ class RoleAuthorizationTests {
 
 		mockMvc.perform(get("/owner").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isOk())
-			.andExpect(view().name("workspace/owner"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Owner workspace")));
+			.andExpect(view().name("owner/dashboard"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Store operations")));
 		mockMvc.perform(get("/cast").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isForbidden());
 	}

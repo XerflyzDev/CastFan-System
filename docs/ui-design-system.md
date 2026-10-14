@@ -72,7 +72,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 ### Navigation
 
 - Member navigation is a floating white pill near the bottom safe area.
-- Active items use dusty rose with a soft rose background while the navigation surface remains white.
+- Active items use dusty rose on the icon and label while the navigation surface remains white.
 - Navigation remains visible without covering page content.
 - Header bars use a translucent light surface with background blur.
 
@@ -132,6 +132,20 @@ The design tokens and shared component styles are implemented in:
 
 `src/main/resources/static/css/app.css`
 
+The approved mobile Member shell and Home components are implemented in:
+
+`src/main/resources/static/css/member-home.css`
+
+The production Member Schedule extensions are implemented in:
+
+`src/main/resources/static/css/member-schedule.css`
+
+The production Following and Profile extensions are implemented in:
+
+`src/main/resources/static/css/member-following.css`
+
+`src/main/resources/static/css/member-profile.css`
+
 Current templates consume the shared stylesheet from:
 
 `src/main/resources/templates/`
@@ -140,11 +154,42 @@ When adding a new page, reuse the existing tokens and component classes before i
 
 ## Current Theme Status
 
-- [x] Member Home
+- [x] Member Home concept and JPA-backed production route
+- [x] Member Schedule concept and JPA-backed production route
+- [x] Member Following concept and JPA-backed production route
+- [x] Member Profile concept and JPA-backed production route
+- [x] Cast Profile concept and JPA-backed production route
+- [x] Event Detail concept and JPA-backed production route
 - [x] Authentication and account pages
 - [x] Cast discovery and following pages
 - [x] Member membership pages
-- [x] Cast and Owner workspaces
+- [x] JPA-backed Cast Dashboard, Schedule, Profile, and Membership Tiers
+- [x] JPA-backed Cast Content Studio with audience and tier visibility
+- [x] JPA-backed Owner Dashboard and Shift Review workspace
+- [x] JPA-backed Owner Event Management workspace
+- [x] JPA-backed Owner Store Management and permanent Cast roster
 - [x] Cast membership tier management
 - [x] Access-denied page
 - [x] Responsive mobile and desktop behavior
+
+## Approved Member Information Architecture
+
+The persistent Member navigation contains four destinations in this order:
+
+1. `Home` - published events, today's approved shifts, and summary information.
+2. `Schedule` - approved Cast shifts by day or week.
+3. `Following` - Cast profiles followed by the authenticated Member.
+4. `Profile` - account information, memberships, notification preferences, and sign out.
+
+Search remains a field within Home and relevant directory pages. It is not duplicated as a top-level icon. Membership management belongs in Profile and individual Cast profiles rather than the persistent navigation.
+
+## Approved Owner Information Architecture
+
+The persistent Owner navigation contains four destinations:
+
+1. `Dashboard` - store health, staffing totals, pending reviews, and upcoming events.
+2. `Shifts` - shift approval queue and daily schedule.
+3. `Events` - draft, edit, publish, preview, and archive store events.
+4. `Account` - owner identity, security, and sign out.
+
+Event deletion is represented by an `Archived` state so published history remains auditable. Only `Published` events are exposed through Member and public routes.

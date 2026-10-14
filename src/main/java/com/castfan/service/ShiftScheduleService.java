@@ -35,6 +35,9 @@ public class ShiftScheduleService {
 		if (!assignment.isActive()) {
 			throw new DomainRuleViolationException("Store assignment is inactive.");
 		}
+		if (!assignment.getStore().isActive()) {
+			throw new DomainRuleViolationException("Store is inactive.");
+		}
 		if (!assignment.getCastProfile().getUserAccount().getId().equals(castAccount.getId())) {
 			throw new DomainRuleViolationException("Cast can submit shifts only for their own assignment.");
 		}
@@ -49,6 +52,9 @@ public class ShiftScheduleService {
 		var assignment = storeCastRepository.findByIdForUpdate(shift.getStoreCast().getId())
 			.orElseThrow(() -> new DomainRuleViolationException("Store assignment not found."));
 		requireStoreOwner(owner, assignment.getStore().getOwner());
+		if (!assignment.getStore().isActive()) {
+			throw new DomainRuleViolationException("Shifts cannot be approved for an inactive Store.");
+		}
 		if (shift.getStatus() != ShiftStatus.SUBMITTED) {
 			throw new DomainRuleViolationException("Only submitted shifts can be approved.");
 		}

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" th:content="${cast.stageName + ' Cast profile on CastFan.'}">
+    <title th:text="${cast.stageName + ' | CastFan'}">Cast Profile | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/cast-profile.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone cast-phone" th:attr="aria-label=${cast.stageName + ' Cast profile'}">
+        <header class="status-bar cast-status" aria-label="Local time"><strong id="local-time">--:--</strong><span th:text="${cast.storeName}">Hoshi Cafe</span></header>
+
+        <div class="screen-content cast-content">
+            <section class="cast-hero" th:classappend="${cast.avatarUrl == null} ? 'no-photo'" th:attr="aria-label=${cast.stageName + ' profile image'}">
+                <img th:if="${cast.avatarUrl != null}" th:src="${cast.avatarUrl}" th:alt="${cast.stageName + ', a Cast at ' + cast.storeName}">
+                <span class="hero-initials" th:if="${cast.avatarUrl == null}" th:text="${cast.initials}">CF</span>
+                <div class="detail-actions">
+                    <a th:href="@{/}" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left"></i></a>
+                    <button type="button" data-share-profile th:attr="data-share-title=${cast.stageName + ' on CastFan'}" aria-label="Share profile" title="Share"><i class="bi bi-share"></i></button>
+                </div>
+                <span class="working-badge" th:if="${cast.nextShift != null and cast.nextShift.workingNow}"><i></i> Working now</span>
+            </section>
+
+            <div class="cast-details">
+                <header class="cast-identity">
+                    <div><p th:text="${cast.storeName + ' Cast'}">Hoshi Cafe Cast</p><h1 th:text="${cast.stageName}">Mina</h1><span th:text="${cast.handle}">@mina</span></div>
+                    <form sec:authorize="hasRole('MEMBER')" th:if="${!cast.followed}" th:action="@{/member/casts/{id}/follow-profile(id=${cast.id})}" method="post">
+                        <button class="primary-follow" type="submit"><i class="bi bi-heart"></i><span>Follow</span></button>
+                    </form>
+                    <form sec:authorize="hasRole('MEMBER')" th:if="${cast.followed}" th:action="@{/member/casts/{id}/unfollow-profile(id=${cast.id})}" method="post">
+                        <button class="primary-follow active" type="submit"><i class="bi bi-heart-fill"></i><span>Following</span></button>
+                    </form>
+                    <a class="primary-follow" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-heart"></i><span>Follow</span></a>
+                </header>
+
+                <p class="cast-bio" th:text="${cast.bio != null ? cast.bio : 'Profile details will be added soon.'}">Cast bio</p>
+
+                <section class="profile-stats" th:classappend="'two-stats'" th:attr="aria-label=${cast.stageName + ' profile summary'}">
+                    <div><strong th:text="${cast.followerCount}">0</strong><small>Followers</small></div>
+                    <div><strong th:text="${cast.tiers.size()}">0</strong><small>Member tiers</small></div>
+                </section>
+
+                <section class="next-shift" th:if="${cast.nextShift != null}" aria-labelledby="next-shift-heading">
+                    <span><i class="bi bi-calendar3"></i></span>
+                    <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">Hoshi Cafe</p></div>
+                    <a sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}" aria-label="Open full schedule"><i class="bi bi-arrow-right"></i></a>
+                    <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open full schedule"><i class="bi bi-arrow-right"></i></a>
+                </section>
+                <div class="profile-no-shift" th:if="${cast.nextShift == null}"><i class="bi bi-calendar2"></i><span><strong>No upcoming shifts</strong><small>Check back for schedule updates.</small></span></div>
+
+                <section class="profile-section-block" aria-labelledby="content-title">
+                    <div class="section-title"><h2 id="content-title">Latest updates</h2><span th:text="${cast.content.size() + ' posts'}">0 posts</span></div>
+                    <div class="public-content-list" th:if="${!cast.content.empty}">
+                        <article class="public-content-card" th:each="post : ${cast.content}" th:classappend="${!post.accessible} ? ' locked'">
+                            <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" th:alt="${post.title}">
+                            <div class="public-content-copy"><div><span th:text="${post.audience}">Public</span><small th:text="${post.publishedLabel}">14 Oct</small></div><h3 th:text="${post.title}">Update title</h3><p th:if="${post.accessible}" th:text="${post.body}">Update content</p><p th:unless="${post.accessible}" class="locked-copy"><i class="bi bi-lock"></i> Join the required audience to read this update.</p></div>
+                        </article>
+                    </div>
+                    <p class="profile-empty-copy" th:if="${cast.content.empty}">No published updates yet.</p>
+                </section>
+
+                <section class="profile-section-block" aria-labelledby="membership-title">
+                    <div class="section-title"><h2 id="membership-title">Membership</h2><a sec:authorize="hasRole('MEMBER')" th:href="@{/member/memberships}">Compare</a></div>
+                    <div class="tier-list" th:if="${!cast.tiers.empty}">
+                        <a class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="hasRole('MEMBER')" th:href="@{/member/memberships}">
+                            <span class="tier-icon"><i class="bi bi-star-fill"></i></span>
+                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
+                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
+                        </a>
+                        <a class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="isAnonymous()" th:href="@{/login}">
+                            <span class="tier-icon"><i class="bi bi-star-fill"></i></span>
+                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
+                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
+                        </a>
+                        <div class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="isAuthenticated() and !hasRole('MEMBER')">
+                            <span class="tier-icon"><i class="bi bi-star-fill"></i></span>
+                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
+                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
+                        </div>
+                    </div>
+                    <p class="profile-empty-copy" th:if="${cast.tiers.empty}">No active membership tiers.</p>
+                </section>
+            </div>
+        </div>
+
+        <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
+            <a class="nav-button" th:href="@{/}"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button active" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}" aria-current="page"><i class="bi bi-heart-fill"></i><span>Following</span></a>
+            <a class="nav-button active" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/account}"><i class="bi bi-person"></i><span>Profile</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+        <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script th:src="@{/js/public-detail.js}" defer></script>
+</body>
+</html>

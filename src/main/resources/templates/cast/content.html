@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Create and publish Cast content."><title>Content Studio | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet"><link th:href="@{/css/cast-workspace.css}" rel="stylesheet">
+</head>
+<body><main class="concept-stage"><section class="phone" aria-label="Cast content studio">
+    <div class="ambient-top" aria-hidden="true"></div>
+    <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-pencil-square"></i>Content studio</span></header>
+    <div class="screen-content cast-content content-studio">
+        <div class="top-actions"><a class="wordmark" th:href="@{/cast}">CastFan</a><a class="round-button" th:href="@{/cast}" aria-label="Back to dashboard"><i class="bi bi-grid"></i></a></div>
+        <header class="cast-heading"><p>Member updates</p><h1>Your content</h1></header>
+        <div class="inline-alert success" th:if="${param.created}" role="status"><i class="bi bi-check-circle"></i>Draft created.</div>
+        <div class="inline-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle"></i>Changes saved.</div>
+        <div class="inline-alert success" th:if="${param.published}" role="status"><i class="bi bi-broadcast"></i>Content published.</div>
+        <div class="inline-alert neutral" th:if="${param.archived}" role="status"><i class="bi bi-archive"></i>Content archived.</div>
+        <div class="inline-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle"></i><span th:text="${param.error}">Unable to update content.</span></div>
+
+        <section class="cast-section content-list-section" aria-labelledby="content-list-heading">
+            <div class="section-title"><div><small>Drafts and published posts</small><h2 id="content-list-heading">Content library</h2></div><span class="count-pill" th:text="${contentView.content.size()}">0</span></div>
+            <div class="content-card-list" th:if="${!contentView.content.empty}">
+                <article class="studio-content-card" th:each="post : ${contentView.content}">
+                    <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" th:alt="${post.title}"><span class="content-image-placeholder" th:unless="${post.imageUrl != null}"><i class="bi bi-file-earmark-text"></i></span>
+                    <div class="studio-content-copy"><div><span class="shift-badge" th:classappend="${post.statusTone}" th:text="${post.status}">Draft</span><small th:text="${post.audience}">Public</small></div><h3 th:text="${post.title}">Post title</h3><p th:text="${post.body}">Post preview</p><em th:if="${post.publishedLabel != null}" th:text="${post.publishedLabel}">14 Oct 2026</em></div>
+                    <div class="content-card-actions"><a th:if="${post.editable}" th:href="@{/cast/content/{id}/edit(id=${post.id})}" aria-label="Edit content" title="Edit"><i class="bi bi-pencil"></i></a><form th:if="${post.publishable}" th:action="@{/cast/content/{id}/publish(id=${post.id})}" method="post"><button class="publish" type="submit" aria-label="Publish content" title="Publish"><i class="bi bi-broadcast"></i></button></form><form th:if="${post.archivable}" th:action="@{/cast/content/{id}/archive(id=${post.id})}" method="post" data-confirm="Archive this content? It will no longer be visible on your profile."><button class="archive" type="submit" aria-label="Archive content" title="Archive"><i class="bi bi-archive"></i></button></form></div>
+                </article>
+            </div>
+            <div class="cast-empty" th:if="${contentView.content.empty}"><i class="bi bi-pencil-square"></i><div><strong>No content yet</strong><small>Create a draft and choose who can see it.</small></div></div>
+        </section>
+
+        <section class="form-card" aria-labelledby="content-form-heading">
+            <div class="card-heading"><div><small th:text="${contentView.editingContentId == null ? 'New post' : 'Update post'}">New post</small><h2 id="content-form-heading" th:text="${contentView.editingContentId == null ? 'Create content' : 'Edit content'}">Create content</h2></div><a class="content-cancel" th:if="${contentView.editingContentId != null}" th:href="@{/cast/content}" aria-label="Cancel editing"><i class="bi bi-x-lg"></i></a></div>
+            <form class="cast-form" th:action="${contentFormAction}" th:object="${form}" method="post">
+                <div class="inline-alert error" th:if="${#fields.hasGlobalErrors()}" role="alert"><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid content.</span></div>
+                <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" required placeholder="A new update"><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title error</small></label>
+                <label><span>Content</span><textarea th:field="*{body}" maxlength="5000" rows="6" required placeholder="Share an update with your audience."></textarea><small class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">Content error</small></label>
+                <label><span>Image URL <small>Optional</small></span><input type="text" th:field="*{imageUrl}" maxlength="2048" placeholder="https://example.com/photo.jpg"><small class="field-error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}">Image URL error</small></label>
+                <label><span>Audience</span><select th:field="*{audience}" required data-content-audience><option value="PUBLIC">Public</option><option value="FOLLOWERS">Followers</option><option value="MEMBERS">Members by tier</option></select><small class="field-error" th:if="${#fields.hasErrors('audience')}" th:errors="*{audience}">Audience error</small></label>
+                <label data-tier-field><span>Minimum tier</span><select th:field="*{minimumTierId}"><option value="">Choose a tier</option><option th:each="tier : ${contentView.tiers}" th:if="${tier.active}" th:value="${tier.id}" th:text="${tier.name + ' · Rank ' + tier.rank}">Silver</option></select><small class="field-error" th:if="${#fields.hasErrors('minimumTierId')}" th:errors="*{minimumTierId}">Tier error</small></label>
+                <small class="form-note">Higher-ranked memberships can also view content for lower tiers.</small>
+                <button class="primary-action form-submit" type="submit"><i class="bi" th:classappend="${contentView.editingContentId == null ? 'bi-plus-lg' : 'bi-check2'}"></i><span th:text="${contentView.editingContentId == null ? 'Create draft' : 'Save changes'}">Create draft</span></button>
+            </form>
+        </section>
+    </div>
+    <nav class="floating-nav" aria-label="Cast navigation"><a class="nav-button active" th:href="@{/cast}" aria-current="page"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a><a class="nav-button" th:href="@{/cast/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a><a class="nav-button" th:href="@{/cast/tiers}"><i class="bi bi-stars"></i><span>Tiers</span></a><a class="nav-button" th:href="@{/cast/profile}"><i class="bi bi-person"></i><span>Profile</span></a></nav>
+</section></main><script th:src="@{/js/cast-workspace.js}" defer></script></body></html>

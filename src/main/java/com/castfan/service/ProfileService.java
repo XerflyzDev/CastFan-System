@@ -77,6 +77,38 @@ public class ProfileService {
 		}
 	}
 
+	@Transactional
+	public CastProfile updateCastProfile(
+		String email,
+		String stageName,
+		String bio,
+		String avatarUrl,
+		boolean discoverable
+	) {
+		var profile = castProfileRepository.findByUserAccountEmailIgnoreCase(email)
+			.orElseThrow(() -> new DomainRuleViolationException("Cast profile not found."));
+		var cleanStageName = requireText(stageName, "Stage name", 80);
+		var stageNameKey = normalizeKey(cleanStageName);
+		castProfileRepository.findByStageNameKey(stageNameKey)
+			.filter(existing -> !existing.getId().equals(profile.getId()))
+			.ifPresent(existing -> {
+				throw new DomainConflictException("This stage name is already in use.");
+			});
+
+		profile.updatePublicDetails(
+			cleanStageName,
+			stageNameKey,
+			cleanOptionalText(bio, "Bio", 1000),
+			cleanOptionalText(avatarUrl, "Avatar URL", 2048),
+			discoverable
+		);
+		try {
+			return castProfileRepository.saveAndFlush(profile);
+		} catch (DataIntegrityViolationException exception) {
+			throw new DomainConflictException("This stage name is already in use.");
+		}
+	}
+
 	private void requireEligibleAccount(UserAccount account, UserRole requiredRole) {
 		if (account == null || account.getId() == null) {
 			throw new DomainRuleViolationException("A saved account is required.");

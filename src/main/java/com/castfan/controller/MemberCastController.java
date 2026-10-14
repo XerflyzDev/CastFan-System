@@ -52,4 +52,16 @@ public class MemberCastController {
 		memberCastService.unfollow(principal.getName(), castProfileId);
 		return "redirect:/member/following";
 	}
+
+	@PostMapping("/member/casts/{castProfileId}/follow-profile")
+	public String followFromProfile(Principal principal, @PathVariable Long castProfileId) {
+		memberCastService.follow(principal.getName(), castProfileId);
+		return "redirect:/casts/" + castProfileId;
+	}
+
+	@PostMapping("/member/casts/{castProfileId}/unfollow-profile")
+	public String unfollowFromProfile(Principal principal, @PathVariable Long castProfileId) {
+		memberCastService.unfollow(principal.getName(), castProfileId);
+		return "redirect:/casts/" + castProfileId;
+	}
 }

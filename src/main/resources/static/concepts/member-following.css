@@ -1,0 +1,44 @@
+.following-content { padding-top: 17px; }
+
+.following-heading { margin: 22px 0 16px; }
+.following-heading p,
+.following-heading h1 { margin: 0; }
+.following-heading p { margin-bottom: 3px; color: var(--muted); font-size: 0.7rem; }
+.following-heading > div { display: flex; align-items: end; justify-content: space-between; }
+.following-heading h1 { font-size: 1.75rem; line-height: 1; }
+.following-heading > div > span { color: var(--muted); font-size: 0.66rem; }
+
+.following-search { margin-bottom: 12px; }
+.following-filters { display: flex; gap: 7px; overflow-x: auto; margin: 0 -15px 15px; padding: 0 15px 3px; scrollbar-width: none; }
+.following-filters::-webkit-scrollbar { display: none; }
+.following-filters button { flex: 0 0 auto; min-height: 31px; padding: 0 12px; border: 1px solid rgba(17, 19, 24, 0.05); border-radius: 999px; color: var(--muted); background: rgba(255, 255, 255, 0.62); font-size: 0.62rem; cursor: pointer; }
+.following-filters button.active { border-color: var(--ink); color: #fff; background: var(--ink); }
+
+.following-list { display: grid; gap: 9px; }
+.following-card { overflow: hidden; border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
+.following-card[hidden] { display: none; }
+.cast-profile-action { display: grid; width: 100%; grid-template-columns: 50px minmax(0, 1fr) 12px; align-items: center; gap: 11px; padding: 14px 14px 12px; border: 0; color: var(--ink); background: transparent; text-align: left; text-decoration: none; cursor: pointer; }
+.profile-avatar { position: relative; display: grid; width: 50px; height: 50px; place-items: center; border-radius: 50%; font-size: 0.72rem; font-weight: 700; }
+.profile-avatar.rose { color: var(--rose-dark); background: var(--rose-soft); }
+.profile-avatar.lavender { color: #655b86; background: var(--lavender); }
+.profile-avatar.amber { color: #806b3f; background: var(--amber); }
+.profile-avatar i { position: absolute; right: 2px; bottom: 2px; width: 11px; height: 11px; border: 2px solid #fff; border-radius: 50%; background: var(--rose); }
+.following-copy { display: grid; min-width: 0; gap: 3px; }
+.name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.name-row strong { font-size: 0.78rem; }
+.name-row small { color: var(--muted); font-size: 0.52rem; }
+.name-row .live-label { padding: 3px 6px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-weight: 700; }
+.following-copy > span:not(.name-row) { color: var(--muted); font-size: 0.6rem; }
+.following-copy > small { overflow: hidden; color: #806b3f; font-size: 0.56rem; text-overflow: ellipsis; white-space: nowrap; }
+.cast-profile-action > .bi-chevron-right { color: #aaaab0; font-size: 0.65rem; }
+
+.following-button { display: flex; width: calc(100% - 28px); align-items: center; justify-content: center; gap: 6px; min-height: 34px; margin: 0 14px 12px; border: 0; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.61rem; font-weight: 700; cursor: pointer; }
+.following-button:not(.is-following) { color: var(--ink); background: #f1f1f3; }
+.following-empty { margin: 32px 0; color: var(--muted); font-size: 0.68rem; text-align: center; }
+
+.discover-action { display: grid; width: 100%; grid-template-columns: 34px minmax(0, 1fr) 20px; align-items: center; gap: 10px; margin-top: 13px; padding: 12px; border: 1px dashed rgba(17, 19, 24, 0.14); border-radius: 16px; color: var(--ink); background: rgba(255, 255, 255, 0.44); text-align: left; cursor: pointer; }
+.discover-action > .bi-plus { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 1rem; }
+.discover-action span { display: grid; gap: 2px; }
+.discover-action strong { font-size: 0.68rem; }
+.discover-action small { color: var(--muted); font-size: 0.56rem; }
+.discover-action > .bi-arrow-right { color: var(--muted); }

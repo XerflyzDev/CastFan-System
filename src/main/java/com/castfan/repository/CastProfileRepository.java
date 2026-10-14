@@ -1,5 +1,6 @@
 package com.castfan.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.castfan.entity.CastProfile;
@@ -12,12 +13,16 @@ public interface CastProfileRepository extends JpaRepository<CastProfile, Long> 
 
 	Optional<CastProfile> findByUserAccountId(Long userAccountId);
 
+	Optional<CastProfile> findByUserAccountEmailIgnoreCase(String email);
+
 	Optional<CastProfile> findByStageNameKey(String stageNameKey);
 
 	Page<CastProfile> findAllByDiscoverableTrueAndUserAccountStatusOrderByStageNameAsc(
 		UserStatus status,
 		Pageable pageable
 	);
+
+	List<CastProfile> findAllByUserAccountStatusOrderByStageNameAsc(UserStatus status);
 
 	boolean existsByUserAccountId(Long userAccountId);
 

@@ -73,6 +73,20 @@ public class CastProfile {
 		this.discoverable = discoverable;
 	}
 
+	public void updatePublicDetails(
+		String stageName,
+		String stageNameKey,
+		String bio,
+		String avatarUrl,
+		boolean discoverable
+	) {
+		this.stageName = stageName;
+		this.stageNameKey = stageNameKey;
+		this.bio = bio;
+		this.avatarUrl = avatarUrl;
+		this.discoverable = discoverable;
+	}
+
 	@PrePersist
 	void onCreate() {
 		var now = Instant.now();

@@ -1,0 +1,183 @@
+package com.castfan.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
+import com.castfan.entity.CastProfile;
+import com.castfan.entity.ShiftSchedule;
+import com.castfan.entity.ShiftStatus;
+import com.castfan.entity.StoreCast;
+import com.castfan.entity.UserAccount;
+import com.castfan.repository.CastProfileRepository;
+import com.castfan.repository.ShiftScheduleRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
+class OwnerWorkspaceWorkflowTests {
+
+	private static final ZoneId STORE_ZONE = ZoneId.of("Asia/Bangkok");
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private PrivilegedAccountProvisioningService provisioningService;
+
+	@Autowired
+	private StoreService storeService;
+
+	@Autowired
+	private StoreCastService storeCastService;
+
+	@Autowired
+	private ShiftScheduleService shiftScheduleService;
+
+	@Autowired
+	private CastProfileRepository castProfileRepository;
+
+	@Autowired
+	private ShiftScheduleRepository shiftScheduleRepository;
+
+	private UserAccount owner;
+	private UserAccount cast;
+	private StoreCast assignment;
+	private ShiftSchedule submittedShift;
+	private LocalDate shiftDate;
+
+	@BeforeEach
+	void setUp() {
+		var suffix = Long.toString(System.nanoTime());
+		owner = provisioningService.provisionOwner(
+			"owner-workspace-" + suffix + "@castfan.test", "secure-owner-pass-123", "Hoshi Owner"
+		);
+		cast = provisioningService.provisionCast(
+			"owner-cast-" + suffix + "@castfan.test", "secure-cast-pass-123", "Mina Cast", "Mina Review " + suffix
+		);
+		var store = storeService.createStore(
+			owner, "Hoshi Review Cafe", "hoshi-review-" + suffix, null, "Bangkok", STORE_ZONE.getId()
+		);
+		assignment = storeCastService.assignCast(owner, store.getId(), requireProfile(cast).getId());
+		shiftDate = LocalDate.now(STORE_ZONE).plusDays(3);
+		submittedShift = submit(shiftDate, LocalTime.of(14, 0), LocalTime.of(20, 0));
+	}
+
+	@Test
+	void ownerCanOpenDashboardAndDateSchedule() throws Exception {
+		mockMvc.perform(get("/owner").with(user(owner.getEmail()).roles("OWNER")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("owner/dashboard"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Review Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Review")));
+
+		mockMvc.perform(get("/owner/shifts")
+				.param("date", shiftDate.toString())
+				.with(user(owner.getEmail()).roles("OWNER")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("owner/shifts"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Review queue")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("14:00 - 20:00")));
+	}
+
+	@Test
+	void ownerCanApproveTheirStoreShift() throws Exception {
+		mockMvc.perform(post("/owner/shifts/{id}/approve", submittedShift.getId())
+				.with(user(owner.getEmail()).roles("OWNER"))
+				.with(csrf())
+				.param("date", shiftDate.toString())
+				.param("reviewNote", "Staffing confirmed"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/shifts?approved=true&date=" + shiftDate));
+
+		var approved = shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow();
+		assertThat(approved.getStatus()).isEqualTo(ShiftStatus.APPROVED);
+		assertThat(approved.getReviewNote()).isEqualTo("Staffing confirmed");
+	}
+
+	@Test
+	void rejectionRequiresAReasonAndThenRecordsIt() throws Exception {
+		mockMvc.perform(post("/owner/shifts/{id}/reject", submittedShift.getId())
+				.with(user(owner.getEmail()).roles("OWNER"))
+				.with(csrf())
+				.param("date", shiftDate.toString())
+				.param("reviewNote", ""))
+			.andExpect(status().is3xxRedirection());
+		assertThat(shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow().getStatus())
+			.isEqualTo(ShiftStatus.SUBMITTED);
+
+		mockMvc.perform(post("/owner/shifts/{id}/reject", submittedShift.getId())
+				.with(user(owner.getEmail()).roles("OWNER"))
+				.with(csrf())
+				.param("date", shiftDate.toString())
+				.param("reviewNote", "Store capacity reached"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/shifts?rejected=true&date=" + shiftDate));
+
+		var rejected = shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow();
+		assertThat(rejected.getStatus()).isEqualTo(ShiftStatus.REJECTED);
+		assertThat(rejected.getReviewNote()).isEqualTo("Store capacity reached");
+	}
+
+	@Test
+	void anotherOwnerCannotReviewTheShift() throws Exception {
+		var otherOwner = provisioningService.provisionOwner(
+			"other-owner-" + System.nanoTime() + "@castfan.test", "secure-owner-pass-123", "Other Owner"
+		);
+
+		mockMvc.perform(post("/owner/shifts/{id}/approve", submittedShift.getId())
+				.with(user(otherOwner.getEmail()).roles("OWNER"))
+				.with(csrf()))
+			.andExpect(status().is3xxRedirection());
+
+		assertThat(shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow().getStatus())
+			.isEqualTo(ShiftStatus.SUBMITTED);
+	}
+
+	@Test
+	void overlappingApprovedShiftCannotBeApproved() throws Exception {
+		shiftScheduleService.approveShift(owner, submittedShift.getId(), null);
+		var overlapping = submit(shiftDate, LocalTime.of(18, 0), LocalTime.of(22, 0));
+
+		mockMvc.perform(post("/owner/shifts/{id}/approve", overlapping.getId())
+				.with(user(owner.getEmail()).roles("OWNER"))
+				.with(csrf())
+				.param("date", shiftDate.toString()))
+			.andExpect(status().is3xxRedirection());
+
+		assertThat(shiftScheduleRepository.findById(overlapping.getId()).orElseThrow().getStatus())
+			.isEqualTo(ShiftStatus.SUBMITTED);
+	}
+
+	private ShiftSchedule submit(LocalDate date, LocalTime startsAt, LocalTime endsAt) {
+		return shiftScheduleService.submitShift(
+			cast,
+			assignment.getId(),
+			date.atTime(startsAt).atZone(STORE_ZONE).toInstant(),
+			date.atTime(endsAt).atZone(STORE_ZONE).toInstant()
+		);
+	}
+
+	private CastProfile requireProfile(UserAccount account) {
+		return castProfileRepository.findByUserAccountId(account.getId()).orElseThrow();
+	}
+}

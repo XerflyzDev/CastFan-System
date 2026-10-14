@@ -50,12 +50,18 @@ Constraints:
 - Unique URL-safe `slug`.
 - `ownerUserId` must reference an active `OWNER` account.
 - `timezone` uses an IANA identifier such as `Asia/Bangkok`.
+- Store removal is represented by `active = false`; historical schedules and events are retained.
 
 ### StoreCast
 
 Connects a Cast profile to a store and keeps store-specific employment information.
 
 Constraint: unique pair `(storeId, castProfileId)`.
+
+Rules:
+
+- An inactive assignment remains stored for schedule history and can be reactivated by the Store owner.
+- New shifts require both an active assignment and an active Store.
 
 ### ShiftSchedule
 
@@ -104,6 +110,9 @@ Rules:
 - The selected minimum tier must belong to the same Cast as the content.
 - Only the owning Cast can edit, publish, archive, or delete a draft.
 - Published content requires `publishedAt`.
+- `audience` is `PUBLIC`, `FOLLOWERS`, or `MEMBERS`; member content requires `minimumTierId`.
+- Members with a tier rank equal to or higher than the required tier can read the full content.
+- Archived content is retained for audit history and is excluded from public profile queries.
 
 Recommended index: `(castProfileId, status, publishedAt)`.
 

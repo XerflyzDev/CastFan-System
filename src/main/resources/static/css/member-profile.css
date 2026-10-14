@@ -1,0 +1,54 @@
+.profile-content { padding-top: 17px; }
+.profile-heading { margin: 22px 0 16px; }
+.profile-heading p,
+.profile-heading h1 { margin: 0; }
+.profile-heading p { margin-bottom: 3px; color: var(--muted); font-size: 0.7rem; }
+.profile-heading h1 { font-size: 1.75rem; line-height: 1; }
+
+.member-overview { display: grid; grid-template-columns: 58px minmax(0, 1fr) 34px; align-items: center; gap: 12px; padding: 15px; border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
+.member-avatar { display: grid; width: 58px; height: 58px; place-items: center; border-radius: 50%; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.82rem; font-weight: 700; }
+.member-overview div { display: grid; gap: 2px; min-width: 0; }
+.member-overview h2,
+.member-overview p { overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+.member-overview h2 { font-size: 0.88rem; }
+.member-overview p { color: var(--ink); font-size: 0.63rem; }
+.member-overview small { color: var(--muted); font-size: 0.55rem; }
+.verified-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 11px; color: var(--rose-dark); background: var(--rose-soft); }
+
+.profile-section { margin-top: 20px; }
+.profile-section-title { display: flex; align-items: end; justify-content: space-between; margin-bottom: 9px; }
+.profile-section-title small,
+.profile-section-title h2 { margin: 0; }
+.profile-section-title small { color: var(--muted); font-size: 0.56rem; }
+.profile-section-title h2 { font-size: 0.87rem; }
+.profile-section-title > a { padding: 5px 9px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.55rem; font-weight: 700; text-decoration: none; }
+.compact-title { margin-bottom: 6px; }
+
+.membership-list { overflow: hidden; border-radius: 16px; box-shadow: var(--shadow); }
+.membership-row { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--line); background: #fff; }
+.membership-row:last-child { border-bottom: 0; }
+.membership-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; }
+.membership-icon.rose { color: var(--rose-dark); background: var(--rose-soft); }
+.membership-icon.amber { color: #806b3f; background: var(--amber); }
+.membership-row div { display: grid; gap: 2px; min-width: 0; }
+.membership-row strong { overflow: hidden; font-size: 0.68rem; text-overflow: ellipsis; white-space: nowrap; }
+.membership-row small { color: var(--muted); font-size: 0.55rem; }
+.membership-price { color: var(--muted); font-size: 0.62rem; font-weight: 700; }
+.profile-empty { display: flex; align-items: center; gap: 10px; padding: 13px; border-radius: 16px; background: rgba(255, 255, 255, 0.72); }
+.profile-empty > i { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; color: var(--rose-dark); background: var(--rose-soft); }
+.profile-empty > span { display: grid; gap: 2px; }
+.profile-empty strong { font-size: 0.66rem; }
+.profile-empty small { color: var(--muted); font-size: 0.55rem; }
+
+.setting-row { display: grid; width: 100%; grid-template-columns: 34px minmax(0, 1fr) 16px; align-items: center; gap: 10px; min-height: 57px; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); background: #fff; text-align: left; text-decoration: none; }
+.compact-title + .setting-row { border-radius: 16px 16px 0 0; }
+.setting-row:last-child { border-bottom: 0; border-radius: 0 0 16px 16px; }
+.setting-row > span:first-child { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: #62646a; background: #f1f1f3; }
+.setting-row > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; }
+.setting-row strong,
+.setting-row small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.setting-row strong { font-size: 0.66rem; }
+.setting-row small { color: var(--muted); font-size: 0.54rem; }
+.setting-row > i { color: #aaaab0; font-size: 0.64rem; }
+
+.sign-out-button { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: center; gap: 7px; margin-top: 18px; border: 1px solid rgba(154, 73, 98, 0.12); border-radius: 14px; color: var(--rose-dark); background: rgba(255, 255, 255, 0.52); font-size: 0.64rem; font-weight: 700; cursor: pointer; }

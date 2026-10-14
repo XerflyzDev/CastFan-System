@@ -36,6 +36,9 @@ public class StoreCastService {
 		if (!store.getOwner().getId().equals(owner.getId())) {
 			throw new DomainRuleViolationException("Only the Store owner can assign Cast.");
 		}
+		if (!store.isActive()) {
+			throw new DomainRuleViolationException("Activate the Store before assigning Cast.");
+		}
 
 		var castProfile = castProfileRepository.findById(castProfileId)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast profile not found."));

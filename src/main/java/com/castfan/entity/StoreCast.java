@@ -55,6 +55,14 @@ public class StoreCast {
 		this.active = active;
 	}
 
+	public void activate() {
+		this.active = true;
+	}
+
+	public void deactivate() {
+		this.active = false;
+	}
+
 	@PrePersist
 	void onCreate() {
 		var now = Instant.now();

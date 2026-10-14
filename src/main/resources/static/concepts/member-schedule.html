@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="CastFan Member Schedule design concept.">
+    <title>Member Schedule Concept | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+    <link href="/concepts/member-schedule.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Schedule concept">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true">
+                <i class="bi bi-reception-4"></i>
+                <i class="bi bi-wifi"></i>
+                <i class="bi bi-battery-full"></i>
+            </div>
+        </header>
+
+        <div class="screen-content schedule-content">
+            <div class="top-actions">
+                <span class="wordmark">CastFan</span>
+                <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <header class="schedule-heading">
+                <div>
+                    <p>Hoshi Cafe</p>
+                    <h1>Schedule</h1>
+                </div>
+                <button class="month-button" type="button" data-message="Opening monthly calendar" aria-label="Open monthly calendar" title="Open monthly calendar">
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <div class="schedule-mode" role="group" aria-label="Schedule view">
+                <button class="active" type="button" data-schedule-mode="day" aria-pressed="true">Day</button>
+                <button type="button" data-schedule-mode="week" aria-pressed="false">Week</button>
+            </div>
+
+            <section class="date-strip" aria-label="Choose a date">
+                <button type="button" data-date="12"><span>Sun</span><strong>12</strong></button>
+                <button type="button" data-date="13"><span>Mon</span><strong>13</strong></button>
+                <button class="active" type="button" data-date="14" aria-pressed="true"><span>Tue</span><strong>14</strong><i></i></button>
+                <button type="button" data-date="15"><span>Wed</span><strong>15</strong></button>
+                <button type="button" data-date="16"><span>Thu</span><strong>16</strong></button>
+                <button type="button" data-date="17"><span>Fri</span><strong>17</strong></button>
+                <button type="button" data-date="18"><span>Sat</span><strong>18</strong></button>
+            </section>
+
+            <section class="schedule-summary" aria-label="Selected day summary">
+                <div>
+                    <small>Tuesday, 14 October</small>
+                    <strong>3 Cast working today</strong>
+                </div>
+                <span>Open until 23:00</span>
+            </section>
+
+            <section class="shift-section" aria-labelledby="shift-heading">
+                <div class="section-title">
+                    <h2 id="shift-heading">Today's Shifts</h2>
+                    <button type="button" data-message="Filtering the schedule" aria-label="Filter schedule" title="Filter schedule"><i class="bi bi-sliders"></i></button>
+                </div>
+
+                <div class="timeline">
+                    <article class="shift-row is-live">
+                        <time datetime="14:00">14:00</time>
+                        <span class="timeline-marker" aria-hidden="true"></span>
+                        <button type="button" data-message="Opening Mina's profile">
+                            <span class="avatar rose">MN<i></i></span>
+                            <span class="shift-copy"><strong>Mina</strong><small>14:00 - 20:00</small></span>
+                            <span class="shift-status">Now</span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                    <article class="shift-row">
+                        <time datetime="16:00">16:00</time>
+                        <span class="timeline-marker" aria-hidden="true"></span>
+                        <button type="button" data-message="Opening Yuki's profile">
+                            <span class="avatar lavender">YK</span>
+                            <span class="shift-copy"><strong>Yuki</strong><small>16:00 - 22:00</small></span>
+                            <span class="shift-status upcoming">Soon</span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                    <article class="shift-row">
+                        <time datetime="18:00">18:00</time>
+                        <span class="timeline-marker" aria-hidden="true"></span>
+                        <button type="button" data-message="Opening Ami's profile">
+                            <span class="avatar amber">AM</span>
+                            <span class="shift-copy"><strong>Ami</strong><small>18:00 - 23:00</small></span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                </div>
+            </section>
+
+            <section class="event-note" aria-label="Schedule note">
+                <span><i class="bi bi-stars" aria-hidden="true"></i></span>
+                <div><small>Coming up</small><strong>Autumn Sweet Night · 31 Oct</strong></div>
+                <button type="button" data-message="Opening Autumn Sweet Night" aria-label="Open event"><i class="bi bi-arrow-right"></i></button>
+            </section>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" href="/concepts/member-home.html" aria-label="Home" title="Home"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button active" href="/concepts/member-schedule.html" aria-label="Schedule" title="Schedule" aria-current="page"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" href="/concepts/member-following.html" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" href="/concepts/member-profile.html" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+
+<script src="/concepts/member-schedule.js" defer></script>
+</body>
+</html>

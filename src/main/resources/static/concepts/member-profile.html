@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="CastFan Member Profile design concept.">
+    <title>Member Profile Concept | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+    <link href="/concepts/member-profile.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Profile concept">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true">
+                <i class="bi bi-reception-4"></i>
+                <i class="bi bi-wifi"></i>
+                <i class="bi bi-battery-full"></i>
+            </div>
+        </header>
+
+        <div class="screen-content profile-content">
+            <div class="top-actions">
+                <span class="wordmark">CastFan</span>
+                <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <header class="profile-heading">
+                <p>Your account</p>
+                <h1>Profile</h1>
+            </header>
+
+            <section class="member-overview" aria-labelledby="member-name">
+                <span class="member-avatar">AR</span>
+                <div>
+                    <h2 id="member-name">Aruna</h2>
+                    <p>Hoshi Cafe Member</p>
+                    <small>Joined October 2026</small>
+                </div>
+                <button type="button" data-message="Opening profile editor" aria-label="Edit profile" title="Edit profile">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                </button>
+            </section>
+
+            <section class="profile-section" aria-labelledby="membership-heading">
+                <div class="profile-section-title">
+                    <div><small>Member access</small><h2 id="membership-heading">Memberships</h2></div>
+                    <button type="button" data-message="Opening all memberships">Manage</button>
+                </div>
+                <div class="membership-row">
+                    <span class="membership-icon rose"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
+                    <div><strong>Silver Member</strong><small>Mina · Renews 31 Oct</small></div>
+                    <span class="membership-price">฿199</span>
+                </div>
+                <div class="membership-row">
+                    <span class="membership-icon amber"><i class="bi bi-stars" aria-hidden="true"></i></span>
+                    <div><strong>Rose Member</strong><small>Ami · Renews 12 Nov</small></div>
+                    <span class="membership-price">฿149</span>
+                </div>
+            </section>
+
+            <section class="profile-section" aria-labelledby="preferences-heading">
+                <div class="profile-section-title compact-title">
+                    <div><small>Account</small><h2 id="preferences-heading">Preferences</h2></div>
+                </div>
+                <button class="setting-row" type="button" data-message="Opening personal information">
+                    <span><i class="bi bi-person" aria-hidden="true"></i></span>
+                    <span><strong>Personal information</strong><small>Name and contact details</small></span>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+                <label class="setting-row notification-setting">
+                    <span><i class="bi bi-bell" aria-hidden="true"></i></span>
+                    <span><strong>Notifications</strong><small>Shifts, events, and Cast updates</small></span>
+                    <input type="checkbox" data-notification-toggle checked aria-label="Enable notifications">
+                    <i class="toggle-control" aria-hidden="true"></i>
+                </label>
+                <button class="setting-row" type="button" data-message="Opening help and support">
+                    <span><i class="bi bi-question-circle" aria-hidden="true"></i></span>
+                    <span><strong>Help and support</strong><small>FAQ and contact</small></span>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+            </section>
+
+            <button class="sign-out-button" type="button" data-message="Sign out confirmation opened">
+                <i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Sign out</span>
+            </button>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" href="/concepts/member-home.html" aria-label="Home" title="Home"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button" href="/concepts/member-schedule.html" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" href="/concepts/member-following.html" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button active" href="/concepts/member-profile.html" aria-label="Profile" title="Profile" aria-current="page"><i class="bi bi-person-fill"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+
+<script src="/concepts/member-profile.js" defer></script>
+</body>
+</html>

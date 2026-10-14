@@ -10,9 +10,9 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Foundation development**
+> **Owner workflow integration**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, database profiles, the first mobile-first Member Home interface, the initial database design, and database-backed Member registration and authentication. The next step is to implement role profiles and the Store domain.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Schedule, Following, Profile, public Cast Profile, and public Event Detail use Spring Data JPA. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, and publish events through ownership-protected routes. Published events also provide downloadable iCalendar files.
 
 ## Objectives
 
@@ -100,7 +100,7 @@ Public registration always creates a `MEMBER`. Privileged `CAST` and `OWNER` acc
 
 ## Core Data Model
 
-Planned entities:
+Implemented and planned entities:
 
 - `UserAccount`
 - `MemberProfile`
@@ -111,7 +111,7 @@ Planned entities:
 - `MemberTier`
 - `TierMembership`
 - `CastFollow`
-- `Content`
+- `CastContent`
 - `StoreEvent`
 - `StorePromotion`
 
@@ -124,8 +124,10 @@ The approved visual language, color tokens, components, and responsive UI rules 
 ## Development Roadmap
 
 - [ ] Finalize functional requirements and acceptance criteria.
-- [x] Design the first Member Home interface.
-- [ ] Complete wireframes and user flows for all roles.
+- [x] Design the Member Home, Schedule, Following, Profile, Cast Profile, and Event Detail interfaces.
+- [x] Design the Owner Dashboard and Shift Review flow.
+- [x] Complete the Owner Event Management interface.
+- [x] Complete Owner Store Management interface.
 - [x] Design the ER diagram and database schema.
 - [x] Create the Spring Boot project.
 - [x] Configure Spring Data JPA and H2.
@@ -135,9 +137,16 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Add role-based route and method authorization for Cast and Owner workspaces.
 - [x] Implement Cast discovery and Member follow/unfollow workflow.
 - [x] Implement Cast membership tiers and Member tier access checks.
+- [x] Connect the real Member Home to approved shifts, published events, and follow state.
+- [x] Connect the protected Member Schedule to approved shifts with date selection.
+- [x] Connect Member Following and Profile to the existing follow and membership workflows.
+- [x] Connect public Cast Profile and Event Detail, including calendar export.
 - [ ] Complete the remaining Member workflow.
-- [ ] Implement the Cast workflow.
-- [ ] Implement the Owner workflow.
+- [x] Implement the Cast profile, shift submission, cancellation, and membership tier workflow.
+- [x] Implement Cast content publishing and tier-based visibility.
+- [x] Implement the Owner Dashboard, daily schedule, and shift approval workflow.
+- [x] Implement Owner Event Management with draft, publish, and archive states.
+- [x] Implement Owner Store Management and permanent Cast roster controls.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.MemberProfile;
@@ -114,6 +115,24 @@ class MemberCastWorkflowTests {
 			.andExpect(redirectedUrl("/member/casts"));
 
 		assertThat(castFollowRepository.existsByMemberProfileIdAndCastProfileId(member.getId(), cast.getId())).isTrue();
+
+		mockMvc.perform(get("/member/following").with(memberRequest))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/following"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Web Cast")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Search followed Cast")));
+
+		mockMvc.perform(post("/member/casts/{id}/unfollow", cast.getId()).with(memberRequest).with(csrf()))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/member/following"));
+		assertThat(castFollowRepository.existsByMemberProfileIdAndCastProfileId(member.getId(), cast.getId())).isFalse();
+
+		mockMvc.perform(post("/member/casts/{id}/follow-profile", cast.getId()).with(memberRequest).with(csrf()))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/casts/" + cast.getId()));
+		mockMvc.perform(post("/member/casts/{id}/unfollow-profile", cast.getId()).with(memberRequest).with(csrf()))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/casts/" + cast.getId()));
 	}
 
 	private MemberProfile createMember(String email) {

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Manage CastFan store operations and shift reviews.">
+    <title>Owner Dashboard | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="Owner dashboard">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${workspace.stores.empty ? 'Owner workspace' : workspace.stores.getFirst().name}">Owner workspace</span></span></header>
+
+        <div class="screen-content owner-content">
+            <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/account}" aria-label="Open account" title="Account"><i class="bi bi-person" aria-hidden="true"></i></a></div>
+            <header class="owner-heading"><p>Store operations</p><h1>Good day, <span th:text="${workspace.displayName}">Owner</span></h1></header>
+
+            <a class="store-card store-card-link" th:if="${!workspace.stores.empty}" th:href="@{/owner/stores}" aria-label="Manage stores">
+                <span><i class="bi bi-shop-window" aria-hidden="true"></i></span>
+                <div><small>Active store</small><strong th:text="${workspace.stores.getFirst().name}">Hoshi Cafe</strong><p th:text="${workspace.stores.getFirst().address != null ? workspace.stores.getFirst().address : workspace.stores.getFirst().timezone}">Bangkok</p></div>
+                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </a>
+            <a class="owner-empty owner-empty-link" th:if="${workspace.stores.empty}" th:href="@{/owner/stores}"><i class="bi bi-shop" aria-hidden="true"></i><div><strong>No stores assigned</strong><small>Create a store before managing Cast operations.</small></div></a>
+
+            <div class="owner-stats" aria-label="Store summary">
+                <div><span><i class="bi bi-people" aria-hidden="true"></i></span><strong th:text="${workspace.activeCastCount}">0</strong><small>Active Cast</small></div>
+                <a th:href="@{/owner/shifts}"><span class="rose"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Needs review</small></a>
+                <div><span class="green"><i class="bi bi-calendar-check" aria-hidden="true"></i></span><strong th:text="${workspace.approvedTodayCount}">0</strong><small>Approved today</small></div>
+                <a th:href="@{/owner/events}"><span class="lavender"><i class="bi bi-stars" aria-hidden="true"></i></span><strong th:text="${workspace.upcomingEventCount}">0</strong><small>Upcoming events</small></a>
+            </div>
+
+            <section class="owner-section" aria-labelledby="pending-heading">
+                <div class="section-title"><div><small>Approvals</small><h2 id="pending-heading">Shift requests</h2></div><a th:href="@{/owner/shifts}" aria-label="Review all shifts"><i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+                <div class="owner-shift-list" th:if="${!workspace.pendingShifts.empty}">
+                    <article class="owner-shift-row" th:each="shift : ${workspace.pendingShifts}">
+                        <img th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.castName}">
+                        <span class="owner-avatar" th:unless="${shift.avatarUrl != null}" th:text="${shift.initials}">MN</span>
+                        <div><strong th:text="${shift.castName}">Mina</strong><small><span th:text="${shift.dateLabel}">15 Oct</span> · <span th:text="${shift.timeLabel}">14:00 - 20:00</span></small><p th:text="${shift.storeName}">Hoshi Cafe</p></div>
+                        <span class="status-pill pending">Pending</span>
+                    </article>
+                </div>
+                <div class="owner-empty" th:if="${workspace.pendingShifts.empty}"><i class="bi bi-check2-circle" aria-hidden="true"></i><div><strong>All caught up</strong><small>No shift requests need review.</small></div></div>
+            </section>
+
+            <a class="owner-primary" th:href="@{/owner/shifts}"><i class="bi bi-clipboard2-check" aria-hidden="true"></i><span>Review schedule</span></a>
+        </div>
+
+        <nav class="floating-nav owner-nav" aria-label="Owner navigation">
+            <a class="nav-button active" th:href="@{/owner}" aria-current="page"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
+            <a class="nav-button" th:href="@{/owner/shifts}"><i class="bi bi-calendar3"></i><span>Shifts</span></a>
+            <a class="nav-button" th:href="@{/owner/events}"><i class="bi bi-stars"></i><span>Events</span></a>
+            <a class="nav-button" th:href="@{/account}"><i class="bi bi-person"></i><span>Account</span></a>
+        </nav>
+    </section>
+</main>
+<script th:src="@{/js/owner-workspace.js}" defer></script>
+</body>
+</html>

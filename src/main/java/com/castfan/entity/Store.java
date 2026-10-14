@@ -71,6 +71,21 @@ public class Store {
 		this.active = active;
 	}
 
+	public void updateDetails(String name, String description, String address, String timezone) {
+		this.name = name;
+		this.description = description;
+		this.address = address;
+		this.timezone = timezone;
+	}
+
+	public void activate() {
+		this.active = true;
+	}
+
+	public void deactivate() {
+		this.active = false;
+	}
+
 	@PrePersist
 	void onCreate() {
 		var now = Instant.now();

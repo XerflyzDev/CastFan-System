@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" th:content="${event.description}">
+    <title th:text="${event.title + ' | CastFan'}">Event | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/event-detail.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone event-phone" th:attr="aria-label=${event.title + ' event details'}">
+        <header class="status-bar event-status" aria-label="Local time"><strong id="local-time">--:--</strong><span th:text="${event.storeName}">Hoshi Cafe</span></header>
+
+        <div class="screen-content event-detail-content">
+            <section class="event-detail-hero" th:attr="aria-label=${event.title + ' event image'}">
+                <img th:src="${event.imageUrl != null ? event.imageUrl : '/images/autumn-cafe-event.png'}" th:alt="${event.title}">
+                <div class="detail-actions">
+                    <a th:href="@{/}" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left"></i></a>
+                    <button type="button" data-share-profile th:attr="data-share-title=${event.title + ' on CastFan'}" aria-label="Share event" title="Share"><i class="bi bi-share"></i></button>
+                </div>
+                <span class="event-type">Special event</span>
+            </section>
+
+            <div class="event-detail-body">
+                <header class="event-title-block">
+                    <p th:text="${event.storeName + ' presents'}">Hoshi Cafe presents</p>
+                    <h1 th:text="${event.title}">Event title</h1>
+                    <span th:text="${event.description}">Event description</span>
+                </header>
+
+                <section class="event-facts" aria-label="Event information">
+                    <div><span><i class="bi bi-calendar3"></i></span><p><small>Date</small><strong th:text="${event.dateLabel}">Saturday, 31 October</strong></p></div>
+                    <div><span><i class="bi bi-clock"></i></span><p><small>Time</small><strong th:text="${event.timeLabel}">16:00 - 21:00</strong></p></div>
+                    <div><span><i class="bi bi-geo-alt"></i></span><p><small>Location</small><strong th:text="${event.location}">Hoshi Cafe</strong></p></div>
+                </section>
+
+                <section class="event-section" aria-labelledby="about-event-title">
+                    <h2 id="about-event-title">About the Event</h2>
+                    <p th:text="${event.description}">Event description</p>
+                </section>
+
+                <section class="event-section" th:if="${!event.featuredCast.empty}" aria-labelledby="event-cast-title">
+                    <div class="section-title"><h2 id="event-cast-title">Featured Cast</h2></div>
+                    <div class="featured-cast-list">
+                        <a th:each="cast, castStat : ${event.featuredCast}" th:href="@{/casts/{id}(id=${cast.id})}">
+                            <img th:if="${cast.avatarUrl != null}" th:src="${cast.avatarUrl}" th:alt="${cast.name}">
+                            <span class="event-avatar" th:unless="${cast.avatarUrl != null}" th:classappend="${castStat.even ? 'lavender' : 'amber'}" th:text="${cast.initials}">CF</span>
+                            <span><strong th:text="${cast.name}">Cast</strong><small th:text="${cast.shiftTime}">16:00 - 21:00</small></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="event-note-block" aria-label="Event note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <p><strong>Published event</strong><span>Contact the store directly for capacity, reservation, and entry details.</span></p>
+                </section>
+
+                <a class="calendar-action" th:href="@{/events/{id}/calendar.ics(id=${event.id})}" download>
+                    <i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Add to Calendar</span>
+                </a>
+            </div>
+        </div>
+
+        <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
+            <a class="nav-button active" th:href="@{/}" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/account}"><i class="bi bi-person"></i><span>Profile</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+        <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script th:src="@{/js/public-detail.js}" defer></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Mina Cast profile design concept for CastFan.">
+    <title>Mina | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+    <link href="/concepts/cast-profile.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone cast-phone" aria-label="Mina Cast profile concept">
+        <header class="status-bar cast-status" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true"><i class="bi bi-reception-4"></i><i class="bi bi-wifi"></i><i class="bi bi-battery-full"></i></div>
+        </header>
+
+        <div class="screen-content cast-content">
+            <section class="cast-hero" aria-label="Mina profile photo">
+                <img src="/images/mina-profile.jpg" alt="Mina, a Cast at Hoshi Cafe">
+                <div class="detail-actions">
+                    <a href="/concepts/member-following.html" aria-label="Back to Following" title="Back"><i class="bi bi-arrow-left"></i></a>
+                    <button type="button" data-message="Profile link ready to share" aria-label="Share profile" title="Share"><i class="bi bi-share"></i></button>
+                </div>
+                <span class="working-badge"><i></i> Working now</span>
+            </section>
+
+            <div class="cast-details">
+                <header class="cast-identity">
+                    <div><p>Hoshi Cafe Cast</p><h1>Mina</h1><span>@mina_hoshi</span></div>
+                    <button class="primary-follow active" type="button" data-profile-follow aria-pressed="true"><i class="bi bi-heart-fill"></i><span>Following</span></button>
+                </header>
+
+                <p class="cast-bio">Warm conversations, seasonal desserts, and quiet afternoon shifts. Find my latest schedule and member updates here.</p>
+
+                <section class="profile-stats" aria-label="Mina profile summary">
+                    <div><strong>1.2K</strong><small>Followers</small></div>
+                    <div><strong>48</strong><small>Updates</small></div>
+                    <div><strong>2</strong><small>Member tiers</small></div>
+                </section>
+
+                <section class="next-shift" aria-labelledby="next-shift-heading">
+                    <span><i class="bi bi-calendar3"></i></span>
+                    <div><small>Today's shift</small><h2 id="next-shift-heading">14:00 - 20:00</h2><p>Now at Hoshi Cafe</p></div>
+                    <a href="/concepts/member-schedule.html" aria-label="Open full schedule"><i class="bi bi-arrow-right"></i></a>
+                </section>
+
+                <section class="profile-section-block" aria-labelledby="membership-title">
+                    <div class="section-title"><h2 id="membership-title">Membership</h2><button type="button" data-message="Comparing Mina's member tiers">Compare</button></div>
+                    <button class="tier-option" type="button" data-message="Opening Silver Member details">
+                        <span class="tier-icon"><i class="bi bi-star-fill"></i></span>
+                        <span><small>Recommended</small><strong>Silver Member</strong><em>Exclusive updates and early schedule access</em></span>
+                        <b>฿199<small>/mo</small></b>
+                    </button>
+                </section>
+
+                <section class="profile-section-block" aria-labelledby="updates-title">
+                    <div class="section-title"><h2 id="updates-title">Latest Update</h2><button type="button" data-message="Opening all Mina updates"><i class="bi bi-arrow-right"></i></button></div>
+                    <article class="cast-update">
+                        <small>Members · 2 hours ago</small>
+                        <p>Today's seasonal strawberry plate is ready. See you during my afternoon shift.</p>
+                        <span><i class="bi bi-heart"></i> 86</span>
+                    </article>
+                </section>
+            </div>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" href="/concepts/member-home.html"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button" href="/concepts/member-schedule.html"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button active" href="/concepts/member-following.html" aria-current="page"><i class="bi bi-heart-fill"></i><span>Following</span></a>
+            <a class="nav-button" href="/concepts/member-profile.html"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script src="/concepts/cast-profile.js" defer></script>
+</body>
+</html>

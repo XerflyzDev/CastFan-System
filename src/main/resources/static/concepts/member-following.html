@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="CastFan Member Following design concept.">
+    <title>Following Concept | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+    <link href="/concepts/member-following.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Following concept">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true">
+                <i class="bi bi-reception-4"></i>
+                <i class="bi bi-wifi"></i>
+                <i class="bi bi-battery-full"></i>
+            </div>
+        </header>
+
+        <div class="screen-content following-content">
+            <div class="top-actions">
+                <span class="wordmark">CastFan</span>
+                <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <header class="following-heading">
+                <p>Your favorites</p>
+                <div><h1>Following</h1><span>3 Cast</span></div>
+            </header>
+
+            <label class="concept-search following-search" for="following-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="following-search" type="search" placeholder="Search followed Cast" autocomplete="off">
+                <button type="button" data-clear-following-search aria-label="Clear search" title="Clear search">
+                    <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+                </button>
+            </label>
+
+            <div class="following-filters" role="group" aria-label="Filter followed Cast">
+                <button class="active" type="button" data-following-filter="all" aria-pressed="true">All</button>
+                <button type="button" data-following-filter="working" aria-pressed="false">Working now</button>
+                <button type="button" data-following-filter="membership" aria-pressed="false">Membership</button>
+            </div>
+
+            <section class="following-list" aria-label="Followed Cast">
+                <article class="following-card" data-following-card data-cast-name="Mina" data-working="true" data-membership="true">
+                    <a class="cast-profile-action" href="/concepts/cast-profile.html" aria-label="Open Mina's profile">
+                        <span class="profile-avatar rose">MN<i></i></span>
+                        <span class="following-copy">
+                            <span class="name-row"><strong>Mina</strong><small class="live-label">Working now</small></span>
+                            <span>14:00 - 20:00 today</span>
+                            <small><i class="bi bi-star-fill" aria-hidden="true"></i> Silver member</small>
+                        </span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
+                    <button class="following-button" type="button" data-follow-toggle aria-pressed="true" aria-label="Unfollow Mina">
+                        <i class="bi bi-heart-fill" aria-hidden="true"></i><span>Following</span>
+                    </button>
+                </article>
+
+                <article class="following-card" data-following-card data-cast-name="Yuki" data-working="false" data-membership="false">
+                    <button class="cast-profile-action" type="button" data-message="Opening Yuki's profile" aria-label="Open Yuki's profile">
+                        <span class="profile-avatar lavender">YK</span>
+                        <span class="following-copy">
+                            <span class="name-row"><strong>Yuki</strong><small>Next shift</small></span>
+                            <span>Today · 16:00 - 22:00</span>
+                            <small>Public updates</small>
+                        </span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                    <button class="following-button" type="button" data-follow-toggle aria-pressed="true" aria-label="Unfollow Yuki">
+                        <i class="bi bi-heart-fill" aria-hidden="true"></i><span>Following</span>
+                    </button>
+                </article>
+
+                <article class="following-card" data-following-card data-cast-name="Ami" data-working="false" data-membership="true">
+                    <button class="cast-profile-action" type="button" data-message="Opening Ami's profile" aria-label="Open Ami's profile">
+                        <span class="profile-avatar amber">AM</span>
+                        <span class="following-copy">
+                            <span class="name-row"><strong>Ami</strong><small>Next shift</small></span>
+                            <span>Today · 18:00 - 23:00</span>
+                            <small><i class="bi bi-star-fill" aria-hidden="true"></i> Rose member</small>
+                        </span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                    <button class="following-button" type="button" data-follow-toggle aria-pressed="true" aria-label="Unfollow Ami">
+                        <i class="bi bi-heart-fill" aria-hidden="true"></i><span>Following</span>
+                    </button>
+                </article>
+            </section>
+
+            <p class="following-empty" data-following-empty hidden>No followed Cast match this filter.</p>
+
+            <button class="discover-action" type="button" data-message="Opening Cast directory">
+                <i class="bi bi-plus" aria-hidden="true"></i>
+                <span><strong>Discover more Cast</strong><small>Browse all active profiles</small></span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" href="/concepts/member-home.html" aria-label="Home" title="Home"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button" href="/concepts/member-schedule.html" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button active" href="/concepts/member-following.html" aria-label="Following" title="Following" aria-current="page"><i class="bi bi-heart-fill"></i><span>Following</span></a>
+            <a class="nav-button" href="/concepts/member-profile.html" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+
+<script src="/concepts/member-following.js" defer></script>
+</body>
+</html>

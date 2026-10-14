@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Browse the approved Cast schedule at Hoshi Cafe.">
+    <title th:text="${pageTitle} + ' | CastFan'">Schedule | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/member-schedule.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Schedule">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Local time">
+            <strong id="local-time">--:--</strong>
+            <span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${schedule.storeName}">Hoshi Cafe</span></span>
+        </header>
+
+        <div class="screen-content schedule-content">
+            <div class="top-actions">
+                <a class="wordmark" th:href="@{/}">CastFan</a>
+                <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <header class="schedule-heading">
+                <div>
+                    <p th:text="${schedule.storeName}">Hoshi Cafe</p>
+                    <h1>Schedule</h1>
+                </div>
+                <button class="month-button" type="button" th:attr="data-message=${schedule.monthLabel}" aria-label="Selected month" title="Selected month">
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                </button>
+            </header>
+
+            <div class="schedule-mode" role="group" aria-label="Schedule view">
+                <button class="active" type="button" aria-pressed="true">Day</button>
+                <button type="button" data-message="Week view is planned for a later release" aria-pressed="false">Week</button>
+            </div>
+
+            <nav class="date-strip" aria-label="Choose a date">
+                <a th:each="day : ${schedule.days}" th:href="@{/member/schedule(date=${day.isoDate})}"
+                   th:classappend="${day.selected} ? 'active'" th:attr="aria-current=${day.selected ? 'date' : null}">
+                    <span th:text="${day.dayLabel}">Tue</span>
+                    <strong th:text="${day.dayNumber}">14</strong>
+                    <i th:if="${day.selected}" aria-hidden="true"></i>
+                </a>
+            </nav>
+
+            <section class="schedule-summary" aria-label="Selected day summary">
+                <div>
+                    <small th:text="${schedule.selectedDateLabel}">Tuesday, 14 October</small>
+                    <strong><span th:text="${schedule.shifts.size()}">0</span> <span th:text="${schedule.shifts.size() == 1 ? 'Cast member' : 'Cast members'}">Cast members</span> scheduled</strong>
+                </div>
+                <span th:if="${schedule.closingTime != null}" th:text="${'Open until ' + schedule.closingTime}">Open until 23:00</span>
+            </section>
+
+            <section class="shift-section" aria-labelledby="shift-heading">
+                <div class="section-title">
+                    <h2 id="shift-heading">Approved Shifts</h2>
+                </div>
+
+                <div class="timeline" th:if="${!schedule.shifts.empty}">
+                    <article class="shift-row" th:each="shift : ${schedule.shifts}" th:classappend="${shift.workingNow} ? 'is-live'">
+                        <time th:datetime="${shift.startsAt}" th:text="${shift.startsAt}">14:00</time>
+                        <span class="timeline-marker" aria-hidden="true"></span>
+                        <button type="button" th:attr="data-message=${'Opening ' + shift.name + ' profile'}">
+                            <img class="avatar avatar-photo" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.name}">
+                            <span class="avatar" th:unless="${shift.avatarUrl != null}" th:classappend="${shift.avatarTone}" th:text="${shift.initials}">MN</span>
+                            <span class="shift-copy"><strong th:text="${shift.name}">Mina</strong><small th:text="${shift.shiftTime}">14:00 - 20:00</small></span>
+                            <span class="shift-status" th:if="${shift.workingNow}">Now</span>
+                            <span class="shift-status upcoming" th:if="${!shift.workingNow and shift.startingSoon}">Soon</span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </article>
+                </div>
+
+                <div class="home-empty schedule-empty" th:if="${schedule.shifts.empty}">
+                    <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+                    <div><strong>No approved shifts</strong><span>Choose another date to see who is working.</span></div>
+                </div>
+            </section>
+
+            <section class="event-note" th:if="${schedule.upcomingEvent != null}" aria-label="Upcoming event">
+                <span><i class="bi bi-stars" aria-hidden="true"></i></span>
+                <div><small>Coming up</small><strong><span th:text="${schedule.upcomingEvent.title}">Autumn Sweet Night</span> · <span th:text="${schedule.upcomingEvent.dateLabel}">31 Oct</span></strong></div>
+                <a th:href="@{/events/{id}(id=${schedule.upcomingEvent.id})}" aria-label="Open event"><i class="bi bi-arrow-right"></i></a>
+            </section>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button" th:href="@{/}" aria-label="Home" title="Home"><i class="bi bi-house"></i><span>Home</span></a>
+            <a class="nav-button active" th:href="@{/member/schedule}" aria-label="Schedule" title="Schedule" aria-current="page"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" th:href="@{/member/following}" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" th:href="@{/account}" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script th:src="@{/js/member-schedule.js}" defer></script>
+</body>
+</html>

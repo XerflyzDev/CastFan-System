@@ -3,165 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="CastFan brings Cast schedules, events, and membership access together in one place.">
+    <meta name="description" content="View Hoshi Cafe events and today's Cast schedule on CastFan.">
     <title th:text="${pageTitle} + ' | Home'">CastFan | Home</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
 </head>
 <body>
-<div class="app-shell">
-    <header class="app-header">
-        <div class="page-container header-content">
-            <a class="brand" th:href="@{/}" aria-label="CastFan home">
-                <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
-                <span>CastFan</span>
-            </a>
-            <div class="header-actions">
-                <button class="icon-button" type="button" data-toast="You have no new notifications" aria-label="Notifications" title="Notifications">
-                    <i class="bi bi-bell" aria-hidden="true"></i>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Home">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Local time">
+            <strong id="local-time">--:--</strong>
+            <span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${home.storeName}">Hoshi Cafe</span></span>
+        </header>
+
+        <div class="screen-content">
+            <div class="top-actions">
+                <a class="wordmark" th:href="@{/}">CastFan</a>
+                <div class="action-group">
+                    <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                        <i class="bi bi-bell" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <section class="greeting" aria-labelledby="home-heading">
+                <p th:text="${home.dateLabel}">Tuesday, 14 October</p>
+                <h1 id="home-heading">Good morning,<br><span th:text="${home.memberName} + '.'">there.</span></h1>
+            </section>
+
+            <label class="concept-search" for="cast-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="cast-search" type="search" placeholder="Search Cast or event" autocomplete="off">
+                <button type="button" data-clear-search aria-label="Clear search" title="Clear search">
+                    <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
                 </button>
-                <a class="profile-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in" title="Sign in">
-                    <span>CF</span>
-                </a>
-                <a class="profile-button" sec:authorize="isAuthenticated()" th:href="@{/account}" aria-label="Open account" title="Open account">
-                    <i class="bi bi-person-fill" aria-hidden="true"></i>
-                </a>
-            </div>
-        </div>
-    </header>
+            </label>
 
-    <main class="page-container page-content">
-        <label class="search-field home-search" for="cast-search">
-            <i class="bi bi-search" aria-hidden="true"></i>
-            <input id="cast-search" type="search" placeholder="Search Cast or cafe" autocomplete="off">
-            <button class="search-clear" type="button" aria-label="Clear search" title="Clear search" hidden>
-                <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
-            </button>
-        </label>
-
-        <div class="dashboard-grid">
-            <div class="primary-column">
-                <section class="content-section" aria-labelledby="working-heading">
-                    <div class="section-heading">
-                        <div>
-                            <p class="eyebrow">Daily schedule</p>
-                            <h2 id="working-heading">Cast Working Today</h2>
-                        </div>
-                        <a class="text-action" sec:authorize="hasRole('MEMBER')" th:href="@{/member/casts}">Discover</a>
-                        <a class="text-action" sec:authorize="isAnonymous()" th:href="@{/login}">Sign in</a>
-                    </div>
-
-                    <div class="cast-strip" id="working-cast-list">
-                        <button class="cast-preview" type="button" th:each="cast : ${home.workingToday}" th:attr="data-search-item=${cast.name + ' ' + cast.cafeName},data-toast=${cast.name + ' is working ' + cast.shiftTime}">
-                            <span class="avatar avatar-large" th:classappend="${'tone-' + cast.avatarTone}">
-                                <span th:text="${cast.initials}">MN</span>
-                                <i th:if="${cast.workingNow}" class="online-dot" aria-label="Working now"></i>
-                            </span>
-                            <strong th:text="${cast.name}">Mina</strong>
-                            <small th:text="${cast.shiftTime}">14:00 - 20:00</small>
-                        </button>
-                    </div>
-                    <p class="search-empty" id="working-empty" hidden>No working Cast matches your search.</p>
-                </section>
-
-                <section class="content-section" aria-labelledby="event-heading">
-                    <div class="section-heading">
-                        <div>
-                            <p class="eyebrow">Featured event</p>
-                            <h2 id="event-heading">A Special Moment</h2>
-                        </div>
-                    </div>
-
-                    <article class="event-card">
-                        <img th:src="@{${home.featuredEvent.imageUrl}}" alt="A table of strawberry desserts and tea in an evening cafe">
-                        <div class="event-content">
-                            <span class="event-label">Special event</span>
-                            <h3 th:text="${home.featuredEvent.title}">Autumn Sweet Night</h3>
-                            <p class="event-meta">
-                                <i class="bi bi-calendar3" aria-hidden="true"></i>
-                                <span th:text="${home.featuredEvent.date}">October 31, 2026</span>
-                                <span aria-hidden="true">·</span>
-                                <span th:text="${home.featuredEvent.time}">16:00 - 21:00</span>
-                            </p>
-                            <p class="event-description" th:text="${home.featuredEvent.description}">A special evening with strawberry desserts.</p>
-                            <button class="event-action" type="button" data-toast="Event details will be available soon">
-                                View details
-                                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </article>
-                </section>
-            </div>
-
-            <aside class="content-section following-section" aria-labelledby="following-heading">
-                <div class="section-heading">
-                    <div>
-                        <p class="eyebrow">Following</p>
-                        <h2 id="following-heading">Your Cast</h2>
-                    </div>
-                    <span class="count-label" th:text="${home.followedCast.size() + ' Cast'}">3 Cast</span>
+            <section class="content-block featured-event" aria-labelledby="event-title">
+                <div class="section-title">
+                    <h2 id="event-title">Featured Event</h2>
+                    <button type="button" data-message="Showing upcoming events" aria-label="See upcoming events" title="See upcoming events"><i class="bi bi-arrow-right"></i></button>
                 </div>
 
-                <div class="following-list" id="following-cast-list">
-                    <article class="cast-row" th:each="cast : ${home.followedCast}" th:attr="data-search-item=${cast.name + ' ' + cast.cafeName}">
-                        <button class="cast-row-main" type="button" th:attr="data-toast=${'Open ' + cast.name + ' profile'}">
-                            <span class="avatar" th:classappend="${'tone-' + cast.avatarTone}">
-                                <span th:text="${cast.initials}">MN</span>
-                                <i th:if="${cast.workingNow}" class="online-dot" aria-label="Working now"></i>
-                            </span>
-                            <span class="cast-details">
-                                <strong th:text="${cast.name}">Mina</strong>
-                                <small>
-                                    <span th:text="${cast.cafeName}">Hoshi Cafe</span>
-                                    <span aria-hidden="true">·</span>
-                                    <span th:text="${cast.shiftTime}">14:00 - 20:00</span>
-                                </small>
-                            </span>
-                        </button>
-                        <button class="follow-button is-following" type="button" aria-pressed="true" th:attr="aria-label=${'Unfollow ' + cast.name},data-cast-name=${cast.name}">
-                            <i class="bi bi-check-lg" aria-hidden="true"></i>
-                            <span>Following</span>
-                        </button>
-                    </article>
+                <div class="event-carousel" data-event-carousel th:if="${!home.featuredEvents.empty}">
+                    <a class="event-preview" data-event-slide th:each="event, eventStat : ${home.featuredEvents}"
+                            th:href="@{/events/{id}(id=${event.id})}" th:attr="data-search-item=${event.title}">
+                        <img th:src="${event.imageUrl != null ? event.imageUrl : '/images/autumn-cafe-event.png'}" th:alt="${event.title}">
+                        <span class="event-copy">
+                            <small><span th:text="${event.date}">31 OCT</span> · <span th:text="${event.time}">16:00 - 21:00</span></small>
+                            <strong th:text="${event.title}">Autumn Sweet Night</strong>
+                            <span th:text="${home.storeName}">Hoshi Cafe</span>
+                        </span>
+                    </a>
                 </div>
-                <p class="search-empty" id="following-empty" hidden>No followed Cast matches your search.</p>
-            </aside>
-        </div>
-    </main>
+                <div class="event-dots" aria-label="Featured event pages" th:if="${home.featuredEvents.size() > 1}">
+                    <button type="button" th:each="event, eventStat : ${home.featuredEvents}"
+                            th:classappend="${eventStat.first} ? 'active'"
+                            th:attr="data-event-dot=${eventStat.index},aria-label=${'Show event ' + (eventStat.index + 1)},aria-current=${eventStat.first ? 'true' : null}"></button>
+                </div>
+                <div class="home-empty" data-event-empty th:if="${home.featuredEvents.empty}">
+                    <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                    <div><strong>No upcoming events</strong><span>Published events will appear here.</span></div>
+                </div>
+            </section>
 
-    <nav class="bottom-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
-        <div class="bottom-nav-content">
-            <a class="nav-item active" th:href="@{/}" aria-current="page">
-                <i class="bi bi-house-fill" aria-hidden="true"></i>
-                <span>Home</span>
-            </a>
-            <button class="nav-item" type="button" data-toast="The schedule page is coming next">
-                <i class="bi bi-calendar3" aria-hidden="true"></i>
-                <span>Schedule</span>
-            </button>
-            <a class="nav-item" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}">
-                <i class="bi bi-heart" aria-hidden="true"></i>
-                <span>Following</span>
-            </a>
-            <a class="nav-item" sec:authorize="isAnonymous()" th:href="@{/login}">
-                <i class="bi bi-heart" aria-hidden="true"></i>
-                <span>Following</span>
-            </a>
-            <a class="nav-item" sec:authorize="isAnonymous()" th:href="@{/login}">
-                <i class="bi bi-person" aria-hidden="true"></i>
-                <span>Profile</span>
-            </a>
-            <a class="nav-item" sec:authorize="isAuthenticated()" th:href="@{/account}">
-                <i class="bi bi-person-fill" aria-hidden="true"></i>
-                <span>Profile</span>
-            </a>
-        </div>
-    </nav>
-</div>
+            <section class="content-block working-today" aria-labelledby="working-title">
+                <div class="section-title">
+                    <h2 id="working-title">Working Today</h2>
+                    <a sec:authorize="hasRole('MEMBER')" th:href="@{/member/casts}" aria-label="See all Cast" title="See all Cast"><i class="bi bi-arrow-right"></i></a>
+                    <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Cast" title="Sign in"><i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="cast-carousel" id="working-cast-list" th:if="${!home.workingToday.empty}">
+                    <a class="cast-card" th:each="cast : ${home.workingToday}" th:href="@{/casts/{id}(id=${cast.id})}"
+                            th:attr="data-search-item=${cast.name}">
+                        <img class="avatar avatar-photo" th:if="${cast.avatarUrl != null}" th:src="${cast.avatarUrl}" th:alt="${cast.name}">
+                        <span class="avatar" th:unless="${cast.avatarUrl != null}" th:classappend="${cast.avatarTone}" th:text="${cast.initials}">MN</span>
+                        <span class="cast-card-copy"><strong th:text="${cast.name}">Mina</strong><small th:text="${cast.shiftTime}">14:00 - 20:00</small></span>
+                        <span class="cafe">
+                            <span th:text="${home.storeName}">Hoshi Cafe</span>
+                            <i th:if="${cast.workingNow}" aria-label="Working now"></i>
+                        </span>
+                    </a>
+                </div>
+                <div class="home-empty" id="working-empty" th:if="${home.workingToday.empty}">
+                    <i class="bi bi-people" aria-hidden="true"></i>
+                    <div><strong>No approved shifts today</strong><span>Check another day in Schedule.</span></div>
+                </div>
+                <p class="search-empty" id="working-search-empty" hidden>No Cast match your search.</p>
+            </section>
 
-<div class="app-toast" id="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<script th:src="@{/js/app.js}" defer></script>
+            <section class="current-shift" th:if="${!home.workingToday.empty}" aria-labelledby="current-shift-title">
+                <div>
+                    <p th:text="${home.workingToday[0].workingNow ? 'Current shift' : 'Next shift'}">Next shift</p>
+                    <h2 id="current-shift-title"><span th:text="${home.workingToday[0].name}">Mina</span> at <span th:text="${home.storeName}">Hoshi Cafe</span></h2>
+                    <span th:text="${home.workingToday[0].shiftTime}">14:00 - 20:00</span>
+                </div>
+                <span class="live-badge" th:text="${home.workingToday[0].workingNow ? 'Now' : 'Today'}">Today</span>
+                <a class="card-arrow" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}" aria-label="Open today's schedule" title="Open today's schedule"><i class="bi bi-arrow-right"></i></a>
+                <a class="card-arrow" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open today's schedule" title="Sign in"><i class="bi bi-arrow-right"></i></a>
+            </section>
+
+            <section class="quick-stats" aria-label="Today overview">
+                <button class="stat-card" type="button" th:attr="data-message=${home.workingToday.size() + ' Cast working today'}">
+                    <span class="stat-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+                    <strong th:text="${home.workingToday.size()}">0</strong>
+                    <small>Working today</small>
+                </button>
+                <button class="stat-card" type="button" th:attr="data-message=${home.featuredEvents.size() + ' upcoming events'}">
+                    <span class="stat-icon warm"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                    <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+                    <strong th:text="${home.featuredEvents.size()}">0</strong>
+                    <small>Upcoming events</small>
+                </button>
+            </section>
+        </div>
+
+        <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
+            <a class="nav-button active" th:href="@{/}" aria-label="Home" title="Home" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Schedule" title="Sign in"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Following" title="Sign in"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" sec:authorize="isAuthenticated()" th:href="@{/account}" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
+            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in" title="Sign in"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script th:src="@{/js/member-home.js}" defer></script>
 </body>
 </html>

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="CastFan Member Home design concept.">
+    <title>Member Home Concept | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="CastFan Member Home concept">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <header class="status-bar" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true">
+                <i class="bi bi-reception-4"></i>
+                <i class="bi bi-wifi"></i>
+                <i class="bi bi-battery-full"></i>
+            </div>
+        </header>
+
+        <div class="screen-content">
+            <div class="top-actions">
+                <span class="wordmark">CastFan</span>
+                <div class="action-group">
+                    <button class="round-button" type="button" data-message="No new notifications" aria-label="Notifications" title="Notifications">
+                        <i class="bi bi-bell" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <section class="greeting" aria-labelledby="concept-heading">
+                <p>Tuesday, 14 October</p>
+                <h1 id="concept-heading">Good morning,<br><span>Aruna.</span></h1>
+            </section>
+
+            <label class="concept-search" for="concept-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="concept-search" type="search" placeholder="Search Cast or event" autocomplete="off">
+                <button type="button" data-clear-search aria-label="Clear search" title="Clear search">
+                    <i class="bi bi-x-circle-fill" aria-hidden="true"></i>
+                </button>
+            </label>
+
+            <section class="content-block featured-event" aria-labelledby="event-title">
+                <div class="section-title">
+                    <h2 id="event-title">Featured Event</h2>
+                    <button type="button" data-message="Opening event details" aria-label="Open event details" title="Open event details"><i class="bi bi-arrow-right"></i></button>
+                </div>
+                <div class="event-carousel" data-event-carousel>
+                    <a class="event-preview" href="/concepts/event-detail.html" data-event-slide aria-label="Open Autumn Sweet Night">
+                        <img src="/images/autumn-cafe-event.png" alt="Strawberry desserts at Autumn Sweet Night">
+                        <span class="event-copy">
+                            <small>31 OCT · 16:00</small>
+                            <strong>Autumn Sweet Night</strong>
+                            <span>Hoshi Cafe</span>
+                        </span>
+                    </a>
+                    <button class="event-preview event-preview-lavender" type="button" data-event-slide data-message="Opening Moonlight Theme Week">
+                        <img src="/images/autumn-cafe-event.png" alt="Dessert table at Moonlight Theme Week">
+                        <span class="event-copy">
+                            <small>08 NOV · ALL DAY</small>
+                            <strong>Moonlight Theme Week</strong>
+                            <span>Hoshi Cafe</span>
+                        </span>
+                    </button>
+                    <button class="event-preview event-preview-amber" type="button" data-event-slide data-message="Opening Cast Anniversary">
+                        <img src="/images/autumn-cafe-event.png" alt="Cafe celebration at Cast Anniversary">
+                        <span class="event-copy">
+                            <small>15 NOV · 18:00</small>
+                            <strong>Cast Anniversary</strong>
+                            <span>Hoshi Cafe</span>
+                        </span>
+                    </button>
+                </div>
+                <div class="event-dots" aria-label="Featured event pages">
+                    <button class="active" type="button" data-event-dot="0" aria-label="Show event 1" aria-current="true"></button>
+                    <button type="button" data-event-dot="1" aria-label="Show event 2"></button>
+                    <button type="button" data-event-dot="2" aria-label="Show event 3"></button>
+                </div>
+            </section>
+
+            <section class="content-block working-today" aria-labelledby="working-title">
+                <div class="section-title">
+                    <h2 id="working-title">Working Today</h2>
+                    <button type="button" data-message="Opening Cast discovery" aria-label="See all Cast" title="See all Cast"><i class="bi bi-arrow-right"></i></button>
+                </div>
+                <div class="cast-carousel">
+                    <a class="cast-card" href="/concepts/cast-profile.html" aria-label="Open Mina's profile">
+                        <span class="avatar rose">MN<i></i></span>
+                        <span><strong>Mina</strong><small>14:00 - 20:00</small></span>
+                        <span class="cafe">Hoshi Cafe</span>
+                    </a>
+                    <button class="cast-card" type="button" data-message="Opening Yuki's profile">
+                        <span class="avatar lavender">YK</span>
+                        <span><strong>Yuki</strong><small>16:00 - 22:00</small></span>
+                        <span class="cafe">Hoshi Cafe</span>
+                    </button>
+                    <button class="cast-card" type="button" data-message="Opening Ami's profile">
+                        <span class="avatar amber">AM</span>
+                        <span><strong>Ami</strong><small>18:00 - 23:00</small></span>
+                        <span class="cafe">Hoshi Cafe</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="current-shift" aria-labelledby="current-shift-title">
+                <div>
+                    <p>Current shift</p>
+                    <h2 id="current-shift-title">Mina at Hoshi Cafe</h2>
+                    <span>14:00 - 20:00</span>
+                </div>
+                <span class="live-badge">Now</span>
+                <button class="card-arrow" type="button" data-message="Opening Mina's schedule" aria-label="Open current shift" title="Open current shift">
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+            </section>
+
+            <section class="quick-stats" aria-label="Today overview">
+                <button class="stat-card" type="button" data-message="3 Cast are working today">
+                    <span class="stat-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+                    <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+                    <strong>3</strong>
+                    <small>Working today</small>
+                </button>
+                <button class="stat-card" type="button" data-message="2 events are coming this week">
+                    <span class="stat-icon warm"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                    <i class="bi bi-arrow-right stat-arrow" aria-hidden="true"></i>
+                    <strong>2</strong>
+                    <small>Events this week</small>
+                </button>
+            </section>
+
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button active" href="/concepts/member-home.html" aria-label="Home" title="Home" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
+            <a class="nav-button" href="/concepts/member-schedule.html" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" href="/concepts/member-following.html" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" href="/concepts/member-profile.html" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+
+<script src="/concepts/member-home.js" defer></script>
+</body>
+</html>

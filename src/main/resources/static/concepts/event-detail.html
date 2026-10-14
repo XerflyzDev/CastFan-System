@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Autumn Sweet Night event detail concept for CastFan.">
+    <title>Autumn Sweet Night | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/concepts/member-home.css" rel="stylesheet">
+    <link href="/concepts/event-detail.css" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone event-phone" aria-label="Autumn Sweet Night event detail concept">
+        <header class="status-bar event-status" aria-label="Device status">
+            <strong>9:41</strong>
+            <div class="device-status" aria-hidden="true"><i class="bi bi-reception-4"></i><i class="bi bi-wifi"></i><i class="bi bi-battery-full"></i></div>
+        </header>
+
+        <div class="screen-content event-detail-content">
+            <section class="event-detail-hero" aria-label="Autumn Sweet Night event image">
+                <img src="/images/autumn-cafe-event.png" alt="Strawberry desserts prepared for Autumn Sweet Night">
+                <div class="detail-actions">
+                    <a href="/concepts/member-home.html" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left"></i></a>
+                    <button type="button" data-message="Event link ready to share" aria-label="Share event" title="Share"><i class="bi bi-share"></i></button>
+                </div>
+                <span class="event-type">Special event</span>
+            </section>
+
+            <div class="event-detail-body">
+                <header class="event-title-block">
+                    <p>Hoshi Cafe presents</p>
+                    <h1>Autumn Sweet Night</h1>
+                    <span>Seasonal desserts and a special evening with your favorite Cast.</span>
+                </header>
+
+                <section class="event-facts" aria-label="Event information">
+                    <div><span><i class="bi bi-calendar3"></i></span><p><small>Date</small><strong>Saturday, 31 October</strong></p></div>
+                    <div><span><i class="bi bi-clock"></i></span><p><small>Time</small><strong>16:00 - 21:00</strong></p></div>
+                    <div><span><i class="bi bi-geo-alt"></i></span><p><small>Location</small><strong>Hoshi Cafe</strong></p><button type="button" data-message="Opening map">Map</button></div>
+                </section>
+
+                <section class="event-section" aria-labelledby="about-event-title">
+                    <h2 id="about-event-title">About the Event</h2>
+                    <p>Enjoy a limited strawberry dessert set, seasonal drinks, and special photo moments. Regular cafe rules and opening-hour policies apply.</p>
+                </section>
+
+                <section class="event-section" aria-labelledby="event-cast-title">
+                    <div class="section-title"><h2 id="event-cast-title">Featured Cast</h2><button type="button" data-message="Opening all featured Cast"><i class="bi bi-arrow-right"></i></button></div>
+                    <div class="featured-cast-list">
+                        <a href="/concepts/cast-profile.html"><img src="/images/mina-profile.jpg" alt="Mina"><span><strong>Mina</strong><small>16:00 - 21:00</small></span></a>
+                        <button type="button" data-message="Opening Yuki's profile"><span class="event-avatar lavender">YK</span><span><strong>Yuki</strong><small>17:00 - 21:00</small></span></button>
+                        <button type="button" data-message="Opening Ami's profile"><span class="event-avatar amber">AM</span><span><strong>Ami</strong><small>18:00 - 21:00</small></span></button>
+                    </div>
+                </section>
+
+                <section class="event-note-block" aria-label="Event note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    <p><strong>No reservation required</strong><span>Entry is available during event hours while capacity allows.</span></p>
+                </section>
+
+                <button class="calendar-action" type="button" data-calendar-action>
+                    <i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Add to Calendar</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="floating-nav" aria-label="Member navigation">
+            <a class="nav-button active" href="/concepts/member-home.html" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
+            <a class="nav-button" href="/concepts/member-schedule.html"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
+            <a class="nav-button" href="/concepts/member-following.html"><i class="bi bi-heart"></i><span>Following</span></a>
+            <a class="nav-button" href="/concepts/member-profile.html"><i class="bi bi-person"></i><span>Profile</span></a>
+        </nav>
+        <div class="concept-toast" role="status" aria-live="polite"></div>
+    </section>
+</main>
+<script src="/concepts/event-detail.js" defer></script>
+</body>
+</html>

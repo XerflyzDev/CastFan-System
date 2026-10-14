@@ -27,7 +27,8 @@ class HomeControllerTests {
 			.andExpect(view().name("index"))
 			.andExpect(model().attribute("pageTitle", "CastFan"))
 			.andExpect(model().attributeExists("home"))
-			.andExpect(content().string(containsString("Cast Working Today")));
+			.andExpect(content().string(containsString("Working Today")))
+			.andExpect(content().string(containsString("No approved shifts today")));
 	}
 
 	@Test
@@ -47,8 +48,89 @@ class HomeControllerTests {
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
 
+		mockMvc.perform(get("/js/member-home.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/member-following.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/member-profile.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/public-detail.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/cast-workspace.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/owner-workspace.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/css/cast-profile.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
+		mockMvc.perform(get("/css/event-detail.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
+		mockMvc.perform(get("/css/member-following.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
+		mockMvc.perform(get("/css/member-profile.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
+		mockMvc.perform(get("/css/cast-workspace.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
+		mockMvc.perform(get("/css/owner-workspace.css"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/css"));
+
 		mockMvc.perform(get("/images/autumn-cafe-event.png"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("image/png"));
+	}
+
+	@Test
+	void memberHomeConceptIsPublic() throws Exception {
+		mockMvc.perform(get("/concepts/member-home.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Good morning")));
+
+		mockMvc.perform(get("/concepts/member-schedule.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Today's Shifts")));
+
+		mockMvc.perform(get("/concepts/member-following.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Search followed Cast")));
+
+		mockMvc.perform(get("/concepts/member-profile.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Personal information")));
+
+		mockMvc.perform(get("/concepts/cast-profile.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Silver Member")));
+
+		mockMvc.perform(get("/concepts/event-detail.html"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/html"))
+			.andExpect(content().string(containsString("Add to Calendar")));
 	}
 }

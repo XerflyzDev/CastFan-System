@@ -14,6 +14,8 @@ public interface CastFollowRepository extends JpaRepository<CastFollow, Long> {
 
 	boolean existsByMemberProfileIdAndCastProfileId(Long memberProfileId, Long castProfileId);
 
+	long countByCastProfileId(Long castProfileId);
+
 	@Query("""
 		select follow.castProfile.id
 		from CastFollow follow

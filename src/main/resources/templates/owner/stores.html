@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Manage your CastFan stores and resident Cast.">
+    <title>Store Management | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="Owner store management">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i>Store setup</span></header>
+        <div class="screen-content owner-content store-management">
+            <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/owner}" aria-label="Back to dashboard" title="Dashboard"><i class="bi bi-grid"></i></a></div>
+            <header class="owner-heading"><p>Store operations</p><h1>Store management</h1></header>
+            <div class="owner-alert success" th:if="${param.created}" role="status"><i class="bi bi-check-circle"></i>Store created.</div>
+            <div class="owner-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle"></i>Store details saved.</div>
+            <div class="owner-alert success" th:if="${param.assigned}" role="status"><i class="bi bi-person-check"></i>Cast assigned to the store.</div>
+            <div class="owner-alert neutral" th:if="${param.deactivated}" role="status"><i class="bi bi-pause-circle"></i>Store paused.</div>
+            <div class="owner-alert success" th:if="${param.activated}" role="status"><i class="bi bi-play-circle"></i>Store activated.</div>
+            <div class="owner-alert neutral" th:if="${param.removed}" role="status"><i class="bi bi-person-dash"></i>Cast removed from the active roster.</div>
+            <div class="owner-alert success" th:if="${param.restored}" role="status"><i class="bi bi-person-check"></i>Cast restored to the roster.</div>
+            <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle"></i><span th:text="${param.error}">Unable to update the store.</span></div>
+
+            <section class="owner-section store-list-section" aria-labelledby="stores-heading">
+                <div class="section-title"><div><small>Locations you own</small><h2 id="stores-heading">Your stores</h2></div><span class="owner-count" th:text="${storeView.stores.size()}">0</span></div>
+                <div class="managed-store-list" th:if="${!storeView.stores.empty}">
+                    <article class="managed-store-card" th:each="store : ${storeView.stores}">
+                        <span class="store-symbol"><i class="bi bi-shop-window"></i></span>
+                        <div class="managed-store-copy"><div><strong th:text="${store.name}">Hoshi Cafe</strong><span class="status-pill" th:classappend="${store.active ? 'approved' : 'archived'}" th:text="${store.active ? 'Active' : 'Paused'}">Active</span></div><small th:text="${store.address != null ? store.address : store.timezone}">Bangkok</small><p><span th:text="${store.activeCastCount}">0</span> active Cast · <span th:text="${store.timezone}">Asia/Bangkok</span></p></div>
+                        <div class="store-row-actions">
+                            <a class="event-action" th:href="@{/owner/stores/{id}/edit(id=${store.id})}" aria-label="Edit store" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <form th:if="${store.active}" th:action="@{/owner/stores/{id}/deactivate(id=${store.id})}" method="post" data-confirm="Pause this store? Cast will not be able to submit new shifts for it."><button class="event-action archive" type="submit" aria-label="Pause store" title="Pause"><i class="bi bi-pause"></i></button></form>
+                            <form th:unless="${store.active}" th:action="@{/owner/stores/{id}/activate(id=${store.id})}" method="post"><button class="event-action publish" type="submit" aria-label="Activate store" title="Activate"><i class="bi bi-play"></i></button></form>
+                        </div>
+                    </article>
+                </div>
+                <div class="owner-empty" th:if="${storeView.stores.empty}"><i class="bi bi-shop"></i><div><strong>No stores yet</strong><small>Create your first location below.</small></div></div>
+            </section>
+
+            <section class="owner-section owner-form-card" aria-labelledby="store-form-heading">
+                <div class="section-title"><div><small th:text="${storeView.editingStoreId == null ? 'New location' : 'Update location'}">New location</small><h2 id="store-form-heading" th:text="${storeView.editingStoreId == null ? 'Create store' : 'Edit store'}">Create store</h2></div><a th:if="${storeView.editingStoreId != null}" th:href="@{/owner/stores}" aria-label="Cancel editing"><i class="bi bi-x-lg"></i></a></div>
+                <form class="owner-event-form" th:action="${storeFormAction}" th:object="${storeForm}" method="post">
+                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save store.</span></div>
+                    <label><span>Store name</span><input type="text" th:field="*{name}" maxlength="120" placeholder="Hoshi Cafe" required><small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name is required</small></label>
+                    <label><span>Public slug <em th:text="${storeView.editingStoreId == null ? 'Lowercase' : 'Cannot be changed'}">Lowercase</em></span><input type="text" th:field="*{slug}" maxlength="100" placeholder="hoshi-cafe" th:readonly="${storeView.editingStoreId != null}" required><small class="field-error" th:if="${#fields.hasErrors('slug')}" th:errors="*{slug}">Use a valid slug</small></label>
+                    <label><span>Description <em>Optional</em></span><textarea th:field="*{description}" maxlength="1000" rows="3" placeholder="Describe this location."></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is too long</small></label>
+                    <label><span>Address <em>Optional</em></span><textarea th:field="*{address}" maxlength="500" rows="2" placeholder="Bangkok, Thailand"></textarea><small class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">Address is too long</small></label>
+                    <label><span>Timezone</span><input type="text" th:field="*{timezone}" maxlength="64" placeholder="Asia/Bangkok" required><small class="field-error" th:if="${#fields.hasErrors('timezone')}" th:errors="*{timezone}">Timezone is required</small></label>
+                    <button class="owner-form-submit" type="submit"><i class="bi" th:classappend="${storeView.editingStoreId == null ? 'bi-plus-lg' : 'bi-check2'}"></i><span th:text="${storeView.editingStoreId == null ? 'Create store' : 'Save changes'}">Create store</span></button>
+                </form>
+            </section>
+
+            <section class="owner-section owner-form-card" aria-labelledby="assign-heading">
+                <div class="section-title"><div><small>Permanent roster</small><h2 id="assign-heading">Assign Cast</h2></div><i class="bi bi-person-plus"></i></div>
+                <form class="owner-event-form" th:action="@{/owner/stores/cast}" th:object="${assignmentForm}" method="post">
+                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to assign Cast.</span></div>
+                    <label><span>Store</span><select th:field="*{storeId}" required><option value="">Choose a store</option><option th:each="store : ${storeView.stores}" th:if="${store.active}" th:value="${store.id}" th:text="${store.name}">Hoshi Cafe</option></select><small class="field-error" th:if="${#fields.hasErrors('storeId')}" th:errors="*{storeId}">Store is required</small></label>
+                    <label><span>Cast account</span><select th:field="*{castProfileId}" required><option value="">Choose Cast</option><option th:each="cast : ${storeView.availableCast}" th:value="${cast.id}" th:text="${cast.stageName + ' · ' + cast.email}">Mina</option></select><small class="field-error" th:if="${#fields.hasErrors('castProfileId')}" th:errors="*{castProfileId}">Cast is required</small></label>
+                    <button class="owner-form-submit" type="submit" th:disabled="${storeView.stores.empty || storeView.availableCast.empty}"><i class="bi bi-person-plus"></i>Add to roster</button>
+                </form>
+            </section>
+
+            <section class="owner-section" aria-labelledby="roster-heading">
+                <div class="section-title"><div><small>Active and past assignments</small><h2 id="roster-heading">Store Cast</h2></div><span class="owner-count" th:text="${storeView.assignments.size()}">0</span></div>
+                <div class="cast-roster" th:if="${!storeView.assignments.empty}">
+                    <article class="roster-row" th:each="assignment : ${storeView.assignments}">
+                        <img th:if="${assignment.avatarUrl != null}" th:src="${assignment.avatarUrl}" th:alt="${assignment.castName}">
+                        <span class="owner-avatar" th:unless="${assignment.avatarUrl != null}" th:text="${assignment.initials}">MN</span>
+                        <div><strong th:text="${assignment.castName}">Mina</strong><small th:text="${assignment.email}">mina@example.com</small><p th:text="${assignment.storeName}">Hoshi Cafe</p></div>
+                        <form th:if="${assignment.active}" th:action="@{/owner/stores/cast/{id}/deactivate(id=${assignment.id})}" method="post" data-confirm="Remove this Cast from the active store roster?"><button class="roster-action remove" type="submit" aria-label="Remove Cast" title="Remove"><i class="bi bi-person-dash"></i></button></form>
+                        <form th:unless="${assignment.active}" th:action="@{/owner/stores/cast/{id}/activate(id=${assignment.id})}" method="post"><button class="roster-action restore" type="submit" aria-label="Restore Cast" title="Restore"><i class="bi bi-arrow-counterclockwise"></i></button></form>
+                    </article>
+                </div>
+                <div class="owner-empty" th:if="${storeView.assignments.empty}"><i class="bi bi-people"></i><div><strong>No Cast assigned</strong><small>Add an existing Cast account to an active store.</small></div></div>
+            </section>
+        </div>
+        <nav class="floating-nav owner-nav" aria-label="Owner navigation">
+            <a class="nav-button active" th:href="@{/owner}" aria-current="page"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
+            <a class="nav-button" th:href="@{/owner/shifts}"><i class="bi bi-calendar3"></i><span>Shifts</span></a>
+            <a class="nav-button" th:href="@{/owner/events}"><i class="bi bi-stars"></i><span>Events</span></a>
+            <a class="nav-button" th:href="@{/account}"><i class="bi bi-person"></i><span>Account</span></a>
+        </nav>
+    </section>
+</main>
+<script th:src="@{/js/owner-workspace.js}" defer></script>
+</body>
+</html>

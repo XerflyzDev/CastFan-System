@@ -10,9 +10,9 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Member notification preferences integration**
+> **Owner promotion and banner management**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, and publish events through ownership-protected routes. Published events also provide downloadable iCalendar files.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, publish events, and schedule promotion banners through ownership-protected routes. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
 
 ## Objectives
 
@@ -152,6 +152,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 - [x] Implement the Owner Dashboard, daily schedule, and shift approval workflow.
 - [x] Implement Owner Event Management with draft, publish, and archive states.
 - [x] Implement Owner Store Management and permanent Cast roster controls.
+- [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
 - [ ] Connect Cloud SQL for MySQL.
 - [ ] Deploy the Spring Boot service to Google Cloud Run.
 - [ ] Store production credentials in Google Cloud Secret Manager.

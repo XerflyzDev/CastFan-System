@@ -20,6 +20,7 @@ import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreEventRepository;
+import com.castfan.repository.StorePromotionRepository;
 import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,7 @@ public class HomeService {
 	private final StoreRepository storeRepository;
 	private final ShiftScheduleRepository shiftScheduleRepository;
 	private final StoreEventRepository storeEventRepository;
+	private final StorePromotionRepository storePromotionRepository;
 	private final UserAccountRepository userAccountRepository;
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastFollowRepository castFollowRepository;
@@ -48,6 +50,7 @@ public class HomeService {
 		StoreRepository storeRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
 		StoreEventRepository storeEventRepository,
+		StorePromotionRepository storePromotionRepository,
 		UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository,
 		CastFollowRepository castFollowRepository,
@@ -57,6 +60,7 @@ public class HomeService {
 		this.storeRepository = storeRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
 		this.storeEventRepository = storeEventRepository;
+		this.storePromotionRepository = storePromotionRepository;
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castFollowRepository = castFollowRepository;
@@ -111,6 +115,16 @@ public class HomeService {
 				event.getImageUrl()
 			))
 			.toList();
+		var promotions = storePromotionRepository.findCurrentPublicPromotions(now, PageRequest.of(0, 3)).stream()
+			.map(promotion -> {
+				var promotionZone = safeZone(promotion.getStore().getTimezone());
+				return new HomeViewModel.FeaturedPromotion(
+					promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
+					promotion.getBannerUrl(), promotion.getStore().getName(),
+					"Ends " + EVENT_DATE_FORMAT.format(promotion.getEndsAt().atZone(promotionZone))
+				);
+			})
+			.toList();
 		var member = activeMember(authenticatedEmail);
 		var feed = member.map(profile -> castContentRepository.findFeedForMember(
 			profile.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE, PageRequest.of(0, 6)
@@ -129,6 +143,7 @@ public class HomeService {
 			memberName(authenticatedEmail),
 			DAY_FORMAT.format(today),
 			store.map(value -> value.getName()).orElse("CastFan"),
+			promotions,
 			cast,
 			events,
 			feed

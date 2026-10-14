@@ -173,6 +173,7 @@ When adding a new page, reuse the existing tokens and component classes before i
 - [x] JPA-backed Owner Dashboard and Shift Review workspace
 - [x] JPA-backed Owner Event Management workspace
 - [x] JPA-backed Owner Store Management and permanent Cast roster
+- [x] JPA-backed Owner Promotion and Banner Management
 - [x] Cast membership tier management
 - [x] Access-denied page
 - [x] Responsive mobile and desktop behavior

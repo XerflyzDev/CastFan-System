@@ -10,6 +10,7 @@ import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.Store;
 import com.castfan.entity.StoreCast;
 import com.castfan.entity.StoreEvent;
+import com.castfan.entity.StorePromotion;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -17,6 +18,7 @@ import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
+import com.castfan.repository.StorePromotionRepository;
 import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.boot.ApplicationRunner;
@@ -39,6 +41,7 @@ public class DevDataConfiguration {
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
 		StoreEventRepository storeEventRepository,
+		StorePromotionRepository storePromotionRepository,
 		PasswordEncoder passwordEncoder
 	) {
 		return arguments -> {
@@ -90,6 +93,12 @@ public class DevDataConfiguration {
 				eventStartsAt,
 				eventStartsAt.plusSeconds(5 * 60 * 60),
 				EventStatus.PUBLISHED
+			));
+			storePromotionRepository.save(new StorePromotion(
+				store, owner, "First visit welcome", "Show this offer to receive a seasonal welcome treat.",
+				"WELCOME10", "/images/autumn-cafe-event.png",
+				today.minusDays(1).atStartOfDay(STORE_ZONE).toInstant(),
+				today.plusDays(30).atTime(23, 59).atZone(STORE_ZONE).toInstant(), true
 			));
 		};
 	}

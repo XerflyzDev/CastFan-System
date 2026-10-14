@@ -134,11 +134,14 @@ Recommended index: `(storeId, status, startsAt)`.
 
 A time-bounded store promotion created by an Owner.
 
+Key fields: `title`, `description`, optional globally unique `code`, optional `bannerUrl`, `startsAt`, `endsAt`, and `active`.
+
 Rules:
 
 - `endsAt` must be after `startsAt`.
 - A non-null promotion `code` is globally unique in the first version.
 - `createdByUserId` must own the referenced store.
+- Public queries return only active promotions whose time range includes the current instant and whose Store is active.
 
 Recommended index: `(storeId, active, startsAt, endsAt)`.
 

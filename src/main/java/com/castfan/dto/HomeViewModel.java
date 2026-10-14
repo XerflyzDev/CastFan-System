@@ -6,10 +6,20 @@ public record HomeViewModel(
 	String memberName,
 	String dateLabel,
 	String storeName,
+	List<FeaturedPromotion> featuredPromotions,
 	List<CastSummary> workingToday,
 	List<FeaturedEvent> featuredEvents,
 	List<FeedItem> followingContent
 ) {
+	public record FeaturedPromotion(
+		Long id,
+		String title,
+		String description,
+		String code,
+		String bannerUrl,
+		String storeName,
+		String endsLabel
+	) { }
 
 	public record CastSummary(
 		Long id,

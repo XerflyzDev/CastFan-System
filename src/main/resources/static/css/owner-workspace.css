@@ -107,6 +107,24 @@
 .event-action.publish { color: #486b5a; background: #e4f4eb; }
 .event-action.archive { color: #9b4751; background: #f8e5e7; }
 
+.promotion-management { padding-bottom: 112px; }
+.owner-promotion-list { display: grid; gap: 9px; }
+.owner-promotion-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 11px; padding: 10px; border-radius: 16px; background: #fff; box-shadow: var(--shadow); }
+.promotion-thumb { width: 76px; height: 76px; border-radius: 13px; object-fit: cover; }
+.promotion-placeholder { display: grid; place-items: center; color: #806b3f; background: var(--amber); font-size: 1.1rem; }
+.promotion-card-copy { display: grid; min-width: 0; align-content: center; gap: 4px; }
+.promotion-card-copy > div { display: flex; align-items: center; gap: 6px; }
+.promotion-card-copy small { overflow: hidden; color: var(--muted); font-size: 0.48rem; text-overflow: ellipsis; white-space: nowrap; }
+.promotion-card-copy h3,
+.promotion-card-copy p { overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+.promotion-card-copy h3 { font-size: 0.66rem; }
+.promotion-card-copy p { color: var(--muted); font-size: 0.48rem; }
+.promotion-card-copy code { justify-self: start; padding: 3px 6px; border-radius: 6px; color: #655b86; background: var(--lavender); font-size: 0.48rem; font-weight: 700; }
+.status-pill.live { color: #486b5a; background: #e4f4eb; }
+.status-pill.scheduled { color: #655b86; background: var(--lavender); }
+.status-pill.paused,
+.status-pill.expired { color: #6d6f75; background: #eeeef1; }
+
 .owner-form-card { padding: 14px; border-radius: 17px; background: rgba(255, 255, 255, 0.78); box-shadow: var(--shadow); }
 .owner-form-card .section-title { margin-bottom: 12px; }
 .owner-form-card .section-title > a { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 10px; color: #62646a; background: #f0f0f2; text-decoration: none; }
@@ -169,4 +187,6 @@
     .owner-avatar { width: 36px; height: 36px; }
 	.owner-event-card { grid-template-columns: 66px minmax(0, 1fr); gap: 9px; }
 	.event-thumb { width: 66px; height: 66px; }
+	.owner-promotion-card { grid-template-columns: 66px minmax(0, 1fr); gap: 9px; }
+	.promotion-thumb { width: 66px; height: 66px; }
 }

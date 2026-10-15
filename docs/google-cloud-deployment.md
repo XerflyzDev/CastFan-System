@@ -20,7 +20,7 @@ Cloud Run is the preferred hosting target because it supports Java source deploy
 - Local development uses the `dev` Spring profile and embedded H2.
 - Automated tests use the `test` Spring profile and isolated H2.
 - Google Cloud uses the `prod` Spring profile and Cloud SQL for MySQL.
-- The Cloud Run region and Cloud SQL region should match to reduce latency and network cost.
+- Cloud Run, Cloud SQL, and Artifact Registry use `asia-southeast1` (Singapore) to reduce latency and network cost.
 - Production resources should use a dedicated service account with only the required IAM roles.
 
 ## Required Runtime Configuration
@@ -54,21 +54,55 @@ Never commit service-account keys, database passwords, `.env` files, or producti
 10. Verify registration, sign-in, authorization, database persistence, HTTPS redirects, logs, and health after deployment.
 11. Configure a budget alert, backups, point-in-time recovery where appropriate, and a cleanup plan for unused resources.
 
-## Deployment Command Template
+## CastFan Cloud Resources
 
-Run deployment commands only after the Cloud SQL connection and secrets are ready. Replace every uppercase placeholder with the actual project values.
+| Resource | Value |
+| --- | --- |
+| Project | `castfan-system` |
+| Region | `asia-southeast1` |
+| Cloud SQL instance | `castfan-system:asia-southeast1:castfan-mysql` |
+| Database | `castfan` |
+| Artifact Registry repository | `castfan-images` |
+| Runtime service account | `castfan-runtime@castfan-system.iam.gserviceaccount.com` |
+| Cloud Run service | `https://castfan-473125501009.asia-southeast1.run.app` |
 
-```bash
-gcloud run deploy castfan \
-  --source . \
-  --project PROJECT_ID \
-  --region REGION \
-  --allow-unauthenticated \
-  --startup-probe httpGet.path=/actuator/health,initialDelaySeconds=10,failureThreshold=20,timeoutSeconds=5,periodSeconds=5 \
-  --liveness-probe httpGet.path=/actuator/health/liveness,initialDelaySeconds=30,failureThreshold=3,timeoutSeconds=3,periodSeconds=10 \
-  --set-env-vars SPRING_PROFILES_ACTIVE=prod,DB_URL=JDBC_URL \
-  --set-secrets DB_USERNAME=castfan-db-username:VERSION,DB_PASSWORD=castfan-db-password:VERSION \
-  --service-account castfan-runtime@PROJECT_ID.iam.gserviceaccount.com
+The initial non-production Cloud Run deployment completed on 15 October 2026. It runs revision `castfan-00002-zbc` with zero minimum instances, a maximum of two instances, and Cloud SQL/Secret Manager access through the dedicated runtime service account.
+
+The current Cloud SQL instance is a 30-day free trial intended for development and demonstration. It does not support backups and stops serving requests when the trial ends unless it is upgraded. Export or upgrade the database before the trial counter expires.
+
+The production JDBC URL uses the Cloud SQL Java Connector. It authenticates with the runtime service account and does not contain a database password:
+
+```text
+jdbc:mysql:///castfan?cloudSqlInstance=castfan-system:asia-southeast1:castfan-mysql&socketFactory=com.google.cloud.sql.mysql.SocketFactory&cloudSqlRefreshStrategy=lazy&ipTypes=PUBLIC
+```
+
+## Build And Push
+
+Build and test locally before publishing the image:
+
+```powershell
+.\mvnw.cmd test
+docker build -t asia-southeast1-docker.pkg.dev/castfan-system/castfan-images/castfan-app:latest .
+docker push asia-southeast1-docker.pkg.dev/castfan-system/castfan-images/castfan-app:latest
+```
+
+## Deployment Command
+
+Run the deployment only after the Cloud SQL connection, numbered secret versions, and image are ready.
+
+```powershell
+gcloud.cmd run deploy castfan `
+  --image asia-southeast1-docker.pkg.dev/castfan-system/castfan-images/castfan-app:latest `
+  --project castfan-system `
+  --region asia-southeast1 `
+  --allow-unauthenticated `
+  --startup-probe httpGet.path=/actuator/health,initialDelaySeconds=10,failureThreshold=20,timeoutSeconds=5,periodSeconds=5 `
+  --liveness-probe httpGet.path=/actuator/health/liveness,initialDelaySeconds=30,failureThreshold=3,timeoutSeconds=3,periodSeconds=10 `
+  --env-vars-file deploy/cloud-run.env.yaml `
+  --set-secrets DB_USERNAME=castfan-db-username:1,DB_PASSWORD=castfan-db-password:1 `
+  --service-account castfan-runtime@castfan-system.iam.gserviceaccount.com `
+  --min 0 `
+  --max 2
 ```
 
 Pin secret environment variables to a numbered version for predictable releases. Rotate by creating a new secret version and deploying a new Cloud Run revision.
@@ -77,7 +111,7 @@ The `prod` profile denies `/h2-console/**`, `/concepts/**`, and every non-health
 
 ## Production Readiness Gates
 
-The application is not ready for production deployment until all of these are complete:
+The deployed application is not ready for production use until all of these are complete:
 
 - The version 1 Flyway migration must continue to pass the opt-in MySQL integration test before every production schema release. It was first verified against MySQL 8.4.11 on 15 October 2026.
 - The Cloud SQL connector and connection pool limits are configured for Cloud Run.

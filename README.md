@@ -125,6 +125,8 @@ The production schema migration workflow is documented in [docs/database-migrati
 
 The approved visual language, color tokens, components, and responsive UI rules are documented in [docs/ui-design-system.md](docs/ui-design-system.md).
 
+The consolidated product requirements, scope, stakeholder context, and current decisions are documented in [PROJECT.md](PROJECT.md). Coding agents should follow [AGENTS.md](AGENTS.md). The recovered original synthesis remains available as historical reference in [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md).
+
 ## Development Roadmap
 
 - [ ] Finalize functional requirements and acceptance criteria.

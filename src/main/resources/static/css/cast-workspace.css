@@ -226,8 +226,47 @@
 .settings-row:hover { background: #fafafb; }
 .settings-row:focus-visible { position: relative; z-index: 1; outline: 3px solid rgba(154, 73, 98, 0.18); outline-offset: -3px; }
 
+/* Keep Cast profile settings in the same account language as Member and Owner. */
+.cast-account-prototype .cast-settings-content { padding: 16px 16px calc(112px + env(safe-area-inset-bottom)); }
+.cast-account-prototype .inline-alert { margin-bottom: 12px; }
+.cast-account-prototype .cast-profile-editor { border-top: 1px solid var(--profile-line); background: #fff; }
+.cast-account-prototype .cast-profile-editor > summary {
+    display: grid;
+    min-height: 52px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    color: var(--profile-copy);
+    cursor: pointer;
+    list-style: none;
+}
+.cast-account-prototype .cast-profile-editor > summary::-webkit-details-marker { display: none; }
+.cast-account-prototype .cast-profile-editor > summary > span {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 16px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 7px;
+}
+.cast-account-prototype .cast-profile-editor > summary strong,
+.cast-account-prototype .cast-profile-editor > summary small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cast-account-prototype .cast-profile-editor > summary strong { color: var(--profile-ink); font-size: 0.6rem; }
+.cast-account-prototype .cast-profile-editor > summary small { grid-column: 2; font-size: 0.5rem; }
+.cast-account-prototype .cast-profile-editor > summary > i { font-size: 0.62rem; transition: transform 160ms ease; }
+.cast-account-prototype .cast-profile-editor[open] > summary > i { transform: rotate(180deg); }
+.cast-account-prototype .cast-profile-form-panel { padding: 14px 16px 16px; border-top: 1px solid var(--profile-line); background: #fafafa; }
+.cast-account-prototype .cast-profile-form-panel .primary-action { margin-bottom: 0; }
+.cast-account-prototype .profile-list .setting-row { grid-template-columns: 34px minmax(0, 1fr) auto; }
+.cast-account-prototype .cast-setting-value { overflow: hidden; color: var(--profile-copy); font-size: 0.55rem; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 350px) {
+    .cast-account-prototype .cast-settings-content { padding-inline: 14px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .settings-chevron { transition: none; }
+    .settings-chevron,
+    .cast-account-prototype .cast-profile-editor > summary > i { transition: none; }
 }
 
 .tier-section { margin-top: 0; }

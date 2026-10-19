@@ -38,7 +38,11 @@
 .next-shift h2 { font-size: 0.73rem; }
 .next-shift a { display: grid; width: 28px; height: 28px; place-items: center; color: var(--muted); text-decoration: none; }
 .profile-section-block { margin-top: 19px; }
-.profile-compose-fab { position: absolute; z-index: 6; right: 24px; bottom: 92px; display: grid; width: 52px; height: 52px; place-items: center; border: 1px solid rgba(255, 255, 255, 0.42); border-radius: 50%; color: #fff; background: var(--ink); box-shadow: 0 12px 28px rgba(17, 19, 24, 0.28); text-decoration: none; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+.profile-compose-fab { position: absolute; z-index: 6; right: 24px; bottom: calc(92px + env(safe-area-inset-bottom)); display: grid; width: 52px; height: 52px; place-items: center; border: 1px solid rgba(255, 255, 255, 0.42); border-radius: 50%; color: #fff; background: var(--ink); box-shadow: 0 12px 28px rgba(17, 19, 24, 0.28); text-decoration: none; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+
+@media (max-width: 470px) {
+    .profile-compose-fab { position: fixed; }
+}
 .profile-compose-fab i { font-size: 1.05rem; }
 .profile-compose-fab:hover { color: #fff; background: var(--rose-dark); box-shadow: 0 15px 32px rgba(143, 71, 97, 0.32); transform: translateY(-2px); }
 .profile-compose-fab:focus-visible { color: #fff; outline: 3px solid rgba(173, 89, 119, 0.3); outline-offset: 3px; }

@@ -106,8 +106,6 @@
 .setting-row > i { color: #aaaab0; font-size: 0.64rem; }
 
 .sign-out-button { display: flex; width: 100%; min-height: 44px; align-items: center; justify-content: center; gap: 7px; margin-top: 18px; border: 1px solid rgba(154, 73, 98, 0.12); border-radius: 14px; color: var(--rose-dark); background: rgba(255, 255, 255, 0.52); font-size: 0.64rem; font-weight: 700; cursor: pointer; }
-.owner-nav .nav-button.active { color: #806b3f; }
-
 .edit-preview { margin-bottom: 20px; }
 .edit-preview p { white-space: normal; }
 .profile-alert { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; font-size: 0.59rem; }
@@ -165,7 +163,7 @@
 }
 
 .account-prototype .profile-content {
-    padding: 16px 16px 112px;
+    padding: 16px 16px calc(112px + env(safe-area-inset-bottom));
 }
 
 .account-prototype .top-actions { min-height: 40px; }
@@ -329,7 +327,7 @@
 
 .account-prototype .floating-nav {
     right: 14px;
-    bottom: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
     left: 14px;
     height: 64px;
     gap: 2px;
@@ -349,9 +347,9 @@
 }
 .account-prototype .nav-button.active,
 .account-prototype .owner-nav .nav-button.active {
-    color: #000;
-    background: rgba(255, 255, 255, 0.76);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 0.5px 0 rgba(255, 255, 255, 0.8);
+    color: var(--ink);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(17, 19, 24, 0.12), inset 0 0 0 1px rgba(17, 19, 24, 0.04);
 }
 
 @media (max-width: 350px) {

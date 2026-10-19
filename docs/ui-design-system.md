@@ -84,7 +84,8 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 ### Navigation
 
 - Persistent navigation is a translucent floating white pill near the bottom safe area.
-- Active items use black text and icons on a subtly brighter inner pill; dusty rose remains available for semantic content accents rather than global navigation state.
+- Navigation destinations divide the available width evenly for every role. Keep labels on one line and use ellipsis only when a label cannot fit at the 320 px minimum viewport.
+- Active items use black text and icons on a solid white inner pill with a restrained shadow. Use the same selected treatment for anonymous, Member, Cast, and Owner navigation; dusty rose remains available for semantic content accents rather than global navigation state.
 - Navigation remains visible without covering page content.
 - Navigation labels remain concise and must not wrap or overlap at `320px`.
 - Page headers use the `CastFan` wordmark, generous whitespace, and an optional circular contextual action instead of the retired full-width desktop header bar.
@@ -136,7 +137,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Convert multi-column grids to a single column on smaller screens.
 - Prevent button labels, navigation labels, and long names from overflowing.
 - Reserve enough bottom padding for the floating navigation and safe-area inset.
-- Use `100dvh` with a `100vh` fallback for full-height application shells, and apply `env(safe-area-inset-bottom)` to fixed or floating bottom navigation.
+- Use `100dvh` with a `100vh` fallback for full-height application shells. On mobile, anchor floating navigation to the visual viewport and add `env(safe-area-inset-bottom)` to the normal bottom spacing so iOS browser controls and the home indicator cannot cover it.
 - Desktop layouts may use wider grids but must retain the same visual language.
 
 ## Accessibility

@@ -14,8 +14,6 @@
 <main class="concept-stage">
     <section class="phone" aria-label="Owner event management">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-stars" aria-hidden="true"></i>Event studio</span></header>
-
         <div class="screen-content owner-content event-management">
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/}" aria-label="Preview public home" title="Public home"><i class="bi bi-eye" aria-hidden="true"></i></a></div>
             <header class="owner-heading"><p>Store content</p><h1>Event management</h1></header>
@@ -50,28 +48,100 @@
 
             <section class="owner-section owner-form-card" aria-labelledby="event-form-heading">
                 <div class="section-title"><div><small th:text="${eventView.editingEventId == null ? 'New store content' : 'Update store content'}">New store content</small><h2 id="event-form-heading" th:text="${eventView.editingEventId == null ? 'Create event' : 'Edit event'}">Create event</h2></div><a th:if="${eventView.editingEventId != null}" th:href="@{/owner/events}" aria-label="Cancel editing" title="Cancel"><i class="bi bi-x-lg" aria-hidden="true"></i></a></div>
-                <form class="owner-event-form" th:action="${eventFormAction}" th:object="${form}" method="post">
+                <form class="owner-event-form" th:action="${eventFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save event.</span></div>
                     <label><span>Store</span><select th:field="*{storeId}" required><option value="">Choose a store</option><option th:each="store : ${eventView.stores}" th:value="${store.id}" th:text="${store.name}">Hoshi Cafe</option></select><small class="field-error" th:if="${#fields.hasErrors('storeId')}" th:errors="*{storeId}">Store is required</small></label>
                     <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" placeholder="Autumn Sweet Night" required><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title is required</small></label>
                     <label><span>Description</span><textarea th:field="*{description}" maxlength="2000" rows="4" placeholder="Tell members what makes this event special." required></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is required</small></label>
-                    <label><span>Image URL <em>Optional</em></span><input type="text" inputmode="url" th:field="*{imageUrl}" maxlength="2048" placeholder="https://example.com/event.jpg or /images/event.jpg"><small class="field-error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}">Use a valid image URL</small></label>
-                    <div class="owner-form-pair"><label><span>Date</span><input type="date" th:field="*{date}" required><small class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">Date is required</small></label><label><span>Start</span><input type="time" th:field="*{startsAt}" required><small class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}">Start time is required</small></label></div>
-                    <label><span>End time</span><input type="time" th:field="*{endsAt}" required><small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End time is required</small></label>
+                    <label class="owner-image-upload">
+                        <span>Event image <em>Optional</em></span>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-event-image-input>
+                        <input type="hidden" th:field="*{removeImage}" data-event-image-remove>
+                        <span class="owner-image-picker">
+                            <img th:if="${eventView.editingImageUrl != null}" th:src="${eventView.editingImageUrl}" alt="Current event image" data-event-image-preview>
+                            <img th:unless="${eventView.editingImageUrl != null}" alt="Selected event image preview" data-event-image-preview hidden>
+                            <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                            <span><strong data-event-image-name th:text="${eventView.editingImageUrl != null ? 'Replace image' : 'Choose image'}">Choose image</strong><small>JPG, PNG, or WebP · Maximum 2 MB</small></span>
+                        </span>
+                    </label>
+                    <button class="owner-image-clear" type="button" data-event-image-clear th:hidden="${eventView.editingImageUrl == null}">
+                        <i class="bi bi-x-circle" aria-hidden="true"></i><span>Clear image</span>
+                    </button>
+                    <div class="owner-form-pair">
+                        <div class="owner-date-field">
+                            <span class="owner-field-label">Date</span>
+                            <div class="custom-date-picker" data-date-picker>
+                                <input class="native-date-value" type="date" th:field="*{date}" required data-date-value>
+                                <button class="date-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" data-date-trigger>
+                                    <span data-date-display>Choose date</span>
+                                    <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                </button>
+                                <div class="date-popover" role="dialog" aria-label="Choose event date" data-date-popover hidden>
+                                    <header class="date-popover-header">
+                                        <strong data-calendar-month>October 2026</strong>
+                                        <span>
+                                            <button type="button" data-calendar-previous aria-label="Previous month" title="Previous month"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                                            <button type="button" data-calendar-next aria-label="Next month" title="Next month"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                                        </span>
+                                    </header>
+                                    <div class="calendar-weekdays" aria-hidden="true"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+                                    <div class="calendar-days" role="grid" data-calendar-days></div>
+                                    <footer class="date-popover-footer">
+                                        <button type="button" data-calendar-clear>Clear</button>
+                                        <button type="button" data-calendar-today>Today</button>
+                                    </footer>
+                                </div>
+                            </div>
+                            <small class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}">Date is required</small>
+                        </div>
+                        <div class="owner-time-field">
+                            <span class="owner-field-label">Start</span>
+                            <div class="custom-time-picker" data-time-picker data-time-title="Start time">
+                                <input class="native-time-value" type="time" th:field="*{startsAt}" required data-time-value>
+                                <button class="time-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" data-time-trigger>
+                                    <span data-time-display>Choose time</span><i class="bi bi-clock" aria-hidden="true"></i>
+                                </button>
+                                <div class="time-popover" role="dialog" aria-label="Choose start time" data-time-popover hidden>
+                                    <header><strong>Start time</strong><button type="button" data-time-close aria-label="Close time picker" title="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                                    <div class="time-columns">
+                                        <div><small>Hour</small><div class="time-options" role="listbox" aria-label="Hour" data-time-hours></div></div>
+                                        <span aria-hidden="true">:</span>
+                                        <div><small>Minute</small><div class="time-options" role="listbox" aria-label="Minute" data-time-minutes></div></div>
+                                    </div>
+                                    <footer><button type="button" data-time-clear>Clear</button><button type="button" data-time-now>Now</button><button class="time-done" type="button" data-time-done>Done</button></footer>
+                                </div>
+                            </div>
+                            <small class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}">Start time is required</small>
+                        </div>
+                    </div>
+                    <div class="owner-time-field">
+                        <span class="owner-field-label">End time</span>
+                        <div class="custom-time-picker" data-time-picker data-time-title="End time">
+                            <input class="native-time-value" type="time" th:field="*{endsAt}" required data-time-value>
+                            <button class="time-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" data-time-trigger>
+                                <span data-time-display>Choose time</span><i class="bi bi-clock" aria-hidden="true"></i>
+                            </button>
+                            <div class="time-popover" role="dialog" aria-label="Choose end time" data-time-popover hidden>
+                                <header><strong>End time</strong><button type="button" data-time-close aria-label="Close time picker" title="Close"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+                                <div class="time-columns">
+                                    <div><small>Hour</small><div class="time-options" role="listbox" aria-label="Hour" data-time-hours></div></div>
+                                    <span aria-hidden="true">:</span>
+                                    <div><small>Minute</small><div class="time-options" role="listbox" aria-label="Minute" data-time-minutes></div></div>
+                                </div>
+                                <footer><button type="button" data-time-clear>Clear</button><button type="button" data-time-now>Now</button><button class="time-done" type="button" data-time-done>Done</button></footer>
+                            </div>
+                        </div>
+                        <small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End time is required</small>
+                    </div>
                     <button class="owner-form-submit" type="submit"><i class="bi" th:classappend="${eventView.editingEventId == null ? 'bi-plus-lg' : 'bi-check2'}" aria-hidden="true"></i><span th:text="${eventView.editingEventId == null ? 'Create draft' : 'Save changes'}">Create draft</span></button>
                 </form>
             </section>
         </div>
 
-        <nav class="floating-nav owner-nav" aria-label="Owner navigation">
-            <a class="nav-button" th:href="@{/owner}"><i class="bi bi-grid"></i><span>Dashboard</span></a>
-            <a class="nav-button" th:href="@{/owner/shifts}"><i class="bi bi-calendar3"></i><span>Shifts</span></a>
-            <a class="nav-button active" th:href="@{/owner/events}" aria-current="page"><i class="bi bi-stars"></i><span>Events</span></a>
-            <a class="nav-button" th:href="@{/owner/promotions}"><i class="bi bi-megaphone"></i><span>Promos</span></a>
-            <a class="nav-button" th:href="@{/account}"><i class="bi bi-person"></i><span>Account</span></a>
-        </nav>
+        <nav th:replace="~{fragments/navigation :: owner('events')}"></nav>
     </section>
 </main>
 <script th:src="@{/js/owner-workspace.js}" defer></script>
+<script th:src="@{/js/confirmation-dialog.js}" defer></script>
 </body>
 </html>

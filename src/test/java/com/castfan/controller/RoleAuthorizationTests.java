@@ -61,7 +61,7 @@ class RoleAuthorizationTests {
 	}
 
 	@Test
-	void memberCanOpenScheduleButCastCannot() throws Exception {
+	void memberAndCastCanOpenThePublicSchedule() throws Exception {
 		var member = saveAccount("member-schedule@castfan.test", UserRole.MEMBER);
 		var cast = saveAccount("cast-schedule@castfan.test", UserRole.CAST);
 
@@ -77,7 +77,8 @@ class RoleAuthorizationTests {
 				.with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(status().isBadRequest());
 		mockMvc.perform(get("/member/schedule").with(user(cast.getEmail()).roles("CAST")))
-			.andExpect(status().isForbidden());
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/schedule"));
 	}
 
 	@Test
@@ -90,6 +91,9 @@ class RoleAuthorizationTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/dashboard"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Role Cast")));
+		mockMvc.perform(get("/member/following").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/following"));
 		mockMvc.perform(get("/owner").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isForbidden());
 	}

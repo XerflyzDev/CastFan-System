@@ -1,12 +1,12 @@
 # CastFan UI Design System
 
-This document is the source of truth for the CastFan visual language. All existing and future interfaces must follow this design system unless a later approved design explicitly replaces it.
+This document is the source of truth for the current CastFan visual language. It replaces earlier blue/mint, pink-dominant, desktop-shell, and role-specific visual variants. All existing and future interfaces must follow this design system unless a later approved design explicitly replaces it.
 
 ## Design Direction
 
-CastFan uses a modern, minimalist, iOS-inspired interface in light mode. Black, grey, and white form the primary visual structure, with restrained dusty rose, lavender, and warm amber accents. The experience should feel calm, premium, friendly, and easy to scan on a mobile device while remaining polished on tablet and desktop screens.
+CastFan uses a modern, minimalist, iOS-inspired interface in light mode. Black, grey, and white form the primary visual structure, with restrained dusty rose, lavender, and warm amber accents. The approved application-wide treatment uses white content canvases, `#F5F5F5` atmospheric backgrounds, `#EBEBEB` separators, very light depth, rounded pill controls, and translucent floating navigation with a neutral active item. The experience should feel calm, premium, friendly, and easy to scan on a mobile device while remaining polished on tablet and desktop screens.
 
-The previous pink-led visual theme has been retired. New pages must use the color tokens, spacing, typography, components, and interaction patterns defined here.
+The previous pink-led visual theme and the older full-width desktop application shell are retired. New pages must use the color tokens, spacing, typography, components, and interaction patterns defined here. The approved direction is based on the current CastFan Product UI v2 reference and the implemented phone-shell pages.
 
 ## Core Principles
 
@@ -21,11 +21,22 @@ The previous pink-led visual theme has been retired. New pages must use the colo
 - Preserve accessible focus, error, success, disabled, and selected states.
 - Ensure layouts remain usable from 320 px mobile screens through desktop widths.
 
+## Current Application Shell
+
+- Use a centered phone-style application surface on tablet and desktop, with a maximum width of approximately `390px` and a maximum working height of approximately `844px`.
+- At viewports up to `470px`, the application surface becomes full-width and full-height with no outer border, radius, or desktop shadow.
+- Use a white content canvas over a `#F5F5F5` page background.
+- Use the `CastFan` wordmark at the upper left and one contextual circular action at the upper right when needed.
+- Keep the main content independently scrollable and reserve bottom space for persistent navigation.
+- Use the same shell, spacing rhythm, heading hierarchy, card treatment, and navigation behavior for Member, Cast, and Owner pages.
+- Role differences belong in information, permissions, actions, and navigation destinations—not in a separate visual theme.
+- Authentication and public-detail pages may omit persistent navigation, but must retain the same typography, colors, radii, border treatment, and accessibility behavior.
+
 ## Color Palette
 
 | Token | Value | Usage |
 | --- | --- | --- |
-| Page Background | `#F0F0F2` | Default application background |
+| Page Background | `#F5F5F5` | Default application background |
 | Card Surface | `#FFFFFF` | Cards, panels, forms, and floating navigation |
 | Primary Text | `#111318` | Headings and important content |
 | Secondary Text | `#898A90` | Supporting copy, captions, and metadata |
@@ -34,9 +45,9 @@ The previous pink-led visual theme has been retired. New pages must use the colo
 | Soft Accent | `#E5E6E8` | Selected controls and subtle neutral surfaces |
 | Success Text | `#303238` | Positive feedback text |
 | Success Surface | `#E8E9EB` | Positive feedback background |
-| Dusty Rose | `#C66C87` | Brand detail, active states, and focused highlights |
+| Dusty Rose | `#C66C87` | Semantic detail, follow actions, badges, and avatar accents |
 | Dusty Rose Dark | `#9A4962` | Accent text and compact actions |
-| Dusty Rose Soft | `#F7E7ED` | Active navigation, badges, and icon surfaces |
+| Dusty Rose Soft | `#F7E7ED` | Badges, empty-state icons, and supporting icon surfaces |
 | Soft Lavender | `#EEEAF7` | Limited avatar variation |
 | Warm Amber | `#F7EDD9` | Limited avatar variation |
 | Error | `#C83F5B` | Validation and destructive feedback |
@@ -59,22 +70,24 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 ## Surfaces And Depth
 
 - Cards and panels use pure or slightly translucent white surfaces.
+- Prefer a `1px` `#EBEBEB` separator or inset outline over a visible drop shadow.
 - Standard card radius is `16px`.
 - Compact controls use a `12px` radius.
 - Feature cards may use an `18px` radius.
 - Pill controls and circular buttons may use fully rounded corners.
 - Borders use low-opacity neutral colors.
-- Shadows must be soft, diffused, and visually light.
+- Shadows must be soft, diffused, and visually light; large card grids should appear almost flat.
 - Do not nest decorative cards inside other decorative cards.
 
 ## Components
 
 ### Navigation
 
-- Member navigation is a floating white pill near the bottom safe area.
-- Active items use dusty rose on the icon and label while the navigation surface remains white.
+- Persistent navigation is a translucent floating white pill near the bottom safe area.
+- Active items use black text and icons on a subtly brighter inner pill; dusty rose remains available for semantic content accents rather than global navigation state.
 - Navigation remains visible without covering page content.
-- Header bars use a translucent light surface with background blur.
+- Navigation labels remain concise and must not wrap or overlap at `320px`.
+- Page headers use the `CastFan` wordmark, generous whitespace, and an optional circular contextual action instead of the retired full-width desktop header bar.
 
 ### Buttons
 
@@ -83,6 +96,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Icon-only commands use circular buttons with tooltips or accessible labels.
 - Follow and compact actions may use pill-shaped controls.
 - Hover, focus, pressed, and disabled states must remain visually distinct.
+- Use task-oriented labels. The Cast dashboard entry action is `Request shift`; the shift form itself may use `Submit a shift` because it performs the actual request submission.
 
 ### Forms And Search
 
@@ -100,6 +114,13 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Status labels use compact pills with semantic colors.
 - Repeated directory and membership items maintain stable dimensions and spacing.
 
+### Shared Page Patterns
+
+- Discovery and membership pages use the shared phone shell, wordmark header, page eyebrow, title, supporting copy, single-column cards, and floating navigation.
+- Member Account and Cast Profile settings use the same identity-card proportions, grouped settings rows, section headings, role pill, and neutral borders.
+- Cast and Owner workspaces may expose different operational cards, metrics, and actions, but use the same white canvas, restrained accent colors, rounded surfaces, and floating navigation treatment.
+- General states such as loading, empty, success, validation, disabled, selected, and error must look consistent across roles.
+
 ### Empty And Feedback States
 
 - Empty states use a simple circular icon treatment, a concise heading, and one short explanation.
@@ -115,6 +136,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Convert multi-column grids to a single column on smaller screens.
 - Prevent button labels, navigation labels, and long names from overflowing.
 - Reserve enough bottom padding for the floating navigation and safe-area inset.
+- Use `100dvh` with a `100vh` fallback for full-height application shells, and apply `env(safe-area-inset-bottom)` to fixed or floating bottom navigation.
 - Desktop layouts may use wider grids but must retain the same visual language.
 
 ## Accessibility
@@ -136,6 +158,16 @@ The approved mobile Member shell and Home components are implemented in:
 
 `src/main/resources/static/css/member-home.css`
 
+Role-aware persistent navigation is centralized in:
+
+`src/main/resources/templates/fragments/navigation.html`
+
+Shared discovery and membership pages reuse the same shell through:
+
+`src/main/resources/templates/member/casts.html`
+
+`src/main/resources/templates/member/memberships.html`
+
 The production Member Schedule extensions are implemented in:
 
 `src/main/resources/static/css/member-schedule.css`
@@ -145,6 +177,12 @@ The production Following and Profile extensions are implemented in:
 `src/main/resources/static/css/member-following.css`
 
 `src/main/resources/static/css/member-profile.css`
+
+Role workspace extensions are implemented in:
+
+`src/main/resources/static/css/cast-workspace.css`
+
+`src/main/resources/static/css/owner-workspace.css`
 
 Current templates consume the shared stylesheet from:
 
@@ -177,6 +215,8 @@ When adding a new page, reuse the existing tokens and component classes before i
 - [x] Cast membership tier management
 - [x] Access-denied page
 - [x] Responsive mobile and desktop behavior
+- [x] Shared application shell and neutral navigation treatment across roles
+- [x] Shared identity-card and grouped-settings language for Member Account and Cast Profile
 
 ## Approved Member Information Architecture
 
@@ -191,11 +231,24 @@ Search remains a field within Home and relevant directory pages. It is not dupli
 
 ## Approved Owner Information Architecture
 
-The persistent Owner navigation contains four destinations:
+The persistent Owner navigation contains five destinations in this order:
 
 1. `Dashboard` - store health, staffing totals, pending reviews, and upcoming events.
 2. `Shifts` - shift approval queue and daily schedule.
 3. `Events` - draft, edit, publish, preview, and archive store events.
-4. `Account` - owner identity, security, and sign out.
+4. `Promos` - promotion and banner scheduling for Member-facing surfaces.
+5. `Account` - owner identity, security, and sign out.
 
 Event deletion is represented by an `Archived` state so published history remains auditable. Only `Published` events are exposed through Member and public routes.
+
+## Approved Cast Information Architecture
+
+The persistent Cast navigation contains five destinations in this order:
+
+1. `Home` - the shared public feed, events, promotions, and today's approved shifts.
+2. `Schedule` - the shared approved Cast schedule by day or week.
+3. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
+4. `Profile` - settings for the Cast's public identity, stage name, bio, photo, discoverability, account email, and sign out.
+5. `Cast` - the private Cast workspace for shift requests, tiers, and content management.
+
+Cast accounts use `/cast/profile` as their single Profile destination. The generic `/account` route redirects Cast accounts there so account and public-profile editing are not presented as separate destinations.

@@ -63,6 +63,8 @@ This project is assessed for the Web Application Development course and must dem
 ### Cast
 
 - Sign in through an internally provisioned `CAST` account.
+- Use the shared Home and approved Schedule experience, with direct access to their Member-facing Cast profile, profile settings, and private Cast workspace.
+- Preview their own public Cast profile exactly as Members see it.
 - Manage only their own public Cast profile.
 - Submit and cancel their own shift requests.
 - Create and manage their own membership tiers.
@@ -75,7 +77,7 @@ This project is assessed for the Web Application Development course and must dem
 - View store metrics and daily schedules.
 - Approve or reject Cast shift requests for their store.
 - Manage store information and permanent Cast assignments.
-- Create, edit, publish, archive, and review store events.
+- Upload event images and create, edit, publish, archive, and review store events.
 - Create and schedule public promotions and banners.
 
 ## Core Workflows
@@ -97,7 +99,7 @@ This project is assessed for the Web Application Development course and must dem
 
 ### Following And Membership
 
-1. A Member follows a Cast.
+1. A Member or Cast follows a Cast.
 2. The Cast may define ordered membership tiers.
 3. Tier membership is Cast-specific; access from one Cast never grants access to another Cast's content.
 4. Content visibility is enforced in backend queries and services, not only hidden in the UI.
@@ -113,7 +115,7 @@ This project is assessed for the Web Application Development course and must dem
 - The current stakeholder scope is one cafe, represented by the current Hoshi Cafe experience.
 - The data model can support multiple stores, but multi-store behavior must not be exposed without confirmed requirements and authorization review.
 - Booking, payments, paid content, food ordering, queueing, and point-of-sale operations are out of scope.
-- Media is currently represented by validated URLs; a production upload pipeline is not yet complete.
+- Profile photos, event images, Cast content images, and promotion images use validated JPG/PNG/WebP uploads up to 2 MB, stored in dedicated one-to-one image tables. Legacy URL columns remain only for seeded and pre-migration data.
 - Notifications are in-app. Email, SMS, push notifications, and background delivery are not confirmed requirements.
 - Member tier assignment and upgrade rules still require final stakeholder confirmation.
 
@@ -160,6 +162,7 @@ Spring Data JPA Repository
 The implemented model includes:
 
 - `UserAccount`
+- `AccountAvatar`
 - `MemberProfile`
 - `CastProfile`
 - `Store`
@@ -233,7 +236,7 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - Confirm whether Cast content needs Owner moderation before publication.
 - Define account recovery and password-reset requirements.
 - Define retention, privacy, and audit-log requirements for personal data.
-- Decide whether file uploads, push notifications, payments, or additional stores belong in a later phase.
+- Decide whether push notifications, payments, or additional stores belong in a later phase.
 - Replace the free-trial database with a backed-up deployment plan before production use.
 
 ## Document Map

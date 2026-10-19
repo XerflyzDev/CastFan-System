@@ -37,7 +37,8 @@ public class ContentAccessService {
 		if (content.getAudience() == ContentAudience.PUBLIC) return new Access(true, false, 0);
 		if (authenticatedEmail == null) return new Access(false, false, 0);
 		var member = userAccountRepository.findByEmailIgnoreCase(authenticatedEmail)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
+				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));
 		if (member.isEmpty()) return new Access(false, false, 0);
 		var followed = castFollowRepository.existsByMemberProfileIdAndCastProfileId(

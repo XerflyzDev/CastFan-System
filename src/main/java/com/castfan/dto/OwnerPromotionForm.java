@@ -24,9 +24,7 @@ public class OwnerPromotionForm {
 	@Pattern(regexp = "^[A-Za-z0-9_-]*$", message = "Code may contain only letters, numbers, hyphens, and underscores")
 	private String code;
 
-	@Size(max = 2048, message = "Banner URL must not exceed 2048 characters")
-	@Pattern(regexp = "^(?:https?://[^\\s]+|/images/[^\\s]+)?$", message = "Banner URL must use http, https, or a local /images path")
-	private String bannerUrl;
+	private boolean removeImage;
 
 	@NotNull(message = "Start date is required")
 	private LocalDate startsOn;
@@ -48,8 +46,8 @@ public class OwnerPromotionForm {
 	public void setDescription(String description) { this.description = description; }
 	public String getCode() { return code; }
 	public void setCode(String code) { this.code = code; }
-	public String getBannerUrl() { return bannerUrl; }
-	public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
+	public boolean isRemoveImage() { return removeImage; }
+	public void setRemoveImage(boolean removeImage) { this.removeImage = removeImage; }
 	public LocalDate getStartsOn() { return startsOn; }
 	public void setStartsOn(LocalDate startsOn) { this.startsOn = startsOn; }
 	public LocalTime getStartsAt() { return startsAt; }

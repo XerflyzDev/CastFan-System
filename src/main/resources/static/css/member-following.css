@@ -12,7 +12,9 @@
 .following-list { display: grid; gap: 9px; }
 .following-card { overflow: hidden; border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
 .following-card[hidden] { display: none; }
-.cast-profile-action { display: grid; width: 100%; grid-template-columns: 50px minmax(0, 1fr) 18px; align-items: center; gap: 11px; padding: 14px 14px 12px; color: var(--ink); }
+.cast-profile-action { display: grid; width: 100%; grid-template-columns: 50px minmax(0, 1fr) 18px; align-items: center; gap: 11px; padding: 14px 14px 12px; color: var(--ink); text-decoration: none; }
+.cast-profile-action:hover { color: var(--ink); text-decoration: none; }
+.cast-profile-action:focus-visible { border-radius: 17px 17px 0 0; outline: 3px solid rgba(173, 89, 119, 0.3); outline-offset: -3px; }
 .profile-avatar { position: relative; display: grid; width: 50px; height: 50px; place-items: center; border-radius: 50%; font-size: 0.72rem; font-weight: 700; }
 .profile-avatar.avatar-photo { object-fit: cover; }
 .profile-avatar.rose { color: var(--rose-dark); background: var(--rose-soft); }

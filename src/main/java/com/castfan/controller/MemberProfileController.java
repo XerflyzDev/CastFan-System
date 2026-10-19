@@ -12,6 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class MemberProfileController {
@@ -33,10 +35,10 @@ public class MemberProfileController {
 
 	@PostMapping("/member/profile")
 	public String updateProfile(Principal principal, @Valid @ModelAttribute("form") MemberProfileForm form,
-		BindingResult bindingResult, Model model) {
+		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image, Model model) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				profileService.updateMemberProfile(principal.getName(), form);
+				profileService.updateMemberProfile(principal.getName(), form, image);
 				return "redirect:/member/profile?saved";
 			} catch (DomainRuleViolationException exception) {
 				bindingResult.reject("profile.invalid", exception.getMessage());

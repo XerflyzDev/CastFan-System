@@ -5,7 +5,6 @@ import java.time.LocalTime;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class OwnerEventForm {
@@ -21,12 +20,7 @@ public class OwnerEventForm {
 	@Size(max = 2000, message = "Description must not exceed 2000 characters")
 	private String description;
 
-	@Size(max = 2048, message = "Image URL must not exceed 2048 characters")
-	@Pattern(
-		regexp = "^(?:https?://[^\\s]+|/images/[^\\s]+)?$",
-		message = "Image URL must use http, https, or a local /images path"
-	)
-	private String imageUrl;
+	private boolean removeImage;
 
 	@NotNull(message = "Event date is required")
 	private LocalDate date;
@@ -43,8 +37,8 @@ public class OwnerEventForm {
 	public void setTitle(String title) { this.title = title; }
 	public String getDescription() { return description; }
 	public void setDescription(String description) { this.description = description; }
-	public String getImageUrl() { return imageUrl; }
-	public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+	public boolean isRemoveImage() { return removeImage; }
+	public void setRemoveImage(boolean removeImage) { this.removeImage = removeImage; }
 	public LocalDate getDate() { return date; }
 	public void setDate(LocalDate date) { this.date = date; }
 	public LocalTime getStartsAt() { return startsAt; }

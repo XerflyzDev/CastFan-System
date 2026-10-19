@@ -1,7 +1,6 @@
 package com.castfan.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class MemberProfileForm {
@@ -13,12 +12,7 @@ public class MemberProfileForm {
 	@Size(max = 500, message = "Bio must not exceed 500 characters")
 	private String bio;
 
-	@Size(max = 2048, message = "Avatar URL must not exceed 2048 characters")
-	@Pattern(
-		regexp = "^(?:https?://[^\\s]+|/images/[^\\s]+)?$",
-		message = "Avatar URL must use http, https, or a local /images path"
-	)
-	private String avatarUrl;
+	private boolean removeImage;
 
 	private boolean castUpdateNotifications;
 	private boolean eventNotifications;
@@ -27,8 +21,8 @@ public class MemberProfileForm {
 	public void setDisplayName(String displayName) { this.displayName = displayName; }
 	public String getBio() { return bio; }
 	public void setBio(String bio) { this.bio = bio; }
-	public String getAvatarUrl() { return avatarUrl; }
-	public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+	public boolean isRemoveImage() { return removeImage; }
+	public void setRemoveImage(boolean removeImage) { this.removeImage = removeImage; }
 	public boolean isCastUpdateNotifications() { return castUpdateNotifications; }
 	public void setCastUpdateNotifications(boolean castUpdateNotifications) { this.castUpdateNotifications = castUpdateNotifications; }
 	public boolean isEventNotifications() { return eventNotifications; }

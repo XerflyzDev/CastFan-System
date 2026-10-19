@@ -19,6 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import com.castfan.service.StorePromotionImageService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,9 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class OwnerPromotionController {
 	private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Bangkok");
 	private final OwnerPromotionService ownerPromotionService;
+	private final StorePromotionImageService storePromotionImageService;
 
-	public OwnerPromotionController(OwnerPromotionService ownerPromotionService) {
+	public OwnerPromotionController(OwnerPromotionService ownerPromotionService,
+		StorePromotionImageService storePromotionImageService) {
 		this.ownerPromotionService = ownerPromotionService;
+		this.storePromotionImageService = storePromotionImageService;
 	}
 
 	@GetMapping("/owner/promotions")
@@ -52,10 +61,10 @@ public class OwnerPromotionController {
 
 	@PostMapping("/owner/promotions")
 	public String create(Principal principal, @Valid @ModelAttribute("form") OwnerPromotionForm form,
-		BindingResult bindingResult, Model model) {
+		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image, Model model) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				ownerPromotionService.create(principal.getName(), form);
+				ownerPromotionService.create(principal.getName(), form, image);
 				return "redirect:/owner/promotions?created";
 			} catch (DomainConflictException | DomainRuleViolationException exception) {
 				bindingResult.reject("promotion.invalid", exception.getMessage());
@@ -67,10 +76,11 @@ public class OwnerPromotionController {
 
 	@PostMapping("/owner/promotions/{promotionId}")
 	public String update(Principal principal, @PathVariable Long promotionId,
-		@Valid @ModelAttribute("form") OwnerPromotionForm form, BindingResult bindingResult, Model model) {
+		@Valid @ModelAttribute("form") OwnerPromotionForm form, BindingResult bindingResult,
+		@RequestParam(name = "image", required = false) MultipartFile image, Model model) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				ownerPromotionService.update(principal.getName(), promotionId, form);
+				ownerPromotionService.update(principal.getName(), promotionId, form, image);
 				return "redirect:/owner/promotions?saved";
 			} catch (DomainConflictException | DomainRuleViolationException exception) {
 				bindingResult.reject("promotion.invalid", exception.getMessage());
@@ -78,6 +88,14 @@ public class OwnerPromotionController {
 		}
 		populate(principal, model, promotionId);
 		return "owner/promotions";
+	}
+
+	@GetMapping("/owner/promotions/{promotionId}/image")
+	public ResponseEntity<byte[]> image(Principal principal, @PathVariable Long promotionId) {
+		return storePromotionImageService.loadOwned(principal.getName(), promotionId)
+			.map(image -> ResponseEntity.ok().cacheControl(CacheControl.noCache())
+				.contentType(MediaType.parseMediaType(image.contentType())).body(image.imageData()))
+			.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/owner/promotions/{promotionId}/{action:activate|deactivate}")

@@ -1,7 +1,9 @@
 package com.castfan.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,6 +31,38 @@ class HomeControllerTests {
 			.andExpect(model().attributeExists("home"))
 			.andExpect(content().string(containsString("Working Today")))
 			.andExpect(content().string(containsString("No approved shifts today")));
+	}
+
+	@Test
+	void ownerHomeShowsDashboardNavigation() throws Exception {
+		mockMvc.perform(get("/").with(user("owner@castfan.test").roles("OWNER")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Owner Dashboard")))
+			.andExpect(content().string(containsString("href=\"/owner/shifts\"")))
+			.andExpect(content().string(containsString("href=\"/owner/events\"")))
+			.andExpect(content().string(containsString("href=\"/owner/promotions\"")))
+			.andExpect(content().string(containsString("href=\"/owner\"")))
+			.andExpect(content().string(containsString("href=\"/account\"")))
+			.andExpect(content().string(matchesPattern(
+				"(?s).*<nav class=\"floating-nav owner-nav\" aria-label=\"Owner navigation\">"
+					+ ".*?<span>Dashboard</span>.*?<span>Shifts</span>.*?<span>Events</span>"
+					+ ".*?<span>Promos</span>.*?<span>Account</span>.*?</nav>.*"
+			)));
+	}
+
+	@Test
+	void castHomeShowsMemberNavigationWithCastWorkspace() throws Exception {
+		mockMvc.perform(get("/").with(user("cast@castfan.test").roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("href=\"/member/schedule\"")))
+			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
+			.andExpect(content().string(containsString("href=\"/cast/profile\"")))
+			.andExpect(content().string(containsString("href=\"/cast\"")))
+			.andExpect(content().string(matchesPattern(
+				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
+					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+			)));
 	}
 
 	@Test
@@ -69,6 +103,10 @@ class HomeControllerTests {
 			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
 
 		mockMvc.perform(get("/js/owner-workspace.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
+		mockMvc.perform(get("/js/confirmation-dialog.js"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
 

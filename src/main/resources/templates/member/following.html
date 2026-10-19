@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,11 +14,6 @@
 <main class="concept-stage">
     <section class="phone" aria-label="CastFan Member Following">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time">
-            <strong id="local-time">--:--</strong>
-            <span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span>Hoshi Cafe</span></span>
-        </header>
-
         <div class="screen-content following-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
@@ -68,12 +63,8 @@
             </a>
         </div>
 
-        <nav class="floating-nav" aria-label="Member navigation">
-            <a class="nav-button" th:href="@{/}" aria-label="Home" title="Home"><i class="bi bi-house"></i><span>Home</span></a>
-            <a class="nav-button" th:href="@{/member/schedule}" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button active" th:href="@{/member/following}" aria-label="Following" title="Following" aria-current="page"><i class="bi bi-heart-fill"></i><span>Following</span></a>
-            <a class="nav-button" th:href="@{/account}" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('following')}"></th:block>
+        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('')}"></th:block>
         <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
     </section>
 </main>

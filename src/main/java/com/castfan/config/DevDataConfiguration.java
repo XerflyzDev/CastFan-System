@@ -6,6 +6,7 @@ import java.time.ZoneId;
 
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.EventStatus;
+import com.castfan.entity.MemberProfile;
 import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.Store;
 import com.castfan.entity.StoreCast;
@@ -15,6 +16,7 @@ import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastProfileRepository;
+import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
@@ -37,6 +39,7 @@ public class DevDataConfiguration {
 	ApplicationRunner seedDevHomeData(
 		UserAccountRepository userAccountRepository,
 		CastProfileRepository castProfileRepository,
+		MemberProfileRepository memberProfileRepository,
 		StoreRepository storeRepository,
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
@@ -62,25 +65,29 @@ public class DevDataConfiguration {
 				STORE_ZONE.getId(),
 				true
 			));
+			var member = userAccountRepository.save(new UserAccount(
+				"member@castfan.local", password, "Mina Fan", UserRole.MEMBER, UserStatus.ACTIVE
+			));
+			memberProfileRepository.save(new MemberProfile(member, null, null));
 
 			var today = LocalDate.now(STORE_ZONE);
 			seedCast(
 				"mina@castfan.local", "Mina", "Warm conversations and seasonal desserts.",
 				"/images/mina-profile.jpg", LocalTime.of(14, 0), LocalTime.of(20, 0),
 				password, owner, store, today, userAccountRepository, castProfileRepository,
-				storeCastRepository, shiftScheduleRepository
+				memberProfileRepository, storeCastRepository, shiftScheduleRepository
 			);
 			seedCast(
 				"yuki@castfan.local", "Yuki", "Evening shifts and cafe recommendations.",
 				null, LocalTime.of(16, 0), LocalTime.of(22, 0),
 				password, owner, store, today, userAccountRepository, castProfileRepository,
-				storeCastRepository, shiftScheduleRepository
+				memberProfileRepository, storeCastRepository, shiftScheduleRepository
 			);
 			seedCast(
 				"ami@castfan.local", "Ami", "Late-night events and member updates.",
 				null, LocalTime.of(18, 0), LocalTime.of(23, 0),
 				password, owner, store, today, userAccountRepository, castProfileRepository,
-				storeCastRepository, shiftScheduleRepository
+				memberProfileRepository, storeCastRepository, shiftScheduleRepository
 			);
 
 			var eventStartsAt = today.plusDays(17).atTime(16, 0).atZone(STORE_ZONE).toInstant();
@@ -116,12 +123,14 @@ public class DevDataConfiguration {
 		LocalDate date,
 		UserAccountRepository userAccountRepository,
 		CastProfileRepository castProfileRepository,
+		MemberProfileRepository memberProfileRepository,
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository
 	) {
 		var account = userAccountRepository.save(new UserAccount(
 			email, password, stageName, UserRole.CAST, UserStatus.ACTIVE
 		));
+		memberProfileRepository.save(new MemberProfile(account, null, null));
 		var profile = castProfileRepository.save(new CastProfile(
 			account, stageName, stageName.toLowerCase(), bio, avatarUrl, true
 		));

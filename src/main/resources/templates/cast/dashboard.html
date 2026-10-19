@@ -14,11 +14,6 @@
 <main class="concept-stage">
     <section class="phone" aria-label="Cast dashboard">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time">
-            <strong id="local-time">--:--</strong>
-            <span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${workspace.assignments.empty ? 'Cast workspace' : workspace.assignments.getFirst().storeName}">Cast workspace</span></span>
-        </header>
-
         <div class="screen-content cast-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/cast}">CastFan</a>
@@ -26,20 +21,9 @@
             </div>
 
             <header class="cast-heading">
-                <p>Welcome back</p>
+                <p th:text="${workspace.assignments.empty ? 'Welcome back' : workspace.assignments.getFirst().storeName}">Welcome back</p>
                 <h1 th:text="${workspace.profile.stageName}">Mina</h1>
             </header>
-
-            <section class="cast-profile-card" aria-label="Public profile summary">
-                <img th:if="${workspace.profile.avatarUrl != null}" th:src="${workspace.profile.avatarUrl}" th:alt="${workspace.profile.stageName}">
-                <span class="cast-avatar" th:unless="${workspace.profile.avatarUrl != null}" th:text="${workspace.profile.initials}">MN</span>
-                <div>
-                    <span class="visibility-label" th:classappend="${!workspace.profile.discoverable} ? ' private'" th:text="${workspace.profile.discoverable ? 'Public profile' : 'Hidden profile'}">Public profile</span>
-                    <strong th:text="${workspace.profile.stageName}">Mina</strong>
-                    <small th:text="${workspace.profile.bio != null ? workspace.profile.bio : 'Add a short bio to complete your profile.'}">Profile bio</small>
-                </div>
-                <a th:href="@{/cast/profile}" aria-label="Edit profile"><i class="bi bi-pencil" aria-hidden="true"></i></a>
-            </section>
 
             <div class="cast-stats" aria-label="Cast summary">
                 <a th:href="@{/cast/schedule}"><span><i class="bi bi-clock" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Pending shifts</small></a>
@@ -62,15 +46,10 @@
                 <div class="cast-empty" th:if="${workspace.shifts.empty}"><i class="bi bi-calendar2-plus" aria-hidden="true"></i><div><strong>No upcoming shifts</strong><small>Submit availability for your store to review.</small></div></div>
             </section>
 
-            <div class="dashboard-actions"><a class="primary-action" th:href="@{/cast/content}"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>Manage content</span></a><a class="secondary-action" th:href="@{/cast/schedule}"><i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Submit a shift</span></a></div>
+            <div class="dashboard-actions"><a class="secondary-action" th:href="@{/cast/schedule}"><i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Request shift</span></a></div>
         </div>
 
-        <nav class="floating-nav" aria-label="Cast navigation">
-            <a class="nav-button active" th:href="@{/cast}" aria-current="page"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
-            <a class="nav-button" th:href="@{/cast/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" th:href="@{/cast/tiers}"><i class="bi bi-stars"></i><span>Tiers</span></a>
-            <a class="nav-button" th:href="@{/cast/profile}"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <nav th:replace="~{fragments/navigation :: cast('cast')}"></nav>
     </section>
 </main>
 <script th:src="@{/js/cast-workspace.js}" defer></script>

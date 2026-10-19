@@ -23,9 +23,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 class DatabaseMigrationTests {
 
 	private static final List<String> EXPECTED_TABLES = List.of(
-		"cast_content", "cast_follows", "cast_profiles", "flyway_schema_history",
-		"member_profiles", "member_tiers", "shift_schedules", "store_cast", "store_events",
-		"store_promotions", "stores", "tier_memberships", "user_accounts"
+		"account_avatars", "cast_content", "cast_content_images", "cast_follows", "cast_profiles", "flyway_schema_history",
+		"member_profiles", "member_tiers", "shift_schedules", "store_cast", "store_event_images", "store_events",
+		"store_promotion_images", "store_promotions", "stores", "tier_memberships", "user_accounts"
 	);
 
 	@Autowired
@@ -45,7 +45,7 @@ class DatabaseMigrationTests {
 			""", String.class);
 
 		assertThat(tables).containsAll(EXPECTED_TABLES);
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("1");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

@@ -19,6 +19,7 @@ import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CastContentService {
@@ -29,13 +30,16 @@ public class CastContentService {
 	private final CastProfileRepository castProfileRepository;
 	private final MemberTierRepository memberTierRepository;
 	private final CastContentRepository castContentRepository;
+	private final CastContentImageService castContentImageService;
 
 	public CastContentService(UserAccountRepository userAccountRepository, CastProfileRepository castProfileRepository,
-		MemberTierRepository memberTierRepository, CastContentRepository castContentRepository) {
+		MemberTierRepository memberTierRepository, CastContentRepository castContentRepository,
+		CastContentImageService castContentImageService) {
 		this.userAccountRepository = userAccountRepository;
 		this.castProfileRepository = castProfileRepository;
 		this.memberTierRepository = memberTierRepository;
 		this.castContentRepository = castContentRepository;
+		this.castContentImageService = castContentImageService;
 	}
 
 	@Transactional(readOnly = true)
@@ -46,7 +50,8 @@ public class CastContentService {
 			memberTierRepository.findAllByCastProfileIdOrderByRankAsc(profile.getId()).stream()
 				.map(tier -> new CastContentView.TierOption(tier.getId(), tier.getName(), tier.getRank(), tier.isActive()))
 				.toList(),
-			editingContentId
+			editingContentId,
+			editingContentId == null ? null : castContentImageService.ownerUrl(requireOwned(email, editingContentId, false))
 		);
 	}
 
@@ -59,35 +64,57 @@ public class CastContentService {
 		var form = new CastContentForm();
 		form.setTitle(content.getTitle());
 		form.setBody(content.getBody());
-		form.setImageUrl(content.getImageUrl());
 		form.setAudience(content.getAudience());
 		form.setMinimumTierId(content.getMinimumTier() == null ? null : content.getMinimumTier().getId());
 		return form;
 	}
 
 	@Transactional
-	public void create(String email, CastContentForm form) {
-		var profile = requireCast(email);
-		var tier = resolveTier(profile, form);
-		castContentRepository.saveAndFlush(new CastContent(
-			profile, cleanRequired(form.getTitle(), "Title", 160), cleanRequired(form.getBody(), "Content", 5000),
-			cleanOptional(form.getImageUrl()), form.getAudience(), tier
-		));
+	public void create(String email, CastContentForm form, MultipartFile image) {
+		createContent(email, form, image);
 	}
 
 	@Transactional
-	public void update(String email, Long contentId, CastContentForm form) {
+	public void createAndPublish(String email, CastContentForm form, MultipartFile image) {
+		var content = createContent(email, form, image);
+		content.publish();
+		castContentRepository.saveAndFlush(content);
+	}
+
+	private CastContent createContent(String email, CastContentForm form, MultipartFile image) {
+		var profile = requireCast(email);
+		var tier = resolveTier(profile, form);
+		var body = cleanRequired(form.getBody(), "Content", 5000);
+		var content = castContentRepository.saveAndFlush(new CastContent(
+			profile, contentTitle(form.getTitle(), body), body,
+			null, form.getAudience(), tier
+		));
+		castContentImageService.store(content, image);
+		return content;
+	}
+
+	@Transactional
+	public void create(String email, CastContentForm form) {
+		create(email, form, null);
+	}
+
+	@Transactional
+	public void update(String email, Long contentId, CastContentForm form, MultipartFile image) {
 		var profile = requireCast(email);
 		var content = requireOwnedForUpdate(profile, contentId);
 		try {
+			var body = cleanRequired(form.getBody(), "Content", 5000);
 			content.updateDetails(
-				cleanRequired(form.getTitle(), "Title", 160), cleanRequired(form.getBody(), "Content", 5000),
-				cleanOptional(form.getImageUrl()), form.getAudience(), resolveTier(profile, form)
+				contentTitle(form.getTitle(), body), body,
+				(form.isRemoveImage() || (image != null && !image.isEmpty())) ? null : content.getImageUrl(),
+				form.getAudience(), resolveTier(profile, form)
 			);
 		} catch (IllegalArgumentException | IllegalStateException exception) {
 			throw new DomainRuleViolationException(exception.getMessage());
 		}
 		castContentRepository.saveAndFlush(content);
+		if (image != null && !image.isEmpty()) castContentImageService.store(content, image);
+		else if (form.isRemoveImage()) castContentImageService.remove(content);
 	}
 
 	@Transactional
@@ -143,7 +170,7 @@ public class CastContentService {
 
 	private CastContentView.ContentItem toItem(CastContent content) {
 		return new CastContentView.ContentItem(
-			content.getId(), content.getTitle(), content.getBody(), content.getImageUrl(), audienceLabel(content),
+			content.getId(), content.getTitle(), content.getBody(), castContentImageService.ownerUrl(content), audienceLabel(content),
 			content.getMinimumTier() == null ? null : content.getMinimumTier().getName(),
 			statusLabel(content.getStatus()), content.getStatus().name().toLowerCase(Locale.ENGLISH),
 			content.getPublishedAt() == null ? null : PUBLISHED.format(content.getPublishedAt().atZone(DISPLAY_ZONE)),
@@ -171,5 +198,14 @@ public class CastContentService {
 		return clean;
 	}
 
-	private String cleanOptional(String value) { return value == null || value.isBlank() ? null : value.trim(); }
+	private String contentTitle(String value, String body) {
+		var clean = value == null ? "" : value.trim();
+		if (!clean.isEmpty()) {
+			if (clean.length() > 160) throw new DomainRuleViolationException("Title is too long.");
+			return clean;
+		}
+		var firstLine = body.lines().findFirst().orElse("Post").trim();
+		return firstLine.length() <= 120 ? firstLine : firstLine.substring(0, 117) + "...";
+	}
+
 }

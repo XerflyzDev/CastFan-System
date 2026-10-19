@@ -90,8 +90,9 @@ public class MemberCastService {
 	private MemberProfile requireActiveMember(String authenticatedEmail) {
 		var account = userAccountRepository.findByEmailIgnoreCase(authenticatedEmail)
 			.orElseThrow(() -> new DomainRuleViolationException("Account not found."));
-		if (account.getRole() != UserRole.MEMBER || account.getStatus() != UserStatus.ACTIVE) {
-			throw new DomainRuleViolationException("An active Member account is required.");
+		if ((account.getRole() != UserRole.MEMBER && account.getRole() != UserRole.CAST)
+				|| account.getStatus() != UserStatus.ACTIVE) {
+			throw new DomainRuleViolationException("An active Member or Cast account is required.");
 		}
 		return memberProfileRepository.findByUserAccountId(account.getId())
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));

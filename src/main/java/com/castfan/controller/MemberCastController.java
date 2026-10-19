@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@PreAuthorize("hasRole('MEMBER')")
+@PreAuthorize("hasAnyRole('MEMBER', 'CAST')")
 public class MemberCastController {
 
 	private static final int PAGE_SIZE = 12;

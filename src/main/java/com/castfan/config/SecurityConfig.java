@@ -29,7 +29,7 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests(authorize -> {
 				authorize.requestMatchers(
-					"/", "/login", "/signup", "/casts/**", "/events/**",
+					"/", "/login", "/signup", "/casts/**", "/events/**", "/promotions/**", "/avatars/**",
 					"/css/**", "/js/**", "/images/**", "/fonts/**", "/error",
 					"/actuator/health", "/actuator/health/**"
 				).permitAll();
@@ -40,6 +40,8 @@ public class SecurityConfig {
 					authorize.requestMatchers("/concepts/**", "/h2-console/**").denyAll();
 				}
 				authorize
+					.requestMatchers("/member/schedule", "/member/casts/**", "/member/following")
+					.hasAnyRole("MEMBER", "CAST")
 					.requestMatchers("/cast/**").hasRole("CAST")
 					.requestMatchers("/owner/**").hasRole("OWNER")
 					.requestMatchers("/member/**").hasRole("MEMBER")
@@ -48,7 +50,15 @@ public class SecurityConfig {
 			.formLogin(form -> form
 				.loginPage("/login")
 				.usernameParameter("email")
-				.defaultSuccessUrl("/account", true)
+				.successHandler((request, response, authentication) -> {
+					var authorities = authentication.getAuthorities().stream()
+						.map(authority -> authority.getAuthority())
+						.collect(java.util.stream.Collectors.toSet());
+					var destination = authorities.contains("ROLE_OWNER")
+						? "/"
+						: authorities.contains("ROLE_CAST") ? "/cast" : "/account";
+					response.sendRedirect(request.getContextPath() + destination);
+				})
 				.failureUrl("/login?error")
 				.permitAll())
 			.logout(logout -> logout

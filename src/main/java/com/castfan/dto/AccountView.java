@@ -8,17 +8,19 @@ import java.util.stream.Collectors;
 
 import com.castfan.entity.UserAccount;
 
-public record AccountView(String displayName, String email, String role, String initials, String joinedLabel) {
+public record AccountView(String displayName, String email, String role, String initials, String joinedLabel,
+	boolean hasAvatar) {
 
 	private static final DateTimeFormatter JOINED_FORMAT = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH);
 
-	public static AccountView from(UserAccount account) {
+	public static AccountView from(UserAccount account, boolean hasAvatar) {
 		return new AccountView(
 			account.getDisplayName(),
 			account.getEmail(),
 			account.getRole().name(),
 			initials(account.getDisplayName()),
-			JOINED_FORMAT.format(account.getCreatedAt().atZone(ZoneId.of("Asia/Bangkok")))
+			JOINED_FORMAT.format(account.getCreatedAt().atZone(ZoneId.of("Asia/Bangkok"))),
+			hasAvatar
 		);
 	}
 

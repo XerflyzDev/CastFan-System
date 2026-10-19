@@ -26,6 +26,18 @@ Constraints:
 - `role` is one of `MEMBER`, `CAST`, or `OWNER`.
 - Passwords are stored only as secure hashes.
 
+### AccountAvatar
+
+An optional profile photo shared by every account role and stored separately so authentication queries do not load image data.
+
+Key fields: `userAccountId`, `contentType`, `imageData`, `updatedAt`.
+
+Constraints:
+
+- `userAccountId` is both the primary key and a foreign key to `UserAccount`.
+- Only validated JPG, PNG, or WebP files up to 2 MB are accepted.
+- Only the authenticated account can replace or remove its photo; public retrieval is limited to active accounts.
+
 ### MemberProfile
 
 Member-specific public information. Each user can have at most one Member profile.
@@ -118,6 +130,16 @@ Rules:
 
 Recommended index: `(castProfileId, status, publishedAt)`.
 
+### CastContentImage
+
+An optional uploaded image stored separately from Cast content.
+
+Rules:
+
+- `castContentId` is both the primary key and a foreign key to `CastContent`.
+- Only validated JPG, PNG, or WebP files up to 2 MB are accepted.
+- The owning Cast can manage the image; public reads follow the content audience and publication rules.
+
 ### StoreEvent
 
 A store event created by an Owner.
@@ -129,6 +151,17 @@ Rules:
 - Public queries return only `PUBLISHED` events.
 
 Recommended index: `(storeId, status, startsAt)`.
+
+### StoreEventImage
+
+An optional uploaded image stored separately so event list queries do not load binary data.
+
+Rules:
+
+- `storeEventId` is both the primary key and a foreign key to `StoreEvent`.
+- Only validated JPG, PNG, or WebP files up to 2 MB are accepted.
+- Owners can read images only for events belonging to their stores.
+- Public image access requires a `PUBLISHED` event and an active Store.
 
 ### StorePromotion
 
@@ -145,12 +178,23 @@ Rules:
 
 Recommended index: `(storeId, active, startsAt, endsAt)`.
 
+### StorePromotionImage
+
+An optional uploaded promotion image stored separately from campaign metadata.
+
+Rules:
+
+- `storePromotionId` is both the primary key and a foreign key to `StorePromotion`.
+- Only validated JPG, PNG, or WebP files up to 2 MB are accepted.
+- The Store owner can manage the image; public reads require a currently active promotion and active Store.
+
 ## Relationship Summary
 
 | Parent | Relationship | Child |
 | --- | --- | --- |
 | UserAccount | one to zero-or-one | MemberProfile |
 | UserAccount | one to zero-or-one | CastProfile |
+| UserAccount | one to zero-or-one | AccountAvatar |
 | UserAccount | one to many | Store |
 | Store | one to many | StoreCast |
 | CastProfile | one to many | StoreCast |
@@ -161,9 +205,12 @@ Recommended index: `(storeId, active, startsAt, endsAt)`.
 | MemberProfile | one to many | TierMembership |
 | MemberTier | one to many | TierMembership |
 | CastProfile | one to many | CastContent |
+| CastContent | one to zero-or-one | CastContentImage |
 | MemberTier | optional one to many | CastContent |
 | Store | one to many | StoreEvent |
+| StoreEvent | one to zero-or-one | StoreEventImage |
 | Store | one to many | StorePromotion |
+| StorePromotion | one to zero-or-one | StorePromotionImage |
 
 ## Security Boundaries
 
@@ -183,5 +230,5 @@ Recommended index: `(storeId, active, startsAt, endsAt)`.
 4. `CastFollow` and Member discovery queries.
 5. `MemberTier`, `TierMembership`, and access checks.
 6. `CastContent`, `StoreEvent`, and `StorePromotion`.
-7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed for schema version 1.
-8. Run the migration and Hibernate validation against a disposable MySQL database. Completed against MySQL 8.4.11 on 15 October 2026; rerun before the first Cloud SQL deployment.
+7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 5.
+8. Run the migration and Hibernate validation against a disposable MySQL database. Completed through schema version 4 against MySQL 8.4.11 on 15 October 2026; rerun version 5 before the next Cloud SQL deployment.

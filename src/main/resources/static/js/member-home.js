@@ -43,18 +43,6 @@ function applySearch() {
     }
 }
 
-function updateLocalTime() {
-    const time = document.querySelector("#local-time");
-    if (time) {
-        time.textContent = new Intl.DateTimeFormat("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-            timeZone: "Asia/Bangkok"
-        }).format(new Date());
-    }
-}
-
 document.querySelectorAll("[data-message]").forEach((control) => {
     control.addEventListener("click", () => showMessage(control.dataset.message));
 });
@@ -87,6 +75,3 @@ eventCarousel?.addEventListener("scroll", () => {
         setActiveEvent(activeIndex);
     });
 });
-
-updateLocalTime();
-window.setInterval(updateLocalTime, 30000);

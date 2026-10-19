@@ -6,6 +6,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,6 +26,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.mock.web.MockMultipartFile;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -55,10 +57,11 @@ class MemberProfileWorkflowTests {
 			.andExpect(status().isOk()).andExpect(view().name("member/profile"))
 			.andExpect(content().string(containsString("Original Member")));
 
-		mockMvc.perform(post("/member/profile").with(memberUser()).with(csrf())
+		var image = new MockMultipartFile("image", "avatar.png", "image/png",
+			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1});
+		mockMvc.perform(multipart("/member/profile").file(image).with(memberUser()).with(csrf())
 				.param("displayName", "Aruna Fan")
 				.param("bio", "I follow the evening Cast team.")
-				.param("avatarUrl", "https://example.com/aruna.jpg")
 				.param("castUpdateNotifications", "true")
 				.param("eventNotifications", "true"))
 			.andExpect(status().is3xxRedirection())
@@ -68,23 +71,24 @@ class MemberProfileWorkflowTests {
 		var updatedProfile = memberProfileRepository.findByUserAccountId(member.getId()).orElseThrow();
 		assertThat(updatedAccount.getDisplayName()).isEqualTo("Aruna Fan");
 		assertThat(updatedProfile.getBio()).isEqualTo("I follow the evening Cast team.");
-		assertThat(updatedProfile.getAvatarUrl()).isEqualTo("https://example.com/aruna.jpg");
+		assertThat(updatedProfile.getAvatarUrl()).isEqualTo("/avatars/" + member.getId());
 		assertThat(updatedProfile.isCastUpdateNotifications()).isTrue();
 		assertThat(updatedProfile.isEventNotifications()).isTrue();
 		mockMvc.perform(get("/account").with(memberUser()))
 			.andExpect(content().string(containsString("I follow the evening Cast team.")))
-			.andExpect(content().string(containsString("https://example.com/aruna.jpg")));
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Owner navigation"))))
+			.andExpect(content().string(containsString("/account/avatar")));
+		mockMvc.perform(get("/avatars/{id}", member.getId()))
+			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
 	}
 
 	@Test
 	void invalidProfileIsRejectedWithoutChangingStoredDetails() throws Exception {
 		mockMvc.perform(post("/member/profile").with(memberUser()).with(csrf())
 				.param("displayName", " ")
-				.param("bio", "Rejected bio")
-				.param("avatarUrl", "javascript:alert(1)"))
+				.param("bio", "Rejected bio"))
 			.andExpect(status().isOk()).andExpect(view().name("member/profile"))
-			.andExpect(content().string(containsString("Display name is required")))
-			.andExpect(content().string(containsString("Avatar URL must use http")));
+			.andExpect(content().string(containsString("Display name is required")));
 
 		var stored = memberProfileRepository.findByUserAccountId(member.getId()).orElseThrow();
 		assertThat(stored.getBio()).isNull();
@@ -100,7 +104,7 @@ class MemberProfileWorkflowTests {
 		mockMvc.perform(get("/member/profile").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isForbidden());
 		mockMvc.perform(post("/member/profile").with(memberUser())
-				.param("displayName", "No CSRF").param("bio", "Rejected").param("avatarUrl", ""))
+				.param("displayName", "No CSRF").param("bio", "Rejected"))
 			.andExpect(status().isForbidden());
 		assertThat(userAccountRepository.findById(member.getId()).orElseThrow().getDisplayName())
 			.isEqualTo("Original Member");

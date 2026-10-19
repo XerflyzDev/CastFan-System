@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -51,7 +53,10 @@ class OwnerPromotionWorkflowTests {
 	void ownerCanCreateEditActivateAndPausePromotion() throws Exception {
 		mockMvc.perform(get("/owner/promotions").with(ownerUser()))
 			.andExpect(status().isOk()).andExpect(view().name("owner/promotions"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promotions &amp; banners")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promotions &amp; banners")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-picker-date")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-picker-time")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("date-time-picker.js")));
 		createPromotion("Welcome offer", "WELCOME10").andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/promotions?created"));
 		var promotion = promotionRepository.findAllForOwner(owner.getEmail()).getFirst();
 		assertThat(promotion.isActive()).isFalse();
@@ -60,7 +65,6 @@ class OwnerPromotionWorkflowTests {
 		mockMvc.perform(post("/owner/promotions/{id}", promotion.getId()).with(ownerUser()).with(csrf())
 			.param("storeId", store.getId().toString()).param("title", "Welcome members")
 			.param("description", "Updated campaign terms").param("code", "member15")
-			.param("bannerUrl", "/images/autumn-cafe-event.png")
 			.param("startsOn", today.minusDays(1).toString()).param("startsAt", "09:00")
 			.param("endsOn", today.plusDays(10).toString()).param("endsAt", "23:00"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/promotions?saved"));
@@ -76,13 +80,41 @@ class OwnerPromotionWorkflowTests {
 	}
 
 	@Test
+	void ownerCanUploadAndClearPromotionImage() throws Exception {
+		var image = new MockMultipartFile("image", "promotion.png", "image/png",
+			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1});
+		mockMvc.perform(multipart("/owner/promotions").file(image).with(ownerUser()).with(csrf())
+			.param("storeId", store.getId().toString()).param("title", "Image offer")
+			.param("description", "Promotion with uploaded art").param("code", "IMAGE10")
+			.param("startsOn", today.minusDays(1).toString()).param("startsAt", "09:00")
+			.param("endsOn", today.plusDays(10).toString()).param("endsAt", "23:00"))
+			.andExpect(status().is3xxRedirection());
+		var promotion = promotionRepository.findAllForOwner(owner.getEmail()).getFirst();
+		mockMvc.perform(get("/owner/promotions/{id}/image", promotion.getId()).with(ownerUser()))
+			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
+		mockMvc.perform(post("/owner/promotions/{id}/activate", promotion.getId()).with(ownerUser()).with(csrf()))
+			.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/promotions/{id}/image", promotion.getId()))
+			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
+		mockMvc.perform(post("/owner/promotions/{id}", promotion.getId()).with(ownerUser()).with(csrf())
+			.param("storeId", store.getId().toString()).param("title", "Image offer")
+			.param("description", "Promotion with uploaded art").param("code", "IMAGE10")
+			.param("removeImage", "true")
+			.param("startsOn", today.minusDays(1).toString()).param("startsAt", "09:00")
+			.param("endsOn", today.plusDays(10).toString()).param("endsAt", "23:00"))
+			.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/owner/promotions/{id}/image", promotion.getId()).with(ownerUser()))
+			.andExpect(status().isNotFound());
+	}
+
+	@Test
 	void codesAreGloballyUniqueAndInvalidRangesAreRejected() throws Exception {
 		createPromotion("First offer", "SAMECODE").andExpect(status().is3xxRedirection());
 		createPromotion("Second offer", "samecode").andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promotion code is already in use.")));
 		mockMvc.perform(post("/owner/promotions").with(ownerUser()).with(csrf())
 			.param("storeId", store.getId().toString()).param("title", "Bad range")
-			.param("description", "Invalid dates").param("code", "").param("bannerUrl", "")
+			.param("description", "Invalid dates").param("code", "")
 			.param("startsOn", today.plusDays(3).toString()).param("startsAt", "12:00")
 			.param("endsOn", today.plusDays(2).toString()).param("endsAt", "12:00"))
 			.andExpect(status().isOk())
@@ -102,7 +134,7 @@ class OwnerPromotionWorkflowTests {
 	private org.springframework.test.web.servlet.ResultActions createPromotion(String title, String code) throws Exception {
 		return mockMvc.perform(post("/owner/promotions").with(ownerUser()).with(csrf())
 			.param("storeId", store.getId().toString()).param("title", title)
-			.param("description", "Promotion campaign details").param("code", code).param("bannerUrl", "")
+			.param("description", "Promotion campaign details").param("code", code)
 			.param("startsOn", today.minusDays(1).toString()).param("startsAt", "09:00")
 			.param("endsOn", today.plusDays(10).toString()).param("endsAt", "23:00"));
 	}

@@ -17,8 +17,12 @@ The dedicated `DatabaseMigrationTests` test enables Flyway against H2 in MySQL c
 Production migrations live in `src/main/resources/db/migration/mysql` and use Flyway's versioned naming convention.
 
 - `V1__create_castfan_schema.sql` creates the initial 12 application tables, relationships, constraints, and query indexes.
+- `V2__add_account_avatars.sql` adds role-neutral profile photo storage linked one-to-one with user accounts.
+- `V3__add_store_event_images.sql` adds uploaded event image storage linked one-to-one with store events.
+- `V4__add_content_and_promotion_images.sql` adds uploaded Cast content and promotion image storage.
+- `V5__add_cast_audience_profiles.sql` gives existing Cast accounts the audience profile required for schedules and following.
 
-Never edit a versioned migration after it has been applied to a shared database. Add a new migration such as `V2__add_audit_log.sql` for every later schema change.
+Never edit a versioned migration after it has been applied to a shared database. Add a new migration such as `V6__add_audit_log.sql` for every later schema change.
 
 ## Local Verification
 
@@ -66,6 +70,6 @@ docker stop castfan-mysql-test
 
 Before the first Cloud SQL deployment, run `DatabaseMySqlMigrationTests` against a new disposable MySQL database. Startup must apply every Flyway migration successfully and Hibernate validation must complete without schema errors. This real-MySQL check is required because H2 compatibility mode cannot reproduce every MySQL behavior.
 
-Schema version 1 passed this gate against MySQL 8.4.11 on 15 October 2026. Repeat the test whenever a migration is added or the production MySQL version changes.
+Schema versions 1 through 4 passed this gate against MySQL 8.4.11 on 15 October 2026. Repeat the test whenever a migration is added or the production MySQL version changes.
 
 Production cleanup remains disabled with `spring.flyway.clean-disabled=true`. Do not use Flyway baseline options unless adopting a pre-existing database has been reviewed and documented.

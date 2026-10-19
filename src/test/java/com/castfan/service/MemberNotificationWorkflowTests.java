@@ -95,7 +95,7 @@ class MemberNotificationWorkflowTests {
 			.andExpect(content().string(not(containsString("Draft Notice Event"))));
 
 		mockMvc.perform(post("/member/profile").with(user(memberAccount.getEmail()).roles("MEMBER")).with(csrf())
-				.param("displayName", "Notice Member").param("bio", "").param("avatarUrl", ""))
+				.param("displayName", "Notice Member").param("bio", ""))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/member/profile?saved"));
 		mockMvc.perform(get("/member/notifications").with(user(memberAccount.getEmail()).roles("MEMBER")))
 			.andExpect(status().isOk())

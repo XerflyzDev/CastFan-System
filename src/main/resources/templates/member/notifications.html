@@ -14,9 +14,8 @@
 <main class="concept-stage">
     <section class="phone" aria-label="Member notifications">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-bell"></i>Activity</span></header>
         <div class="screen-content notification-content">
-            <div class="top-actions"><a class="round-button" th:href="@{/}" aria-label="Back to Home"><i class="bi bi-arrow-left"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+            <div class="top-actions"><a class="round-button" th:href="@{/}" aria-label="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
             <header class="notification-heading"><p>Your activity</p><div><h1>Notifications</h1><span th:text="${notifications.totalCount}">0</span></div></header>
 
             <section class="notification-section" aria-labelledby="cast-update-heading">
@@ -25,11 +24,11 @@
                     <a class="notification-card" th:each="notice : ${notifications.contentUpdates}" th:classappend="${!notice.accessible} ? 'locked'" th:href="@{/casts/{castId}/content/{contentId}(castId=${notice.castProfileId},contentId=${notice.contentId})}">
                         <img class="notification-avatar" th:if="${notice.castAvatarUrl != null}" th:src="${notice.castAvatarUrl}" th:alt="${notice.castName}">
                         <span class="notification-avatar" th:unless="${notice.castAvatarUrl != null}" th:text="${notice.castInitials}">MN</span>
-                        <span class="notification-copy"><small><span th:text="${notice.castName}">Mina</span> · <span th:text="${notice.publishedLabel}">Tue, 14 Oct</span></small><strong th:text="${notice.title}">New update</strong><span th:if="${notice.accessible}" th:text="${notice.bodyPreview}">Preview</span><span class="locked-copy" th:unless="${notice.accessible}"><i class="bi bi-lock-fill"></i><span th:text="${notice.audience}">Members</span></span></span>
-                        <i class="bi bi-chevron-right"></i>
+                        <span class="notification-copy"><small><span th:text="${notice.castName}">Mina</span> · <span th:text="${notice.publishedLabel}">Tue, 14 Oct</span></small><strong th:text="${notice.title}">New update</strong><span th:if="${notice.accessible}" th:text="${notice.bodyPreview}">Preview</span><span class="locked-copy" th:unless="${notice.accessible}"><i class="bi bi-lock-fill" aria-hidden="true"></i><span th:text="${notice.audience}">Members</span></span></span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </a>
                 </div>
-                <div class="notification-empty" th:if="${notifications.contentUpdates.empty}"><i class="bi bi-heart"></i><div><strong>No Cast updates yet</strong><span>New posts from followed Cast will appear here.</span></div></div>
+                <div class="notification-empty" th:if="${notifications.contentUpdates.empty}"><i class="bi bi-heart" aria-hidden="true"></i><div><strong>No Cast updates yet</strong><span>New posts from followed Cast will appear here.</span></div></div>
             </section>
 
             <section class="notification-section" aria-labelledby="event-notice-heading">
@@ -37,20 +36,15 @@
                 <div class="notification-list" th:if="${!notifications.upcomingEvents.empty}">
                     <a class="notification-card event-notification" th:each="event : ${notifications.upcomingEvents}" th:href="@{/events/{id}(id=${event.eventId})}">
                         <img th:if="${event.imageUrl != null}" th:src="${event.imageUrl}" th:alt="${event.title}">
-                        <span class="event-icon" th:unless="${event.imageUrl != null}"><i class="bi bi-calendar-event"></i></span>
+                        <span class="event-icon" th:unless="${event.imageUrl != null}"><i class="bi bi-calendar-event" aria-hidden="true"></i></span>
                         <span class="notification-copy"><small th:text="${event.storeName}">Hoshi Cafe</small><strong th:text="${event.title}">Event</strong><span><span th:text="${event.dateLabel}">Fri, 16 Oct</span> · <span th:text="${event.timeLabel}">18:00</span></span></span>
-                        <i class="bi bi-chevron-right"></i>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </a>
                 </div>
-                <div class="notification-empty" th:if="${notifications.upcomingEvents.empty}"><i class="bi bi-calendar2"></i><div><strong>No upcoming events</strong><span>Published events will appear here.</span></div></div>
+                <div class="notification-empty" th:if="${notifications.upcomingEvents.empty}"><i class="bi bi-calendar2" aria-hidden="true"></i><div><strong>No upcoming events</strong><span>Published events will appear here.</span></div></div>
             </section>
         </div>
-        <nav class="floating-nav" aria-label="Member navigation">
-            <a class="nav-button active" th:href="@{/}" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
-            <a class="nav-button" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" th:href="@{/member/following}"><i class="bi bi-heart"></i><span>Following</span></a>
-            <a class="nav-button" th:href="@{/account}"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <nav th:replace="~{fragments/navigation :: member('home')}"></nav>
     </section>
 </main>
 <script th:src="@{/js/member-profile.js}" defer></script>

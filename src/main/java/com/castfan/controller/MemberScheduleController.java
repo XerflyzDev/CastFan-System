@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 @Controller
-@PreAuthorize("hasRole('MEMBER')")
+@PreAuthorize("hasAnyRole('MEMBER', 'CAST')")
 public class MemberScheduleController {
 
 	private final MemberScheduleService memberScheduleService;

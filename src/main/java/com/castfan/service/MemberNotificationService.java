@@ -32,15 +32,18 @@ public class MemberNotificationService {
 	private final CastContentRepository castContentRepository;
 	private final StoreEventRepository storeEventRepository;
 	private final ContentAccessService contentAccessService;
+	private final StoreEventImageService storeEventImageService;
 
 	public MemberNotificationService(UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository, CastContentRepository castContentRepository,
-		StoreEventRepository storeEventRepository, ContentAccessService contentAccessService) {
+		StoreEventRepository storeEventRepository, ContentAccessService contentAccessService,
+		StoreEventImageService storeEventImageService) {
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castContentRepository = castContentRepository;
 		this.storeEventRepository = storeEventRepository;
 		this.contentAccessService = contentAccessService;
+		this.storeEventImageService = storeEventImageService;
 	}
 
 	@Transactional(readOnly = true)
@@ -68,7 +71,7 @@ public class MemberNotificationService {
 			return new MemberNotificationView.EventNotice(
 				event.getId(), event.getTitle(), event.getStore().getName(),
 				DATE.format(event.getStartsAt().atZone(zone)), TIME.format(event.getStartsAt().atZone(zone)),
-				event.getImageUrl()
+				storeEventImageService.publicImageUrl(event)
 			);
 		}).toList();
 		return new MemberNotificationView(updates.size() + events.size(), updates, events);

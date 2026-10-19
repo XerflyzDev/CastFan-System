@@ -76,17 +76,48 @@ class CastWorkspaceWorkflowTests {
 		mockMvc.perform(get("/cast").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/dashboard"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Test Cafe")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Test Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Request shift")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Manage content"))))
+			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
+				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
+					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+			)));
 
 		mockMvc.perform(get("/cast/schedule").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/schedule"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Submit a shift")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Submit a shift")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-picker-date")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-picker-time")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("date-time-picker.js")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("confirmation-dialog.js")));
 
 		mockMvc.perform(get("/cast/profile").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/profile"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Discoverable profile")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Your account")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Manage profile")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Preferences")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Support")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Discoverable profile")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("/member/notifications"))))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/cast/profile\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("bi-pencil-square")));
+
+		mockMvc.perform(get("/cast/public-profile").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("public/cast-profile"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(requireProfile().getStageName())))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Cast Profile")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"profile-compose-fab\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/cast/content#composer\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("New post")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("<span>Follow</span>"))));
 	}
 
 	@Test
@@ -122,7 +153,6 @@ class CastWorkspaceWorkflowTests {
 				.with(csrf())
 				.param("stageName", "Updated Mina " + cast.getId())
 				.param("bio", "Updated public bio")
-				.param("avatarUrl", "https://example.com/mina.jpg")
 				.param("discoverable", "true"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/cast/profile?saved"));

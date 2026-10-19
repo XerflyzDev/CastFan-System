@@ -10,6 +10,9 @@ import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.OwnerEventService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -27,9 +32,12 @@ public class OwnerEventController {
 	private static final ZoneId STORE_ZONE = ZoneId.of("Asia/Bangkok");
 
 	private final OwnerEventService ownerEventService;
+	private final com.castfan.service.StoreEventImageService storeEventImageService;
 
-	public OwnerEventController(OwnerEventService ownerEventService) {
+	public OwnerEventController(OwnerEventService ownerEventService,
+		com.castfan.service.StoreEventImageService storeEventImageService) {
 		this.ownerEventService = ownerEventService;
+		this.storeEventImageService = storeEventImageService;
 	}
 
 	@GetMapping("/owner/events")
@@ -57,11 +65,12 @@ public class OwnerEventController {
 		Principal principal,
 		@Valid @ModelAttribute("form") OwnerEventForm form,
 		BindingResult bindingResult,
+		@RequestParam(name = "image", required = false) MultipartFile image,
 		Model model
 	) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				ownerEventService.create(principal.getName(), form);
+				ownerEventService.create(principal.getName(), form, image);
 				return "redirect:/owner/events?created";
 			} catch (DomainRuleViolationException exception) {
 				bindingResult.reject("event.invalid", exception.getMessage());
@@ -77,11 +86,12 @@ public class OwnerEventController {
 		@PathVariable Long eventId,
 		@Valid @ModelAttribute("form") OwnerEventForm form,
 		BindingResult bindingResult,
+		@RequestParam(name = "image", required = false) MultipartFile image,
 		Model model
 	) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				ownerEventService.update(principal.getName(), eventId, form);
+				ownerEventService.update(principal.getName(), eventId, form, image);
 				return "redirect:/owner/events?saved";
 			} catch (DomainRuleViolationException exception) {
 				bindingResult.reject("event.invalid", exception.getMessage());
@@ -89,6 +99,16 @@ public class OwnerEventController {
 		}
 		populate(principal, model, eventId);
 		return "owner/events";
+	}
+
+	@GetMapping("/owner/events/{eventId}/image")
+	public ResponseEntity<byte[]> image(Principal principal, @PathVariable Long eventId) {
+		return storeEventImageService.loadOwned(principal.getName(), eventId)
+			.map(image -> ResponseEntity.ok()
+				.cacheControl(CacheControl.noCache())
+				.contentType(MediaType.parseMediaType(image.contentType()))
+				.body(image.imageData()))
+			.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/owner/events/{eventId}/publish")

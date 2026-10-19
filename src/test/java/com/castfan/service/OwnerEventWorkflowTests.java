@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -24,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -68,7 +70,16 @@ class OwnerEventWorkflowTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/events"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event management")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event Test Cafe")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event Test Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Choose image")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-date-picker")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-calendar-days")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Choose date")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-time-picker")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-time-hours")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-time-minutes")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Image URL"))));
 
 		createEvent("Draft Launch")
 			.andExpect(status().is3xxRedirection())
@@ -77,6 +88,55 @@ class OwnerEventWorkflowTests {
 		var event = storeEventRepository.findAllForOwner(owner.getEmail()).getFirst();
 		assertThat(event.getTitle()).isEqualTo("Draft Launch");
 		assertThat(event.getStatus()).isEqualTo(EventStatus.DRAFT);
+	}
+
+	@Test
+	void ownerCanUploadAnImageThatBecomesPublicWithTheEvent() throws Exception {
+		var jpeg = new MockMultipartFile(
+			"image", "event.jpg", "image/jpeg",
+			new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff, 0x00, 0x01}
+		);
+		mockMvc.perform(multipart("/owner/events")
+				.file(jpeg)
+				.with(ownerUser()).with(csrf())
+				.param("storeId", store.getId().toString())
+				.param("title", "Event With Image")
+				.param("description", "An event with an uploaded image")
+				.param("date", eventDate.toString())
+				.param("startsAt", "16:00")
+				.param("endsAt", "21:00"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/events?created"));
+
+		var event = storeEventRepository.findAllForOwner(owner.getEmail()).getFirst();
+		mockMvc.perform(get("/owner/events/{id}/image", event.getId()).with(ownerUser()))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType("image/jpeg"))
+			.andExpect(content().bytes(jpeg.getBytes()));
+		mockMvc.perform(get("/events/{id}/image", event.getId()))
+			.andExpect(status().isNotFound());
+
+		mockMvc.perform(post("/owner/events/{id}/publish", event.getId())
+				.with(ownerUser()).with(csrf()))
+			.andExpect(status().is3xxRedirection());
+		mockMvc.perform(get("/events/{id}/image", event.getId()))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType("image/jpeg"))
+			.andExpect(content().bytes(jpeg.getBytes()));
+
+		mockMvc.perform(post("/owner/events/{id}", event.getId())
+				.with(ownerUser()).with(csrf())
+				.param("storeId", store.getId().toString())
+				.param("title", "Event With Image")
+				.param("description", "An event with a cleared image")
+				.param("removeImage", "true")
+				.param("date", eventDate.toString())
+				.param("startsAt", "16:00")
+				.param("endsAt", "21:00"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/events?saved"));
+		mockMvc.perform(get("/owner/events/{id}/image", event.getId()).with(ownerUser()))
+			.andExpect(status().isNotFound());
 	}
 
 	@Test

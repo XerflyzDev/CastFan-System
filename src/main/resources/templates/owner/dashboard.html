@@ -14,8 +14,6 @@
 <main class="concept-stage">
     <section class="phone" aria-label="Owner dashboard">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${workspace.stores.empty ? 'Owner workspace' : workspace.stores.getFirst().name}">Owner workspace</span></span></header>
-
         <div class="screen-content owner-content">
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/account}" aria-label="Open account" title="Account"><i class="bi bi-person" aria-hidden="true"></i></a></div>
             <header class="owner-heading"><p>Store operations</p><h1>Good day, <span th:text="${workspace.displayName}">Owner</span></h1></header>
@@ -32,7 +30,7 @@
                 <a th:href="@{/owner/shifts}"><span class="rose"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Needs review</small></a>
                 <div><span class="green"><i class="bi bi-calendar-check" aria-hidden="true"></i></span><strong th:text="${workspace.approvedTodayCount}">0</strong><small>Approved today</small></div>
                 <a th:href="@{/owner/events}"><span class="lavender"><i class="bi bi-stars" aria-hidden="true"></i></span><strong th:text="${workspace.upcomingEventCount}">0</strong><small>Upcoming events</small></a>
-                <a th:href="@{/owner/promotions}"><span><i class="bi bi-megaphone" aria-hidden="true"></i></span><strong><i class="bi bi-arrow-right"></i></strong><small>Promotions &amp; banners</small></a>
+                <a th:href="@{/owner/promotions}"><span><i class="bi bi-megaphone" aria-hidden="true"></i></span><strong><i class="bi bi-arrow-right" aria-hidden="true"></i></strong><small>Promotions &amp; banners</small></a>
             </div>
 
             <section class="owner-section" aria-labelledby="pending-heading">
@@ -51,13 +49,7 @@
             <a class="owner-primary" th:href="@{/owner/shifts}"><i class="bi bi-clipboard2-check" aria-hidden="true"></i><span>Review schedule</span></a>
         </div>
 
-        <nav class="floating-nav owner-nav" aria-label="Owner navigation">
-            <a class="nav-button active" th:href="@{/owner}" aria-current="page"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a>
-            <a class="nav-button" th:href="@{/owner/shifts}"><i class="bi bi-calendar3"></i><span>Shifts</span></a>
-            <a class="nav-button" th:href="@{/owner/events}"><i class="bi bi-stars"></i><span>Events</span></a>
-            <a class="nav-button" th:href="@{/owner/promotions}"><i class="bi bi-megaphone"></i><span>Promos</span></a>
-            <a class="nav-button" th:href="@{/account}"><i class="bi bi-person"></i><span>Account</span></a>
-        </nav>
+        <nav th:replace="~{fragments/navigation :: owner('dashboard')}"></nav>
     </section>
 </main>
 <script th:src="@{/js/owner-workspace.js}" defer></script>

@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -61,18 +63,20 @@ class CastContentWorkflowTests {
 	void castCanCreateEditPublishAndArchiveContent() throws Exception {
 		mockMvc.perform(get("/cast/content").with(castUser()))
 			.andExpect(status().isOk()).andExpect(view().name("cast/content"))
-			.andExpect(content().string(containsString("Content library")));
+			.andExpect(content().string(containsString("Share with your fans")))
+			.andExpect(content().string(containsString("Post now")));
 
-		mockMvc.perform(post("/cast/content").with(castUser()).with(csrf())
+		var image = png("content.png");
+		mockMvc.perform(multipart("/cast/content").file(image).with(castUser()).with(csrf())
 				.param("title", "First Update").param("body", "Public content body")
-				.param("imageUrl", "").param("audience", "PUBLIC").param("minimumTierId", ""))
+				.param("audience", "PUBLIC").param("minimumTierId", "").param("intent", "draft"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?created"));
 		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
 		assertThat(post.getStatus()).isEqualTo(ContentStatus.DRAFT);
 
 		mockMvc.perform(post("/cast/content/{id}", post.getId()).with(castUser()).with(csrf())
 				.param("title", "Published Update").param("body", "Public content body")
-				.param("imageUrl", "").param("audience", "PUBLIC").param("minimumTierId", ""))
+				.param("audience", "PUBLIC").param("minimumTierId", ""))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?saved"));
 		mockMvc.perform(post("/cast/content/{id}/publish", post.getId()).with(castUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published=true"));
@@ -81,6 +85,8 @@ class CastContentWorkflowTests {
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()))
 			.andExpect(status().isOk()).andExpect(view().name("public/content-detail"))
 			.andExpect(content().string(containsString("Public content body")));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}/image", castProfileId, post.getId()))
+			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
 
 		mockMvc.perform(post("/cast/content/{id}/archive", post.getId()).with(castUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?archived=true"));
@@ -88,6 +94,18 @@ class CastContentWorkflowTests {
 			.andExpect(content().string(not(containsString("Public content body"))));
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()))
 			.andExpect(status().isNotFound());
+	}
+
+	@Test
+	void castCanPublishSimplePostWithoutHeadline() throws Exception {
+		mockMvc.perform(post("/cast/content").with(castUser()).with(csrf())
+				.param("title", "").param("body", "A quick update for everyone")
+				.param("audience", "PUBLIC").param("minimumTierId", "").param("intent", "publish"))
+			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published"));
+
+		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
+		assertThat(post.getTitle()).isEqualTo("A quick update for everyone");
+		assertThat(post.getStatus()).isEqualTo(ContentStatus.PUBLISHED);
 	}
 
 	@Test
@@ -114,6 +132,19 @@ class CastContentWorkflowTests {
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId())
 				.with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(status().isOk()).andExpect(content().string(containsString("Follower secret")));
+
+		var castViewer = saveAccount("content-cast-viewer-" + System.nanoTime() + "@castfan.test", UserRole.CAST);
+		profileService.createMemberProfile(castViewer);
+		profileService.createCastProfile(
+			castViewer, "Content Viewer " + System.nanoTime(), null, null, true
+		);
+		memberCastService.follow(castViewer.getEmail(), castProfileId);
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId())
+				.with(user(castViewer.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Follower secret")))
+			.andExpect(content().string(containsString("href=\"/cast\"")));
+
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, goldPost.getId())
 				.with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(content().string(containsString("This update is locked")))
@@ -179,5 +210,10 @@ class CastContentWorkflowTests {
 
 	private org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.UserRequestPostProcessor castUser() {
 		return user(castAccount.getEmail()).roles("CAST");
+	}
+
+	private MockMultipartFile png(String name) {
+		return new MockMultipartFile("image", name, "image/png",
+			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1});
 	}
 }

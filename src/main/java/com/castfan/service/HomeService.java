@@ -45,6 +45,9 @@ public class HomeService {
 	private final CastFollowRepository castFollowRepository;
 	private final CastContentRepository castContentRepository;
 	private final ContentAccessService contentAccessService;
+	private final StoreEventImageService storeEventImageService;
+	private final StorePromotionImageService storePromotionImageService;
+	private final CastContentImageService castContentImageService;
 
 	public HomeService(
 		StoreRepository storeRepository,
@@ -55,7 +58,10 @@ public class HomeService {
 		MemberProfileRepository memberProfileRepository,
 		CastFollowRepository castFollowRepository,
 		CastContentRepository castContentRepository,
-		ContentAccessService contentAccessService
+		ContentAccessService contentAccessService,
+		StoreEventImageService storeEventImageService,
+		StorePromotionImageService storePromotionImageService,
+		CastContentImageService castContentImageService
 	) {
 		this.storeRepository = storeRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
@@ -66,6 +72,9 @@ public class HomeService {
 		this.castFollowRepository = castFollowRepository;
 		this.castContentRepository = castContentRepository;
 		this.contentAccessService = contentAccessService;
+		this.storeEventImageService = storeEventImageService;
+		this.storePromotionImageService = storePromotionImageService;
+		this.castContentImageService = castContentImageService;
 	}
 
 	@Transactional(readOnly = true)
@@ -112,7 +121,7 @@ public class HomeService {
 				EVENT_DATE_FORMAT.format(event.getStartsAt().atZone(zone)).toUpperCase(Locale.ENGLISH),
 				formatRange(event.getStartsAt(), event.getEndsAt(), zone),
 				event.getDescription(),
-				event.getImageUrl()
+				storeEventImageService.publicImageUrl(event)
 			))
 			.toList();
 		var promotions = storePromotionRepository.findCurrentPublicPromotions(now, PageRequest.of(0, 3)).stream()
@@ -120,7 +129,7 @@ public class HomeService {
 				var promotionZone = safeZone(promotion.getStore().getTimezone());
 				return new HomeViewModel.FeaturedPromotion(
 					promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
-					promotion.getBannerUrl(), promotion.getStore().getName(),
+					storePromotionImageService.publicUrl(promotion), promotion.getStore().getName(),
 					"Ends " + EVENT_DATE_FORMAT.format(promotion.getEndsAt().atZone(promotionZone))
 				);
 			})
@@ -134,7 +143,7 @@ public class HomeService {
 			return new HomeViewModel.FeedItem(
 				content.getId(), castProfile.getId(), castProfile.getStageName(), initials(castProfile.getStageName()),
 				castProfile.getAvatarUrl(), content.getTitle(), access.accessible() ? preview(content.getBody()) : null,
-				access.accessible() ? content.getImageUrl() : null, contentAccessService.audienceLabel(content),
+				access.accessible() ? castContentImageService.publicUrl(content) : null, contentAccessService.audienceLabel(content),
 				EVENT_DATE_FORMAT.format(content.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
 			);
 		}).toList()).orElseGet(java.util.List::of);
@@ -153,7 +162,8 @@ public class HomeService {
 	private java.util.Optional<com.castfan.entity.MemberProfile> activeMember(String email) {
 		if (email == null) return java.util.Optional.empty();
 		return userAccountRepository.findByEmailIgnoreCase(email)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
+				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));
 	}
 
@@ -162,7 +172,8 @@ public class HomeService {
 			return Set.of();
 		}
 		return userAccountRepository.findByEmailIgnoreCase(email)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
+				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()))
 			.map(profile -> Set.copyOf(castFollowRepository.findFollowedCastProfileIds(profile.getId(), profileIds)))
 			.orElseGet(Set::of);

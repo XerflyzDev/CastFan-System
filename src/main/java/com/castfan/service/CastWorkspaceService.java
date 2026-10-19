@@ -22,6 +22,7 @@ import com.castfan.repository.UserAccountRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CastWorkspaceService {
@@ -118,7 +119,6 @@ public class CastWorkspaceService {
 		var form = new CastProfileForm();
 		form.setStageName(profile.getStageName());
 		form.setBio(profile.getBio());
-		form.setAvatarUrl(profile.getAvatarUrl());
 		form.setDiscoverable(profile.isDiscoverable());
 		return form;
 	}
@@ -157,9 +157,9 @@ public class CastWorkspaceService {
 	}
 
 	@Transactional
-	public void updateProfile(String email, CastProfileForm form) {
+	public void updateProfile(String email, CastProfileForm form, MultipartFile image) {
 		profileService.updateCastProfile(
-			email, form.getStageName(), form.getBio(), form.getAvatarUrl(), form.isDiscoverable()
+			email, form.getStageName(), form.getBio(), form.isDiscoverable(), image, form.isRemoveImage()
 		);
 	}
 

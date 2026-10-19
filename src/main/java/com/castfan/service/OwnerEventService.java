@@ -20,6 +20,7 @@ import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class OwnerEventService {
@@ -31,27 +32,32 @@ public class OwnerEventService {
 	private final UserAccountRepository userAccountRepository;
 	private final StoreRepository storeRepository;
 	private final StoreEventRepository storeEventRepository;
+	private final StoreEventImageService storeEventImageService;
 
 	public OwnerEventService(
 		UserAccountRepository userAccountRepository,
 		StoreRepository storeRepository,
-		StoreEventRepository storeEventRepository
+		StoreEventRepository storeEventRepository,
+		StoreEventImageService storeEventImageService
 	) {
 		this.userAccountRepository = userAccountRepository;
 		this.storeRepository = storeRepository;
 		this.storeEventRepository = storeEventRepository;
+		this.storeEventImageService = storeEventImageService;
 	}
 
 	@Transactional(readOnly = true)
 	public OwnerEventView load(String email, Long editingEventId) {
 		var account = requireOwner(email);
 		var stores = storeRepository.findAllByOwnerIdOrderByNameAsc(account.getId());
+		var events = storeEventRepository.findAllForOwner(email).stream().map(this::toEventItem).toList();
 		return new OwnerEventView(
 			stores.stream().filter(Store::isActive)
 				.map(store -> new OwnerEventView.StoreOption(store.getId(), store.getName(), store.getTimezone()))
 				.toList(),
-			storeEventRepository.findAllForOwner(email).stream().map(this::toEventItem).toList(),
-			editingEventId
+			events,
+			editingEventId,
+			events.stream().filter(event -> event.id().equals(editingEventId)).map(OwnerEventView.EventItem::imageUrl).findFirst().orElse(null)
 		);
 	}
 
@@ -68,7 +74,6 @@ public class OwnerEventService {
 		form.setStoreId(event.getStore().getId());
 		form.setTitle(event.getTitle());
 		form.setDescription(event.getDescription());
-		form.setImageUrl(event.getImageUrl());
 		form.setDate(startsAt.toLocalDate());
 		form.setStartsAt(startsAt.toLocalTime());
 		form.setEndsAt(endsAt.toLocalTime());
@@ -76,24 +81,26 @@ public class OwnerEventService {
 	}
 
 	@Transactional
-	public StoreEvent create(String email, OwnerEventForm form) {
+	public StoreEvent create(String email, OwnerEventForm form, MultipartFile image) {
 		var owner = requireOwner(email);
 		var store = requireOwnedStore(owner.getId(), form.getStoreId());
 		var range = eventRange(form, store);
-		return storeEventRepository.saveAndFlush(new StoreEvent(
+		var event = storeEventRepository.saveAndFlush(new StoreEvent(
 			store,
 			owner,
 			cleanRequired(form.getTitle(), "Title", 160),
 			cleanRequired(form.getDescription(), "Description", 2000),
-			cleanOptional(form.getImageUrl()),
+			null,
 			range.startsAt(),
 			range.endsAt(),
 			EventStatus.DRAFT
 		));
+		storeEventImageService.store(event, image);
+		return event;
 	}
 
 	@Transactional
-	public void update(String email, Long eventId, OwnerEventForm form) {
+	public void update(String email, Long eventId, OwnerEventForm form, MultipartFile image) {
 		var event = requireOwnedEventForUpdate(email, eventId);
 		if (!event.getStore().getId().equals(form.getStoreId())) {
 			throw new DomainRuleViolationException("An event cannot be moved to another store.");
@@ -103,7 +110,7 @@ public class OwnerEventService {
 			event.updateDetails(
 				cleanRequired(form.getTitle(), "Title", 160),
 				cleanRequired(form.getDescription(), "Description", 2000),
-				cleanOptional(form.getImageUrl()),
+				form.isRemoveImage() ? null : event.getImageUrl(),
 				range.startsAt(),
 				range.endsAt()
 			);
@@ -111,6 +118,8 @@ public class OwnerEventService {
 			throw new DomainRuleViolationException(exception.getMessage());
 		}
 		storeEventRepository.saveAndFlush(event);
+		if (form.isRemoveImage()) storeEventImageService.remove(event);
+		storeEventImageService.store(event, image);
 	}
 
 	@Transactional
@@ -143,7 +152,7 @@ public class OwnerEventService {
 		var startsAt = event.getStartsAt().atZone(zone);
 		var endsAt = event.getEndsAt().atZone(zone);
 		return new OwnerEventView.EventItem(
-			event.getId(), event.getTitle(), event.getDescription(), event.getImageUrl(), event.getStore().getName(),
+			event.getId(), event.getTitle(), event.getDescription(), storeEventImageService.ownerImageUrl(event), event.getStore().getName(),
 			DATE.format(startsAt), TIME.format(startsAt) + " - " + TIME.format(endsAt),
 			statusLabel(event.getStatus()), event.getStatus().name().toLowerCase(Locale.ENGLISH),
 			event.getStatus() != EventStatus.ARCHIVED, event.getStatus() == EventStatus.DRAFT,
@@ -191,10 +200,6 @@ public class OwnerEventService {
 		if (clean.isEmpty()) throw new DomainRuleViolationException(field + " is required.");
 		if (clean.length() > maximumLength) throw new DomainRuleViolationException(field + " is too long.");
 		return clean;
-	}
-
-	private String cleanOptional(String value) {
-		return value == null || value.isBlank() ? null : value.trim();
 	}
 
 	private String statusLabel(EventStatus status) {

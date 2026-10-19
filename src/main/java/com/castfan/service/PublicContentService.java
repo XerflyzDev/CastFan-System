@@ -50,6 +50,8 @@ public class PublicContentService {
 	private final StoreEventRepository storeEventRepository;
 	private final CastContentRepository castContentRepository;
 	private final ContentAccessService contentAccessService;
+	private final StoreEventImageService storeEventImageService;
+	private final CastContentImageService castContentImageService;
 
 	public PublicContentService(
 		CastProfileRepository castProfileRepository,
@@ -61,7 +63,9 @@ public class PublicContentService {
 		MemberProfileRepository memberProfileRepository,
 		StoreEventRepository storeEventRepository,
 		CastContentRepository castContentRepository,
-		ContentAccessService contentAccessService
+		ContentAccessService contentAccessService,
+		StoreEventImageService storeEventImageService,
+		CastContentImageService castContentImageService
 	) {
 		this.castProfileRepository = castProfileRepository;
 		this.storeCastRepository = storeCastRepository;
@@ -73,6 +77,8 @@ public class PublicContentService {
 		this.storeEventRepository = storeEventRepository;
 		this.castContentRepository = castContentRepository;
 		this.contentAccessService = contentAccessService;
+		this.storeEventImageService = storeEventImageService;
+		this.castContentImageService = castContentImageService;
 	}
 
 	@Transactional(readOnly = true)
@@ -80,6 +86,22 @@ public class PublicContentService {
 		var profile = castProfileRepository.findById(castProfileId)
 			.filter(value -> value.isDiscoverable() && value.getUserAccount().getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> notFound("Cast profile not found"));
+		return castProfileView(profile, authenticatedEmail);
+	}
+
+	@Transactional(readOnly = true)
+	public PublicCastProfileView ownCastProfile(String authenticatedEmail) {
+		var profile = castProfileRepository.findByUserAccountEmailIgnoreCase(authenticatedEmail)
+			.filter(value -> value.getUserAccount().getStatus() == UserStatus.ACTIVE)
+			.orElseThrow(() -> notFound("Cast profile not found"));
+		return castProfileView(profile, authenticatedEmail);
+	}
+
+	private PublicCastProfileView castProfileView(
+		com.castfan.entity.CastProfile profile,
+		String authenticatedEmail
+	) {
+		var castProfileId = profile.getId();
 		var assignment = storeCastRepository.findAllByCastProfileIdAndActiveTrue(castProfileId).stream()
 			.filter(value -> value.getStore().isActive())
 			.findFirst();
@@ -108,7 +130,7 @@ public class PublicContentService {
 				var access = contentAccessService.access(post, authenticatedEmail);
 				return new PublicCastProfileView.ContentSummary(
 					post.getId(), post.getTitle(), access.accessible() ? post.getBody() : null,
-					access.accessible() ? post.getImageUrl() : null, contentAccessService.audienceLabel(post),
+					access.accessible() ? castContentImageService.publicUrl(post) : null, contentAccessService.audienceLabel(post),
 					SHORT_DATE.format(post.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
 				);
 			}).toList();
@@ -132,7 +154,7 @@ public class PublicContentService {
 		return new PublicContentDetailView(
 			content.getId(), profile.getId(), profile.getStageName(), initials(profile.getStageName()),
 			profile.getAvatarUrl(), content.getTitle(), access.accessible() ? content.getBody() : null,
-			access.accessible() ? content.getImageUrl() : null, contentAccessService.audienceLabel(content),
+			access.accessible() ? castContentImageService.publicUrl(content) : null, contentAccessService.audienceLabel(content),
 			DATE.format(content.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
 		);
 	}
@@ -154,7 +176,7 @@ public class PublicContentService {
 		}, (first, ignored) -> first, java.util.LinkedHashMap::new));
 
 		return new PublicEventView(
-			event.getId(), event.getTitle(), event.getDescription(), event.getImageUrl(),
+			event.getId(), event.getTitle(), event.getDescription(), storeEventImageService.publicImageUrl(event),
 			DATE.format(event.getStartsAt().atZone(zone)), formatRange(event.getStartsAt(), event.getEndsAt(), zone),
 			event.getStore().getName(),
 			event.getStore().getAddress() == null ? event.getStore().getName() : event.getStore().getAddress(),
@@ -186,7 +208,8 @@ public class PublicContentService {
 	private java.util.Optional<com.castfan.entity.MemberProfile> memberProfile(String email) {
 		if (email == null) return java.util.Optional.empty();
 		return userAccountRepository.findByEmailIgnoreCase(email)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
+				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));
 	}
 

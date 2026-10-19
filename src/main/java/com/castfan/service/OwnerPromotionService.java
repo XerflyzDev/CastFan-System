@@ -18,6 +18,7 @@ import com.castfan.repository.UserAccountRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class OwnerPromotionService {
@@ -27,12 +28,14 @@ public class OwnerPromotionService {
 	private final UserAccountRepository userAccountRepository;
 	private final StoreRepository storeRepository;
 	private final StorePromotionRepository storePromotionRepository;
+	private final StorePromotionImageService storePromotionImageService;
 
 	public OwnerPromotionService(UserAccountRepository userAccountRepository, StoreRepository storeRepository,
-		StorePromotionRepository storePromotionRepository) {
+		StorePromotionRepository storePromotionRepository, StorePromotionImageService storePromotionImageService) {
 		this.userAccountRepository = userAccountRepository;
 		this.storeRepository = storeRepository;
 		this.storePromotionRepository = storePromotionRepository;
+		this.storePromotionImageService = storePromotionImageService;
 	}
 
 	@Transactional(readOnly = true)
@@ -44,7 +47,10 @@ public class OwnerPromotionService {
 				.map(store -> new OwnerPromotionView.StoreOption(store.getId(), store.getName(), store.getTimezone()))
 				.toList(),
 			storePromotionRepository.findAllForOwner(email).stream().map(this::toItem).toList(),
-			editingPromotionId
+			editingPromotionId,
+			editingPromotionId == null ? null : storePromotionRepository.findById(editingPromotionId)
+				.filter(value -> value.getStore().getOwner().getId().equals(owner.getId()))
+				.map(storePromotionImageService::ownerUrl).orElse(null)
 		);
 	}
 
@@ -59,7 +65,6 @@ public class OwnerPromotionService {
 		form.setTitle(promotion.getTitle());
 		form.setDescription(promotion.getDescription());
 		form.setCode(promotion.getCode());
-		form.setBannerUrl(promotion.getBannerUrl());
 		form.setStartsOn(startsAt.toLocalDate());
 		form.setStartsAt(startsAt.toLocalTime());
 		form.setEndsOn(endsAt.toLocalDate());
@@ -68,25 +73,27 @@ public class OwnerPromotionService {
 	}
 
 	@Transactional
-	public StorePromotion create(String email, OwnerPromotionForm form) {
+	public StorePromotion create(String email, OwnerPromotionForm form, MultipartFile image) {
 		var owner = requireOwner(email);
 		var store = requireOwnedStore(owner.getId(), form.getStoreId());
 		var code = cleanCode(form.getCode());
 		requireUniqueCode(code, null);
 		var range = range(form, store);
 		try {
-			return storePromotionRepository.saveAndFlush(new StorePromotion(
+			var promotion = storePromotionRepository.saveAndFlush(new StorePromotion(
 				store, owner, cleanRequired(form.getTitle(), "Title", 160),
 				cleanRequired(form.getDescription(), "Description", 2000), code,
-				cleanOptional(form.getBannerUrl()), range.startsAt(), range.endsAt(), false
+				null, range.startsAt(), range.endsAt(), false
 			));
+			storePromotionImageService.store(promotion, image);
+			return promotion;
 		} catch (DataIntegrityViolationException exception) {
 			throw new DomainConflictException("Promotion code is already in use.");
 		}
 	}
 
 	@Transactional
-	public void update(String email, Long promotionId, OwnerPromotionForm form) {
+	public void update(String email, Long promotionId, OwnerPromotionForm form, MultipartFile image) {
 		var promotion = requireOwnedPromotionForUpdate(email, promotionId);
 		if (!promotion.getStore().getId().equals(form.getStoreId())) {
 			throw new DomainRuleViolationException("A promotion cannot be moved to another store.");
@@ -96,9 +103,12 @@ public class OwnerPromotionService {
 		var range = range(form, promotion.getStore());
 		promotion.updateDetails(cleanRequired(form.getTitle(), "Title", 160),
 			cleanRequired(form.getDescription(), "Description", 2000), code,
-			cleanOptional(form.getBannerUrl()), range.startsAt(), range.endsAt());
+			(form.isRemoveImage() || (image != null && !image.isEmpty())) ? null : promotion.getBannerUrl(),
+			range.startsAt(), range.endsAt());
 		try {
 			storePromotionRepository.saveAndFlush(promotion);
+			if (image != null && !image.isEmpty()) storePromotionImageService.store(promotion, image);
+			else if (form.isRemoveImage()) storePromotionImageService.remove(promotion);
 		} catch (DataIntegrityViolationException exception) {
 			throw new DomainConflictException("Promotion code is already in use.");
 		}
@@ -125,7 +135,7 @@ public class OwnerPromotionService {
 			: !now.isBefore(promotion.getEndsAt()) ? "Expired" : "Live";
 		return new OwnerPromotionView.PromotionItem(
 			promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
-			promotion.getBannerUrl(), promotion.getStore().getName(),
+			storePromotionImageService.ownerUrl(promotion), promotion.getStore().getName(),
 			RANGE_FORMAT.format(promotion.getStartsAt().atZone(zone)) + " - "
 				+ RANGE_FORMAT.format(promotion.getEndsAt().atZone(zone)),
 			state, state.toLowerCase(Locale.ENGLISH), true,

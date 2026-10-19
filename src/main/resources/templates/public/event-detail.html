@@ -13,14 +13,12 @@
 <body>
 <main class="concept-stage">
     <section class="phone event-phone" th:attr="aria-label=${event.title + ' event details'}">
-        <header class="status-bar event-status" aria-label="Local time"><strong id="local-time">--:--</strong><span th:text="${event.storeName}">Hoshi Cafe</span></header>
-
         <div class="screen-content event-detail-content">
             <section class="event-detail-hero" th:attr="aria-label=${event.title + ' event image'}">
                 <img th:src="${event.imageUrl != null ? event.imageUrl : '/images/autumn-cafe-event.png'}" th:alt="${event.title}">
                 <div class="detail-actions">
-                    <a th:href="@{/}" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left"></i></a>
-                    <button type="button" data-share-profile th:attr="data-share-title=${event.title + ' on CastFan'}" aria-label="Share event" title="Share"><i class="bi bi-share"></i></button>
+                    <a th:href="@{/}" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+                    <button type="button" data-share-profile th:attr="data-share-title=${event.title + ' on CastFan'}" aria-label="Share event" title="Share"><i class="bi bi-share" aria-hidden="true"></i></button>
                 </div>
                 <span class="event-type">Special event</span>
             </section>
@@ -33,9 +31,9 @@
                 </header>
 
                 <section class="event-facts" aria-label="Event information">
-                    <div><span><i class="bi bi-calendar3"></i></span><p><small>Date</small><strong th:text="${event.dateLabel}">Saturday, 31 October</strong></p></div>
-                    <div><span><i class="bi bi-clock"></i></span><p><small>Time</small><strong th:text="${event.timeLabel}">16:00 - 21:00</strong></p></div>
-                    <div><span><i class="bi bi-geo-alt"></i></span><p><small>Location</small><strong th:text="${event.location}">Hoshi Cafe</strong></p></div>
+                    <div><span><i class="bi bi-calendar3" aria-hidden="true"></i></span><p><small>Date</small><strong th:text="${event.dateLabel}">Saturday, 31 October</strong></p></div>
+                    <div><span><i class="bi bi-clock" aria-hidden="true"></i></span><p><small>Time</small><strong th:text="${event.timeLabel}">16:00 - 21:00</strong></p></div>
+                    <div><span><i class="bi bi-geo-alt" aria-hidden="true"></i></span><p><small>Location</small><strong th:text="${event.location}">Hoshi Cafe</strong></p></div>
                 </section>
 
                 <section class="event-section" aria-labelledby="about-event-title">
@@ -65,15 +63,9 @@
             </div>
         </div>
 
-        <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
-            <a class="nav-button active" th:href="@{/}" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
-            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}"><i class="bi bi-heart"></i><span>Following</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-heart"></i><span>Following</span></a>
-            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/account}"><i class="bi bi-person"></i><span>Profile</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <th:block sec:authorize="isAnonymous()" th:replace="~{fragments/navigation :: anonymous('home')}"></th:block>
+        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('home')}"></th:block>
+        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('home')}"></th:block>
         <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
     </section>
 </main>

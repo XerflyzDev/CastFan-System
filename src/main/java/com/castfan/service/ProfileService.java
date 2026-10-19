@@ -15,24 +15,28 @@ import com.castfan.repository.MemberProfileRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProfileService {
 
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastProfileRepository castProfileRepository;
+	private final AccountAvatarService accountAvatarService;
 
 	public ProfileService(
 		MemberProfileRepository memberProfileRepository,
-		CastProfileRepository castProfileRepository
+		CastProfileRepository castProfileRepository,
+		AccountAvatarService accountAvatarService
 	) {
 		this.memberProfileRepository = memberProfileRepository;
 		this.castProfileRepository = castProfileRepository;
+		this.accountAvatarService = accountAvatarService;
 	}
 
 	@Transactional
 	public MemberProfile createMemberProfile(UserAccount account) {
-		requireEligibleAccount(account, UserRole.MEMBER);
+		requireAudienceAccount(account);
 		if (memberProfileRepository.existsByUserAccountId(account.getId())) {
 			throw new DomainConflictException("This account already has a Member profile.");
 		}
@@ -55,24 +59,21 @@ public class ProfileService {
 		var form = new MemberProfileForm();
 		form.setDisplayName(profile.getUserAccount().getDisplayName());
 		form.setBio(profile.getBio());
-		form.setAvatarUrl(profile.getAvatarUrl());
 		form.setCastUpdateNotifications(profile.isCastUpdateNotifications());
 		form.setEventNotifications(profile.isEventNotifications());
 		return form;
 	}
 
 	@Transactional
-	public MemberProfileView updateMemberProfile(String email, MemberProfileForm form) {
+	public MemberProfileView updateMemberProfile(String email, MemberProfileForm form, MultipartFile image) {
 		var profile = requireMemberProfile(email);
 		var displayName = requireText(form.getDisplayName(), "Display name", 80);
 		var bio = cleanOptionalText(form.getBio(), "Bio", 500);
-		var avatarUrl = cleanOptionalText(form.getAvatarUrl(), "Avatar URL", 2048);
-		if (avatarUrl != null && !avatarUrl.matches("^(?:https?://[^\\s]+|/images/[^\\s]+)$")) {
-			throw new DomainRuleViolationException("Avatar URL must use http, https, or a local /images path.");
-		}
 		profile.getUserAccount().updateDisplayName(displayName);
-		profile.updateDetails(bio, avatarUrl, form.isCastUpdateNotifications(), form.isEventNotifications());
-		return MemberProfileView.from(memberProfileRepository.saveAndFlush(profile));
+		profile.updateDetails(bio, profile.getAvatarUrl(), form.isCastUpdateNotifications(), form.isEventNotifications());
+		var saved = memberProfileRepository.saveAndFlush(profile);
+		updateAvatar(email, image, form.isRemoveImage());
+		return MemberProfileView.from(saved);
 	}
 
 	@Transactional
@@ -115,8 +116,9 @@ public class ProfileService {
 		String email,
 		String stageName,
 		String bio,
-		String avatarUrl,
-		boolean discoverable
+		boolean discoverable,
+		MultipartFile image,
+		boolean removeImage
 	) {
 		var profile = castProfileRepository.findByUserAccountEmailIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast profile not found."));
@@ -132,14 +134,21 @@ public class ProfileService {
 			cleanStageName,
 			stageNameKey,
 			cleanOptionalText(bio, "Bio", 1000),
-			cleanOptionalText(avatarUrl, "Avatar URL", 2048),
+			profile.getAvatarUrl(),
 			discoverable
 		);
 		try {
-			return castProfileRepository.saveAndFlush(profile);
+			var saved = castProfileRepository.saveAndFlush(profile);
+			updateAvatar(email, image, removeImage);
+			return saved;
 		} catch (DataIntegrityViolationException exception) {
 			throw new DomainConflictException("This stage name is already in use.");
 		}
+	}
+
+	private void updateAvatar(String email, MultipartFile image, boolean removeImage) {
+		if (image != null && !image.isEmpty()) accountAvatarService.upload(email, image);
+		else if (removeImage) accountAvatarService.remove(email);
 	}
 
 	private void requireEligibleAccount(UserAccount account, UserRole requiredRole) {
@@ -154,9 +163,22 @@ public class ProfileService {
 		}
 	}
 
+	private void requireAudienceAccount(UserAccount account) {
+		if (account == null || account.getId() == null) {
+			throw new DomainRuleViolationException("A saved account is required.");
+		}
+		if (account.getStatus() != UserStatus.ACTIVE) {
+			throw new DomainRuleViolationException("The account must be active.");
+		}
+		if (account.getRole() != UserRole.MEMBER && account.getRole() != UserRole.CAST) {
+			throw new DomainRuleViolationException("A Member or Cast account is required.");
+		}
+	}
+
 	private MemberProfile requireMemberProfile(String email) {
 		return memberProfileRepository.findByUserAccountEmailIgnoreCase(email)
-			.filter(profile -> profile.getUserAccount().getRole() == UserRole.MEMBER
+			.filter(profile -> (profile.getUserAccount().getRole() == UserRole.MEMBER
+					|| profile.getUserAccount().getRole() == UserRole.CAST)
 				&& profile.getUserAccount().getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
 	}

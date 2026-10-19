@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import com.castfan.dto.CastContentForm;
 import com.castfan.service.CastContentService;
+import com.castfan.service.CastContentImageService;
 import com.castfan.service.DomainRuleViolationException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -22,8 +28,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @PreAuthorize("hasRole('CAST')")
 public class CastContentController {
 	private final CastContentService castContentService;
+	private final CastContentImageService castContentImageService;
 
-	public CastContentController(CastContentService castContentService) { this.castContentService = castContentService; }
+	public CastContentController(CastContentService castContentService, CastContentImageService castContentImageService) {
+		this.castContentService = castContentService;
+		this.castContentImageService = castContentImageService;
+	}
 
 	@GetMapping("/cast/content")
 	public String content(Principal principal, Model model) {
@@ -45,14 +55,25 @@ public class CastContentController {
 
 	@PostMapping("/cast/content")
 	public String create(Principal principal, @Valid @ModelAttribute("form") CastContentForm form,
-		BindingResult bindingResult, Model model) {
-		return save(principal, null, form, bindingResult, model);
+		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image,
+		@RequestParam(name = "intent", defaultValue = "publish") String intent, Model model) {
+		return save(principal, null, form, bindingResult, image, intent, model);
 	}
 
 	@PostMapping("/cast/content/{contentId}")
 	public String update(Principal principal, @PathVariable Long contentId,
-		@Valid @ModelAttribute("form") CastContentForm form, BindingResult bindingResult, Model model) {
-		return save(principal, contentId, form, bindingResult, model);
+		@Valid @ModelAttribute("form") CastContentForm form, BindingResult bindingResult,
+		@RequestParam(name = "image", required = false) MultipartFile image,
+		@RequestParam(name = "intent", defaultValue = "save") String intent, Model model) {
+		return save(principal, contentId, form, bindingResult, image, intent, model);
+	}
+
+	@GetMapping("/cast/content/{contentId}/image")
+	public ResponseEntity<byte[]> image(Principal principal, @PathVariable Long contentId) {
+		return castContentImageService.loadOwned(principal.getName(), contentId)
+			.map(image -> ResponseEntity.ok().cacheControl(CacheControl.noCache())
+				.contentType(MediaType.parseMediaType(image.contentType())).body(image.imageData()))
+			.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/cast/content/{contentId}/publish")
@@ -66,12 +87,18 @@ public class CastContentController {
 	}
 
 	private String save(Principal principal, Long contentId, CastContentForm form,
-		BindingResult bindingResult, Model model) {
+		BindingResult bindingResult, MultipartFile image, String intent, Model model) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				if (contentId == null) castContentService.create(principal.getName(), form);
-				else castContentService.update(principal.getName(), contentId, form);
-				return "redirect:/cast/content?" + (contentId == null ? "created" : "saved");
+				var publish = "publish".equals(intent);
+				if (contentId == null) {
+					if (publish) castContentService.createAndPublish(principal.getName(), form, image);
+					else castContentService.create(principal.getName(), form, image);
+				} else {
+					castContentService.update(principal.getName(), contentId, form, image);
+					if (publish) castContentService.publish(principal.getName(), contentId);
+				}
+				return "redirect:/cast/content?" + (publish ? "published" : contentId == null ? "created" : "saved");
 			} catch (DomainRuleViolationException exception) {
 				bindingResult.reject("content.invalid", exception.getMessage());
 			}

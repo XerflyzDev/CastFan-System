@@ -14,7 +14,6 @@
 <main class="concept-stage">
     <section class="phone" aria-label="Cast membership tiers">
         <div class="ambient-top" aria-hidden="true"></div>
-        <header class="status-bar" aria-label="Local time"><strong id="local-time">--:--</strong><span class="store-status"><i class="bi bi-stars" aria-hidden="true"></i>Memberships</span></header>
         <div class="screen-content cast-content">
             <div class="top-actions"><a class="wordmark" th:href="@{/cast}">CastFan</a><a class="round-button" th:href="@{/cast}" aria-label="Back to dashboard" title="Dashboard"><i class="bi bi-grid" aria-hidden="true"></i></a></div>
             <header class="cast-heading"><p>Member access</p><h1>Your tiers</h1></header>
@@ -46,14 +45,10 @@
             </section>
         </div>
 
-        <nav class="floating-nav" aria-label="Cast navigation">
-            <a class="nav-button" th:href="@{/cast}"><i class="bi bi-grid"></i><span>Dashboard</span></a>
-            <a class="nav-button" th:href="@{/cast/schedule}"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button active" th:href="@{/cast/tiers}" aria-current="page"><i class="bi bi-stars"></i><span>Tiers</span></a>
-            <a class="nav-button" th:href="@{/cast/profile}"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <nav th:replace="~{fragments/navigation :: cast('cast')}"></nav>
     </section>
 </main>
 <script th:src="@{/js/cast-workspace.js}" defer></script>
+<script th:src="@{/js/confirmation-dialog.js}" defer></script>
 </body>
 </html>

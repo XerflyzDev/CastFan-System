@@ -14,11 +14,6 @@
     <section class="phone" aria-label="CastFan Member Home">
         <div class="ambient-top" aria-hidden="true"></div>
 
-        <header class="status-bar" aria-label="Local time">
-            <strong id="local-time">--:--</strong>
-            <span class="store-status"><i class="bi bi-shop" aria-hidden="true"></i><span th:text="${home.storeName}">Hoshi Cafe</span></span>
-        </header>
-
         <div class="screen-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
@@ -55,7 +50,7 @@
             <section class="content-block featured-event" aria-labelledby="event-title">
                 <div class="section-title">
                     <h2 id="event-title">Featured Event</h2>
-                    <button type="button" data-message="Showing upcoming events" aria-label="See upcoming events" title="See upcoming events"><i class="bi bi-arrow-right"></i></button>
+                    <button type="button" data-message="Showing upcoming events" aria-label="See upcoming events" title="See upcoming events"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                 </div>
 
                 <div class="event-carousel" data-event-carousel th:if="${!home.featuredEvents.empty}">
@@ -83,8 +78,8 @@
             <section class="content-block working-today" aria-labelledby="working-title">
                 <div class="section-title">
                     <h2 id="working-title">Working Today</h2>
-                    <a sec:authorize="hasRole('MEMBER')" th:href="@{/member/casts}" aria-label="See all Cast" title="See all Cast"><i class="bi bi-arrow-right"></i></a>
-                    <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Cast" title="Sign in"><i class="bi bi-arrow-right"></i></a>
+                    <a sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/casts}" aria-label="See all Cast" title="See all Cast"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                    <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Cast" title="Sign in"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 </div>
                 <div class="cast-carousel" id="working-cast-list" th:if="${!home.workingToday.empty}">
                     <a class="cast-card" th:each="cast : ${home.workingToday}" th:href="@{/casts/{id}(id=${cast.id})}"
@@ -105,17 +100,17 @@
                 <p class="search-empty" id="working-search-empty" hidden>No Cast match your search.</p>
             </section>
 
-            <section class="content-block following-updates" sec:authorize="hasRole('MEMBER')" aria-labelledby="updates-title">
-                <div class="section-title"><h2 id="updates-title">Following updates</h2><a th:href="@{/member/following}" aria-label="Open Following"><i class="bi bi-arrow-right"></i></a></div>
+            <section class="content-block following-updates" sec:authorize="hasAnyRole('MEMBER','CAST')" aria-labelledby="updates-title">
+                <div class="section-title"><h2 id="updates-title">Following updates</h2><a th:href="@{/member/following}" aria-label="Open Following"><i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
                 <div class="home-content-feed" th:if="${!home.followingContent.empty}">
                     <a class="home-content-card" th:each="post : ${home.followingContent}" th:href="@{/casts/{castId}/content/{contentId}(castId=${post.castProfileId},contentId=${post.id})}" th:classappend="${!post.accessible} ? ' locked'" th:attr="data-search-item=${post.castName + ' ' + post.title}">
                         <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" th:alt="${post.title}">
                         <span class="feed-avatar" th:if="${post.imageUrl == null and post.castAvatarUrl == null}" th:text="${post.castInitials}">MN</span>
                         <img class="feed-avatar" th:if="${post.imageUrl == null and post.castAvatarUrl != null}" th:src="${post.castAvatarUrl}" th:alt="${post.castName}">
-                        <span class="feed-copy"><span><strong th:text="${post.castName}">Mina</strong><small th:text="${post.publishedLabel}">14 Oct</small></span><b th:text="${post.title}">Update title</b><em th:if="${post.accessible}" th:text="${post.bodyPreview}">Preview</em><em th:unless="${post.accessible}"><i class="bi bi-lock"></i> <span th:text="${post.audience}">Members</span></em></span>
+                        <span class="feed-copy"><span><strong th:text="${post.castName}">Mina</strong><small th:text="${post.publishedLabel}">14 Oct</small></span><b th:text="${post.title}">Update title</b><em th:if="${post.accessible}" th:text="${post.bodyPreview}">Preview</em><em th:unless="${post.accessible}"><i class="bi bi-lock" aria-hidden="true"></i> <span th:text="${post.audience}">Members</span></em></span>
                     </a>
                 </div>
-                <div class="home-empty" th:if="${home.followingContent.empty}"><i class="bi bi-heart"></i><div><strong>No following updates</strong><span>Follow Cast to see their latest posts here.</span></div></div>
+                <div class="home-empty" th:if="${home.followingContent.empty}"><i class="bi bi-heart" aria-hidden="true"></i><div><strong>No following updates</strong><span>Follow Cast to see their latest posts here.</span></div></div>
             </section>
 
             <section class="current-shift" th:if="${!home.workingToday.empty}" aria-labelledby="current-shift-title">
@@ -125,8 +120,8 @@
                     <span th:text="${home.workingToday[0].shiftTime}">14:00 - 20:00</span>
                 </div>
                 <span class="live-badge" th:text="${home.workingToday[0].workingNow ? 'Now' : 'Today'}">Today</span>
-                <a class="card-arrow" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}" aria-label="Open today's schedule" title="Open today's schedule"><i class="bi bi-arrow-right"></i></a>
-                <a class="card-arrow" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open today's schedule" title="Sign in"><i class="bi bi-arrow-right"></i></a>
+                <a class="card-arrow" sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/schedule}" aria-label="Open today's schedule" title="Open today's schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <a class="card-arrow" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open today's schedule" title="Sign in"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
             </section>
 
             <section class="quick-stats" aria-label="Today overview">
@@ -145,15 +140,10 @@
             </section>
         </div>
 
-        <nav class="floating-nav" sec:authorize="isAnonymous() or hasRole('MEMBER')" aria-label="Member navigation">
-            <a class="nav-button active" th:href="@{/}" aria-label="Home" title="Home" aria-current="page"><i class="bi bi-house-fill"></i><span>Home</span></a>
-            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/schedule}" aria-label="Schedule" title="Schedule"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Schedule" title="Sign in"><i class="bi bi-calendar3"></i><span>Schedule</span></a>
-            <a class="nav-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}" aria-label="Following" title="Following"><i class="bi bi-heart"></i><span>Following</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Following" title="Sign in"><i class="bi bi-heart"></i><span>Following</span></a>
-            <a class="nav-button" sec:authorize="isAuthenticated()" th:href="@{/account}" aria-label="Profile" title="Profile"><i class="bi bi-person"></i><span>Profile</span></a>
-            <a class="nav-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in" title="Sign in"><i class="bi bi-person"></i><span>Profile</span></a>
-        </nav>
+        <th:block sec:authorize="isAnonymous()" th:replace="~{fragments/navigation :: anonymous('home')}"></th:block>
+        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('home')}"></th:block>
+        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('home')}"></th:block>
+        <th:block sec:authorize="hasRole('OWNER')" th:replace="~{fragments/navigation :: owner('')}"></th:block>
 
         <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
     </section>

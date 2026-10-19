@@ -5,7 +5,8 @@ import java.util.List;
 public record OwnerEventView(
 	List<StoreOption> stores,
 	List<EventItem> events,
-	Long editingEventId
+	Long editingEventId,
+	String editingImageUrl
 ) {
 
 	public record StoreOption(Long id, String name, String timezone) {

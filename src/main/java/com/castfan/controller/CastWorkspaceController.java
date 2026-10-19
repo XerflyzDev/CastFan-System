@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -88,6 +90,7 @@ public class CastWorkspaceController {
 		if (!model.containsAttribute("form")) {
 			model.addAttribute("form", castWorkspaceService.profileForm(principal.getName()));
 		}
+		model.addAttribute("profileEditorOpen", false);
 		model.addAttribute("workspace", castWorkspaceService.load(principal.getName(), 3));
 		return "cast/profile";
 	}
@@ -97,16 +100,18 @@ public class CastWorkspaceController {
 		Principal principal,
 		@Valid @ModelAttribute("form") CastProfileForm form,
 		BindingResult bindingResult,
+		@RequestParam(name = "image", required = false) MultipartFile image,
 		Model model
 	) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				castWorkspaceService.updateProfile(principal.getName(), form);
+				castWorkspaceService.updateProfile(principal.getName(), form, image);
 				return "redirect:/cast/profile?saved";
 			} catch (DomainConflictException | DomainRuleViolationException exception) {
 				bindingResult.reject("profile.invalid", exception.getMessage());
 			}
 		}
+		model.addAttribute("profileEditorOpen", true);
 		model.addAttribute("workspace", castWorkspaceService.load(principal.getName(), 3));
 		return "cast/profile";
 	}

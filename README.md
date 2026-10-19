@@ -12,7 +12,7 @@ English is the primary language for the user interface, system messages, documen
 
 > **Cloud Run health checks and production readiness**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, avatar, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast can manage their public profile, submit or cancel shifts, manage membership tiers, and publish audience-controlled content. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, publish events, and schedule promotion banners through ownership-protected routes. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, profile photo, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast accounts share Home and the approved Schedule, have direct navigation to their own Member-facing Cast Profile, use Profile for editing that identity, and have a fifth Cast destination for their private workspace. Cast can upload content images, submit or cancel shifts, manage membership tiers, and publish audience-controlled content through a streamlined social composer with direct publishing, optional headlines, audience selection, and draft support. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, upload event and promotion images, publish events, and schedule promotion banners through ownership-protected routes. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB instead of image links. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
 
 ## Objectives
 
@@ -35,6 +35,8 @@ The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MyS
 
 ### Cast
 
+- Use Home and approved Schedule like a Member, with direct Cast Profile, Profile settings, and Cast workspace destinations.
+- Preview their own Member-facing Cast profile.
 - Manage their profile.
 - Submit and update work schedules.
 - Create membership tiers for followers.
@@ -103,6 +105,7 @@ Public registration always creates a `MEMBER`. Privileged `CAST` and `OWNER` acc
 Implemented and planned entities:
 
 - `UserAccount`
+- `AccountAvatar`
 - `MemberProfile`
 - `CastProfile`
 - `Store`
@@ -156,7 +159,7 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Implement the Cast profile, shift submission, cancellation, and membership tier workflow.
 - [x] Implement Cast content publishing and tier-based visibility.
 - [x] Implement the Owner Dashboard, daily schedule, and shift approval workflow.
-- [x] Implement Owner Event Management with draft, publish, and archive states.
+- [x] Implement Owner Event Management with image uploads and draft, publish, and archive states.
 - [x] Implement Owner Store Management and permanent Cast roster controls.
 - [x] Implement Owner Promotion and Banner Management with scheduled public visibility.
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.

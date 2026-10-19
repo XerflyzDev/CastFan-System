@@ -4,16 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.castfan.dto.AccountView;
+import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
+import com.castfan.repository.AccountAvatarRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.UserAccountRepository;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.mock.web.MockMultipartFile;
 
 @SpringBootTest(properties = "spring.profiles.active=test")
 @AutoConfigureMockMvc
@@ -36,6 +41,9 @@ class AuthFlowTests {
 	private UserAccountRepository userAccountRepository;
 
 	@Autowired
+	private AccountAvatarRepository accountAvatarRepository;
+
+	@Autowired
 	private MemberProfileRepository memberProfileRepository;
 
 	@Autowired
@@ -43,6 +51,7 @@ class AuthFlowTests {
 
 	@BeforeEach
 	void clearAccounts() {
+		accountAvatarRepository.deleteAll();
 		memberProfileRepository.deleteAll();
 		userAccountRepository.deleteAll();
 	}
@@ -126,6 +135,105 @@ class AuthFlowTests {
 		mockMvc.perform(get("/account"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"));
+	}
+
+	@Test
+	void ownerSignsInToThePublicHomePage() throws Exception {
+		userAccountRepository.saveAndFlush(new UserAccount(
+			"owner-sign-in@castfan.test",
+			passwordEncoder.encode("secure-owner-pass-123"),
+			"Hoshi Owner",
+			UserRole.OWNER,
+			UserStatus.ACTIVE
+		));
+
+		HttpSession session = mockMvc.perform(post("/login")
+				.with(csrf())
+				.param("email", "owner-sign-in@castfan.test")
+				.param("password", "secure-owner-pass-123"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/"))
+			.andReturn()
+			.getRequest()
+			.getSession(false);
+
+		assertThat(session).isNotNull();
+		mockMvc.perform(get("/account").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Owner navigation")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Member navigation"))))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("/owner/promotions")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Edit name")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Change photo")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Crop photo")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Save photo")));
+
+		mockMvc.perform(post("/account/name").with(csrf())
+				.session((org.springframework.mock.web.MockHttpSession) session)
+				.param("displayName", "Hoshi Cafe Owner"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/account?nameSaved"));
+		assertThat(userAccountRepository.findByEmailIgnoreCase("owner-sign-in@castfan.test").orElseThrow().getDisplayName())
+			.isEqualTo("Hoshi Cafe Owner");
+
+		mockMvc.perform(post("/account/name").with(csrf())
+				.session((org.springframework.mock.web.MockHttpSession) session)
+				.param("displayName", " "))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/account"))
+			.andExpect(flash().attribute("nameError", "Name must contain at least 2 characters."));
+
+		var png = new MockMultipartFile(
+			"avatar", "owner.png", "image/png",
+			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}
+		);
+		mockMvc.perform(multipart("/account/avatar").file(png).with(csrf())
+				.session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/account?photoSaved"));
+
+		mockMvc.perform(get("/account/avatar").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType("image/png"))
+			.andExpect(content().bytes(png.getBytes()));
+
+		var invalid = new MockMultipartFile("avatar", "notes.txt", "text/plain", "not an image".getBytes());
+		mockMvc.perform(multipart("/account/avatar").file(invalid).with(csrf())
+				.session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/account"));
+
+		mockMvc.perform(get("/account/avatar").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType("image/png"))
+			.andExpect(content().bytes(png.getBytes()));
+	}
+
+	@Test
+	void castSignsInToTheCastDashboard() throws Exception {
+		userAccountRepository.saveAndFlush(new UserAccount(
+			"cast-sign-in@castfan.test",
+			passwordEncoder.encode("secure-cast-pass-123"),
+			"Mina Cast",
+			UserRole.CAST,
+			UserStatus.ACTIVE
+		));
+
+		HttpSession session = mockMvc.perform(post("/login")
+				.with(csrf())
+				.param("email", "cast-sign-in@castfan.test")
+				.param("password", "secure-cast-pass-123"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/cast"))
+			.andReturn()
+			.getRequest()
+			.getSession(false);
+
+		assertThat(session).isNotNull();
+		mockMvc.perform(get("/account").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/cast/profile"));
 	}
 
 	@Test

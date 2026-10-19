@@ -1,6 +1,8 @@
 package com.castfan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -95,8 +97,11 @@ class OwnerWorkspaceWorkflowTests {
 				.with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/shifts"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Review queue")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("14:00 - 20:00")));
+			.andExpect(content().string(containsString("Review queue")))
+			.andExpect(content().string(containsString("14:00 - 20:00")))
+			.andExpect(content().string(containsString("data-picker-date")))
+			.andExpect(content().string(containsString("date-time-picker.js")))
+			.andExpect(content().string(not(containsString("aria-label=\"Local time\""))));
 	}
 
 	@Test

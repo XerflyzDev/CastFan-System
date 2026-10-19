@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.MemberProfile;
@@ -82,14 +84,14 @@ class MemberCastWorkflowTests {
 	}
 
 	@Test
-	void nonMemberAndUnavailableCastAreRejected() {
+	void nonAudienceAccountAndUnavailableCastAreRejected() {
 		var member = createMember("restricted-member@castfan.test");
-		var castAccount = saveAccount("actor-cast@castfan.test", UserRole.CAST);
+		var ownerAccount = saveAccount("actor-owner@castfan.test", UserRole.OWNER);
 		var hiddenCast = createCast("private-cast@castfan.test", "Private Cast", false);
 
 		assertThatThrownBy(() -> memberCastService.follow(member.getUserAccount().getEmail(), hiddenCast.getId()))
 			.isInstanceOf(DomainRuleViolationException.class);
-		assertThatThrownBy(() -> memberCastService.discover(castAccount.getEmail(), PageRequest.of(0, 12)))
+		assertThatThrownBy(() -> memberCastService.discover(ownerAccount.getEmail(), PageRequest.of(0, 12)))
 			.isInstanceOf(DomainRuleViolationException.class);
 	}
 
@@ -97,16 +99,32 @@ class MemberCastWorkflowTests {
 	void memberEndpointsEnforceRoleAndCsrf() throws Exception {
 		var member = createMember("web-member@castfan.test");
 		var cast = createCast("web-cast@castfan.test", "Web Cast", true);
+		profileService.createMemberProfile(cast.getUserAccount());
 		var memberRequest = user(member.getUserAccount().getEmail()).roles("MEMBER");
+		var castRequest = user(cast.getUserAccount().getEmail()).roles("CAST");
 
 		mockMvc.perform(get("/member/casts"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"));
-		mockMvc.perform(get("/member/casts").with(user("cast@castfan.test").roles("CAST")))
-			.andExpect(status().isForbidden());
+		mockMvc.perform(get("/member/casts").with(castRequest))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/casts"));
+		mockMvc.perform(get("/casts/{id}", cast.getId()).with(castRequest))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("href=\"/cast\"")))
+			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
+			.andExpect(content().string(matchesPattern(
+				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
+					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+			)));
 		mockMvc.perform(get("/member/casts").with(memberRequest))
 			.andExpect(status().isOk())
 			.andExpect(view().name("member/casts"));
+		mockMvc.perform(get("/casts/{id}", cast.getId()).with(memberRequest))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("/cast/content#composer"))));
 
 		mockMvc.perform(post("/member/casts/{id}/follow", cast.getId()).with(memberRequest))
 			.andExpect(status().isForbidden());

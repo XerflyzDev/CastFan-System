@@ -1,5 +1,4 @@
 const toast = document.querySelector("#app-toast");
-const localTime = document.querySelector("#local-time");
 const search = document.querySelector("#following-search");
 const cards = [...document.querySelectorAll("[data-following-card]")];
 const emptyState = document.querySelector("[data-following-empty]");
@@ -11,16 +10,6 @@ function showMessage(message) {
     toast.classList.add("visible");
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
-}
-
-function updateLocalTime() {
-    if (!localTime) return;
-    localTime.textContent = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Asia/Bangkok",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-    }).format(new Date());
 }
 
 function filterCards() {
@@ -46,5 +35,3 @@ document.querySelector("[data-clear-following-search]")?.addEventListener("click
 });
 
 search?.addEventListener("input", filterCards);
-updateLocalTime();
-window.setInterval(updateLocalTime, 30_000);

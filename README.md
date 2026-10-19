@@ -2,7 +2,17 @@
 
 CastFan System is a web application for managing a maid cafe or concept cafe. It connects store owners (`Owner`), staff members (`Cast`), and customers (`Member`) in one system.
 
-This project is being built from scratch for the **Web Application Development** course. It uses Spring Boot, Spring Data JPA, and H2/MySQL as required by the course.
+This project is being built from scratch for three courses: **Web Application Development**, **Software Requirements Analysis and Specification**, and **Database Systems**. It combines requirements engineering, relational database design, and a database-backed Spring Boot web application.
+
+## Project Members
+
+| Student ID | Name |
+| :---: | --- |
+| 6831503057 | Parinya Tanunti |
+| 6831503053 | Nonnaphat Thirawatthanakamchon |
+| 6831503035 | Kunpriya Anwisat |
+| 6831503082 | Areenee Hayiuma |
+| 6831503118 | Sirimanee Jakip |
 
 ## Project Language
 
@@ -122,6 +132,13 @@ Entity details, relationships, constraints, and implementation order are documen
 
 The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
 
+Pushes to `main` are prepared to run the full H2/MySQL test suite and deploy an immutable image to Cloud Run through keyless GitHub Actions Workload Identity Federation. The workflow is stored at [`.github/workflows/google-cloud-deploy.yml`](.github/workflows/google-cloud-deploy.yml).
+
+An optional Cloudflare Worker edge gateway is prepared under `cloudflare/`.
+It proxies to the existing Cloud Run service without moving Spring Boot or
+Cloud SQL. Setup, validation, security boundaries, and rollback are documented
+in [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md).
+
 The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
 
 The production schema migration workflow is documented in [docs/database-migrations.md](docs/database-migrations.md).
@@ -170,7 +187,7 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Store production credentials in Google Cloud Secret Manager.
 - [ ] Add validation, error handling, and broader automated tests.
 - [ ] Complete security and responsive UI reviews.
-- [ ] Prepare deployment and the project demonstration.
+- [ ] Complete production-readiness gates and prepare the project demonstration.
 
 ## Security Requirements
 
@@ -232,4 +249,10 @@ Production will run on Google Cloud Run and connect to Cloud SQL for MySQL. Cred
 
 ## Academic Context
 
-This project is developed for the **Web Application Development** course. It demonstrates Spring Boot, Spring Data JPA, database connectivity, and interface design with Bootstrap and custom CSS.
+This project is developed for three courses:
+
+- **Web Application Development** — Spring Boot, Spring MVC, Thymeleaf, Spring Data JPA, responsive interface design, security, testing, and deployment.
+- **Software Requirements Analysis and Specification** — stakeholder analysis, system scope, functional and non-functional requirements, use cases, acceptance criteria, and requirements traceability.
+- **Database Systems** — relational data modeling, keys and constraints, normalization, SQL database integration, schema migration, and data integrity.
+
+The supplied Web Application Development grading and submission criteria are recorded in [docs/web-application-development-grading.md](docs/web-application-development-grading.md).

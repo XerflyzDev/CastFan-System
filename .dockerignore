@@ -8,4 +8,5 @@ node_modules
 target
 *.iml
 *.log
+gha-creds-*.json
 README.md

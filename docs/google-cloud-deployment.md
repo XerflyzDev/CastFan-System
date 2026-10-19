@@ -9,7 +9,7 @@ CastFan will use the following production services:
 | Spring Boot hosting | Cloud Run |
 | Production database | Cloud SQL for MySQL |
 | Database credentials | Secret Manager |
-| Source build | Cloud Build |
+| Continuous integration and deployment | GitHub Actions with Workload Identity Federation |
 | Container storage | Artifact Registry |
 | Logs and runtime metrics | Cloud Logging and Cloud Monitoring |
 
@@ -64,11 +64,23 @@ Never commit service-account keys, database passwords, `.env` files, or producti
 | Database | `castfan` |
 | Artifact Registry repository | `castfan-images` |
 | Runtime service account | `castfan-runtime@castfan-system.iam.gserviceaccount.com` |
+| GitHub deployer service account | `castfan-deployer@castfan-system.iam.gserviceaccount.com` |
+| Workload Identity provider | `projects/473125501009/locations/global/workloadIdentityPools/github-actions/providers/castfan-github` |
 | Cloud Run service | `https://castfan-473125501009.asia-southeast1.run.app` |
 
 The initial non-production Cloud Run deployment completed on 15 October 2026. It runs revision `castfan-00002-zbc` with zero minimum instances, a maximum of two instances, and Cloud SQL/Secret Manager access through the dedicated runtime service account.
 
 The current Cloud SQL instance is a 30-day free trial intended for development and demonstration. It does not support backups and stops serving requests when the trial ends unless it is upgraded. Export or upgrade the database before the trial counter expires.
+
+## GitHub Actions Deployment
+
+The workflow at [`.github/workflows/google-cloud-deploy.yml`](../.github/workflows/google-cloud-deploy.yml) runs the H2 and opt-in MySQL migration tests for pull requests and pushes to `main`. After tests pass on `main`, it builds the Docker image, pushes the commit-SHA tag to Artifact Registry, deploys the immutable digest to Cloud Run, and verifies `/actuator/health`.
+
+GitHub authenticates with Google Cloud through Workload Identity Federation. No service-account JSON key or GitHub secret is required. The OIDC provider accepts only `XerflyzDev/CastFan-System` workflows running from `refs/heads/main`. The deployer can write images and administer Cloud Run, and it may act as the dedicated runtime service account. It does not receive direct access to the database secrets.
+
+Cloud Run keeps zero minimum instances and at most two instances. The workflow updates only the image and explicitly preserves the approved runtime service account and scaling bounds; the existing environment variables, numbered Secret Manager references, Cloud SQL configuration, and health probes remain attached to the service.
+
+Manual runs must also target `main`; authentication for other branches is intentionally rejected by the provider condition.
 
 The production JDBC URL uses the Cloud SQL Java Connector. It authenticates with the runtime service account and does not contain a database password:
 
@@ -85,6 +97,8 @@ Build and test locally before publishing the image:
 docker build -t asia-southeast1-docker.pkg.dev/castfan-system/castfan-images/castfan-app:latest .
 docker push asia-southeast1-docker.pkg.dev/castfan-system/castfan-images/castfan-app:latest
 ```
+
+This manual procedure is retained for recovery. Normal releases should use the GitHub Actions workflow so tests, immutable digests, and the post-deployment health check cannot be skipped.
 
 ## Deployment Command
 
@@ -129,3 +143,4 @@ See [security-review.md](security-review.md) for the current control inventory a
 - [Deploy services from source code](https://cloud.google.com/run/docs/deploying-source-code)
 - [Connect from Cloud Run to Cloud SQL for MySQL](https://cloud.google.com/sql/docs/mysql/connect-run)
 - [Configure secrets for Cloud Run services](https://cloud.google.com/run/docs/configuring/services/secrets)
+- [Workload Identity Federation with deployment pipelines](https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines)

@@ -36,12 +36,20 @@ The experience should reduce schedule coordination errors while strengthening th
 
 ## Academic Requirements
 
-This project is assessed for the Web Application Development course and must demonstrate:
+This project is developed and assessed across three courses:
+
+- Web Application Development
+- Software Requirements Analysis and Specification
+- Database Systems
+
+Together, these courses require the project to demonstrate:
 
 - Spring Boot as the primary backend framework.
 - Spring Data JPA as the real persistence layer.
 - Embedded H2 for local development and automated tests.
 - MySQL through Google Cloud SQL for the deployed environment.
+- Traceable stakeholder, functional, non-functional, and system requirements.
+- A documented relational data model with appropriate keys, constraints, relationships, and migrations.
 - A clear Controller, Service, Repository, Entity, DTO/form, configuration, and security structure.
 - A polished responsive interface using custom CSS and Bootstrap where appropriate.
 - Real database-backed workflows rather than static-only prototypes.
@@ -131,6 +139,7 @@ This project is assessed for the Web Application Development course and must dem
 | Local/test database | Embedded H2 |
 | Deployed database | Cloud SQL for MySQL 8.4 |
 | Hosting | Google Cloud Run |
+| Optional edge | Cloudflare Worker |
 | Secrets | Google Secret Manager |
 | Container registry | Artifact Registry |
 | Build | Maven Wrapper, Docker |
@@ -140,6 +149,9 @@ Runtime flow:
 
 ```text
 Mobile/Desktop Browser
+        |
+        v
+Optional Cloudflare Worker edge
         |
         v
 Google Cloud Run
@@ -215,6 +227,7 @@ Remaining security work is tracked in [`docs/security-review.md`](docs/security-
 | Database | `castfan` |
 | Artifact Registry | `castfan-images` |
 | Runtime service account | `castfan-runtime@castfan-system.iam.gserviceaccount.com` |
+| Deployment automation | GitHub Actions with keyless Workload Identity Federation |
 
 The Cloud SQL instance is currently a 30-day free-trial resource intended for development and demonstration. It has no backup support and must be exported or upgraded before its trial counter expires. Deployment details are maintained in [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md).
 
@@ -243,9 +256,11 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 
 - [`README.md`](README.md): setup, current status, and development roadmap.
 - [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md): recovered historical requirements synthesis.
+- [`docs/web-application-development-grading.md`](docs/web-application-development-grading.md): Web Application Development grading and submission criteria supplied by the course.
 - [`docs/database-design.md`](docs/database-design.md): authoritative data model and business constraints.
 - [`docs/database-migrations.md`](docs/database-migrations.md): Flyway and MySQL verification workflow.
 - [`docs/ui-design-system.md`](docs/ui-design-system.md): authoritative visual and interaction rules.
 - [`docs/security-review.md`](docs/security-review.md): security controls and remaining risks.
 - [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): Cloud resources and deployment procedure.
+- [`docs/cloudflare-deployment.md`](docs/cloudflare-deployment.md): optional Cloudflare edge preparation and rollout safeguards.
 

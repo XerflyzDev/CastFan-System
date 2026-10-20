@@ -8,44 +8,56 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/app.css}" rel="stylesheet">
+    <script th:src="@{/js/auth.js}" defer></script>
 </head>
 <body class="auth-page">
-<main class="auth-layout">
-    <a class="brand auth-brand" th:href="@{/}" aria-label="CastFan home">
-        <span class="brand-mark" aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
-        <span>CastFan</span>
-    </a>
+<main class="auth-layout auth-layout-login">
+    <div class="auth-atmosphere" aria-hidden="true"></div>
+    <header class="auth-topbar auth-topbar-centered">
+        <a class="auth-wordmark" th:href="@{/}" aria-label="CastFan home">CastFan</a>
+    </header>
 
-    <section class="auth-panel" aria-labelledby="login-heading">
-        <div class="auth-heading">
-            <p class="eyebrow">Welcome back</p>
-            <h1 id="login-heading">Sign in</h1>
-            <p>Continue to your CastFan account.</p>
+    <section class="auth-panel auth-login-panel" aria-labelledby="login-heading">
+        <div class="auth-login-heading">
+            <h1 id="login-heading">Welcome to CastFan</h1>
+            <p>Sign in with your email.</p>
         </div>
 
         <div class="form-alert success" th:if="${param.registered}" role="status">
-            Your account is ready. Sign in to continue.
+            <i class="bi bi-check-circle" aria-hidden="true"></i><span>Your account is ready. Sign in to continue.</span>
         </div>
         <div class="form-alert" th:if="${param.error}" role="alert">
-            Invalid email or password.
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i><span>Invalid email or password.</span>
         </div>
         <div class="form-alert neutral" th:if="${param.logout}" role="status">
-            You have signed out.
+            <i class="bi bi-info-circle" aria-hidden="true"></i><span>You have signed out.</span>
+        </div>
+
+        <div class="auth-social-mock" th:if="${showGoogleLoginMock}">
+            <button class="auth-google-button" type="button" data-google-login-mock aria-describedby="google-login-status">
+                <span class="google-mark" aria-hidden="true">G</span>
+                <span>Continue with Google</span>
+                <small>Mockup</small>
+            </button>
+            <p id="google-login-status" class="auth-mock-status" role="status" hidden>Google sign-in is a visual preview and is not connected yet.</p>
+            <div class="auth-divider"><span>or use email</span></div>
         </div>
 
         <form class="auth-form" th:action="@{/login}" method="post">
             <label class="form-field" for="email">
-                <span>Email</span>
-                <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required autofocus>
+                <span class="field-label">Email</span>
+                <span class="auth-input"><i class="bi bi-envelope" aria-hidden="true"></i><input id="email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" aria-describedby="email-format-error" required autofocus><i class="bi bi-exclamation-circle input-invalid-mark" aria-hidden="true"></i></span>
+                <span id="email-format-error" class="field-error auth-email-error" aria-live="polite" hidden><i class="bi bi-exclamation-circle" aria-hidden="true"></i> Enter a valid email address.</span>
             </label>
             <label class="form-field" for="password">
-                <span>Password</span>
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <span class="field-label">Password</span>
+                <span class="auth-input"><i class="bi bi-lock" aria-hidden="true"></i><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></span>
             </label>
-            <button class="primary-button" type="submit">Sign in</button>
+            <button class="primary-button auth-submit" type="submit"><span>Sign in</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
         </form>
 
         <p class="auth-switch">New to CastFan? <a th:href="@{/signup}">Create an account</a></p>
+        <p class="auth-footnote"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Your account and cafe activity stay protected.</span></p>
     </section>
 </main>
 </body>

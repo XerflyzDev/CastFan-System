@@ -82,6 +82,10 @@ class HomeControllerTests {
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
 
+		mockMvc.perform(get("/js/auth.js"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+
 		mockMvc.perform(get("/js/member-home.js"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("text/javascript"));

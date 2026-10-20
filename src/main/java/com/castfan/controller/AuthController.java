@@ -7,6 +7,8 @@ import com.castfan.service.DuplicateEmailException;
 import com.castfan.service.RegistrationService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +19,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AuthController {
 
 	private final RegistrationService registrationService;
+	private final Environment environment;
 
-	public AuthController(RegistrationService registrationService) {
+	public AuthController(RegistrationService registrationService, Environment environment) {
 		this.registrationService = registrationService;
+		this.environment = environment;
+	}
+
+	@ModelAttribute
+	public void addAuthPreviewFlags(Model model) {
+		model.addAttribute("showGoogleLoginMock", environment.acceptsProfiles(Profiles.of("dev")));
 	}
 
 	@GetMapping("/login")

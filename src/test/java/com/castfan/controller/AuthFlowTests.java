@@ -61,6 +61,7 @@ class AuthFlowTests {
 		mockMvc.perform(get("/login"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("auth/login"))
+			.andExpect(model().attribute("showGoogleLoginMock", false))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Sign in")));
 
 		mockMvc.perform(get("/signup"))
@@ -111,6 +112,21 @@ class AuthFlowTests {
 			.andExpect(model().attributeHasFieldErrors("form", "email"));
 
 		assertThat(userAccountRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void registrationRejectsDisplayNameShorterThanThreeCharacters() throws Exception {
+		mockMvc.perform(post("/signup")
+				.with(csrf())
+				.param("displayName", "Al")
+				.param("email", "short-name@example.com")
+				.param("password", "secure-pass-123")
+				.param("confirmPassword", "secure-pass-123"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/signup"))
+			.andExpect(model().attributeHasFieldErrors("form", "displayName"));
+
+		assertThat(userAccountRepository.count()).isZero();
 	}
 
 	@Test

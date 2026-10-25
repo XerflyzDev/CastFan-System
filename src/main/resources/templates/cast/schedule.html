@@ -19,7 +19,7 @@
             <div class="top-actions"><a class="wordmark" th:href="@{/cast}">CastFan</a><a class="round-button page-back-button" th:href="@{/cast}" aria-label="Back to Cast workspace" title="Back to Cast workspace"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="cast-heading"><p>Availability</p><h1>Schedule</h1></header>
 
-            <div class="inline-alert success" th:if="${param.submitted}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Shift submitted for Owner review.</div>
+            <div class="inline-alert success" th:if="${param.submitted}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Shift request sent. Pending approval from the store Owner.</div>
             <div class="inline-alert neutral" th:if="${param.cancelled}" role="status"><i class="bi bi-info-circle" aria-hidden="true"></i>Shift cancelled.</div>
             <div class="inline-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update shift.</span></div>
 
@@ -34,6 +34,7 @@
                         <div class="picker-form-field"><span class="picker-field-label">Start</span><div data-picker-host><input type="time" th:field="*{startsAt}" required data-picker-time data-picker-label="Start time"></div><small class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}">Start error</small></div>
                         <div class="picker-form-field"><span class="picker-field-label">End</span><div data-picker-host><input type="time" th:field="*{endsAt}" required data-picker-time data-picker-label="End time"></div><small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End error</small></div>
                     </div>
+                    <small class="form-note">Your request goes to the store Owner for approval. It stays Pending until approved, and you can cancel it before then.</small>
                     <small class="form-note">An end time before the start time is treated as the following day.</small>
                     <button class="primary-action form-submit" type="submit" th:disabled="${workspace.assignments.empty}" th:attr="aria-describedby=${workspace.assignments.empty ? 'no-store-reason' : null}"><i class="bi bi-send" aria-hidden="true"></i><span>Send for review</span></button>
                 </form>

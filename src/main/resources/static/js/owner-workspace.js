@@ -235,20 +235,32 @@ document.querySelectorAll("[data-time-picker]").forEach((timePicker) => {
             }
             button.addEventListener("click", () => {
                 onSelect(value);
-                renderOptions();
+                renderOptions(true);
                 updateTimeValue();
             });
             container.append(button);
         }
     }
 
-    function renderOptions() {
+    function renderOptions(animateSelection = false) {
         buildOptions(hoursList, 24, selectedHour, (value) => { selectedHour = value; });
         buildOptions(minutesList, 60, selectedMinute, (value) => { selectedMinute = value; });
         requestAnimationFrame(() => {
             [hoursList, minutesList].forEach((list) => {
                 const selected = list.querySelector(".selected");
-                if (selected) list.scrollTop = selected.offsetTop - ((list.clientHeight - selected.offsetHeight) / 2);
+                if (!selected) return;
+                const listRect = list.getBoundingClientRect();
+                const selectedRect = selected.getBoundingClientRect();
+                const offsetFromCenter = selectedRect.top - listRect.top
+                    - ((list.clientHeight - selectedRect.height) / 2);
+                if (animateSelection && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    list.scrollTo({ top: list.scrollTop + offsetFromCenter, behavior: "smooth" });
+                    return;
+                }
+                const previousScrollBehavior = list.style.scrollBehavior;
+                list.style.scrollBehavior = "auto";
+                list.scrollTop += offsetFromCenter;
+                list.style.scrollBehavior = previousScrollBehavior;
             });
         });
     }
@@ -300,18 +312,19 @@ document.querySelectorAll("[data-time-picker]").forEach((timePicker) => {
         selectedHour = now.getHours();
         selectedMinute = now.getMinutes();
         updateTimeValue();
-        renderOptions();
+        renderOptions(true);
     });
     timePicker.querySelector("[data-time-clear]").addEventListener("click", () => {
         selectedHour = null;
         selectedMinute = null;
         trigger.setAttribute("aria-invalid", "true");
         updateTimeValue();
-        closeTimePicker();
-        trigger.focus();
     });
     document.addEventListener("click", (event) => {
-        if (!popover.hidden && !timePicker.contains(event.target)) closeTimePicker();
+        // The selected option is replaced while rendering the updated choice.
+        // Use the original event path because event.target may be detached by
+        // the time this document-level outside-click handler runs.
+        if (!popover.hidden && !event.composedPath().includes(timePicker)) closeTimePicker();
     });
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && !popover.hidden) {

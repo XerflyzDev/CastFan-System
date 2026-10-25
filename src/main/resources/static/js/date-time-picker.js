@@ -198,20 +198,32 @@ document.querySelectorAll("input[data-picker-time]").forEach((input) => {
             }
             button.addEventListener("click", () => {
                 select(value);
-                render();
+                render(true);
                 updateValue();
             });
             container.append(button);
         }
     }
 
-    function render() {
+    function render(animateSelection = false) {
         buildOptions(hours, 24, selectedHour, (value) => { selectedHour = value; });
         buildOptions(minutes, 60, selectedMinute, (value) => { selectedMinute = value; });
         requestAnimationFrame(() => {
             [hours, minutes].forEach((list) => {
                 const selectedOption = list.querySelector(".selected");
-                if (selectedOption) list.scrollTop = selectedOption.offsetTop - ((list.clientHeight - selectedOption.offsetHeight) / 2);
+                if (!selectedOption) return;
+                const listRect = list.getBoundingClientRect();
+                const optionRect = selectedOption.getBoundingClientRect();
+                const offsetFromCenter = optionRect.top - listRect.top
+                    - ((list.clientHeight - optionRect.height) / 2);
+                if (animateSelection && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    list.scrollTo({ top: list.scrollTop + offsetFromCenter, behavior: "smooth" });
+                    return;
+                }
+                const previousScrollBehavior = list.style.scrollBehavior;
+                list.style.scrollBehavior = "auto";
+                list.scrollTop += offsetFromCenter;
+                list.style.scrollBehavior = previousScrollBehavior;
             });
         });
     }
@@ -248,20 +260,23 @@ document.querySelectorAll("input[data-picker-time]").forEach((input) => {
         selectedHour = now.getHours();
         selectedMinute = now.getMinutes();
         updateValue();
-        render();
+        render(true);
     });
     popover.querySelector("[data-clear]").addEventListener("click", () => {
         selectedHour = null;
         selectedMinute = null;
         trigger.setAttribute("aria-invalid", "true");
         updateValue();
-        closeActivePicker(true);
     });
     updateValue();
 });
 
 document.addEventListener("click", (event) => {
-    if (activePicker && !activePicker.host.contains(event.target)) closeActivePicker();
+    // Selecting an option rebuilds the option buttons. Its original event target
+    // may therefore be detached by the time this document handler runs. Check
+    // the event's original propagation path so that selection does not look like
+    // an outside click and dismiss the picker on touch browsers.
+    if (activePicker && !event.composedPath().includes(activePicker.host)) closeActivePicker();
 });
 
 document.addEventListener("keydown", (event) => {

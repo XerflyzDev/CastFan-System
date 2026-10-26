@@ -70,6 +70,8 @@
 .card-heading small { color: var(--muted); font-size: 0.53rem; }
 .card-heading h2 { margin: 0; font-size: 0.82rem; }
 .card-heading > span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.7rem; }
+.card-heading-action { display: grid; width: 100%; height: 100%; place-items: center; padding: 0; border: 0; color: inherit; background: none; font: inherit; text-decoration: none; }
+.card-heading-action:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .cast-form { display: grid; gap: 11px; }
 .cast-form label { display: grid; gap: 5px; color: #55575d; font-size: 0.57rem; font-weight: 700; }

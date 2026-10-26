@@ -267,6 +267,7 @@ document.querySelectorAll("input[data-picker-time]").forEach((input) => {
         selectedMinute = null;
         trigger.setAttribute("aria-invalid", "true");
         updateValue();
+        render();
     });
     updateValue();
 });

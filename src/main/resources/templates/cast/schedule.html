@@ -24,7 +24,7 @@
             <div class="inline-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update shift.</span></div>
 
             <section class="form-card" aria-labelledby="submit-shift-heading">
-                <div class="card-heading"><div><small>New request</small><h2 id="submit-shift-heading">Submit a shift</h2></div><span><a th:if="${!workspace.assignments.empty}" href="#storeCastId" aria-label="Start a new shift request" title="Start a new shift request" style="display:grid;width:100%;height:100%;place-items:center;color:inherit;text-decoration:none"><i class="bi bi-plus-lg" aria-hidden="true"></i></a><button th:if="${workspace.assignments.empty}" type="button" disabled aria-disabled="true" aria-describedby="no-store-reason" aria-label="Submit a shift unavailable: no active store assigned" title="Unavailable: no active store assigned" style="display:grid;width:100%;height:100%;place-items:center;padding:0;border:0;background:none;color:inherit;font:inherit;opacity:.45;cursor:not-allowed"><i class="bi bi-plus-lg" aria-hidden="true"></i></button></span></div>
+                <div class="card-heading"><div><small>New request</small><h2 id="submit-shift-heading">Submit a shift</h2></div><span><a class="card-heading-action" th:if="${!workspace.assignments.empty}" href="#storeCastId" aria-label="Start a new shift request" title="Start a new shift request"><i class="bi bi-plus-lg" aria-hidden="true"></i></a><button class="card-heading-action" th:if="${workspace.assignments.empty}" type="button" disabled aria-disabled="true" aria-describedby="no-store-reason" aria-label="Submit a shift unavailable: no active store assigned" title="Unavailable: no active store assigned"><i class="bi bi-plus-lg" aria-hidden="true"></i></button></span></div>
                 <div class="cast-empty compact" id="no-store-reason" th:if="${workspace.assignments.empty}" role="status"><i class="bi bi-shop" aria-hidden="true"></i><div><strong>Submit a shift is unavailable</strong><small>An Owner must assign you to an active store before you can submit shifts.</small></div></div>
                 <form class="cast-form" th:action="@{/cast/schedule}" th:object="${form}" method="post">
                     <div class="inline-alert error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Invalid shift</div>
@@ -62,4 +62,3 @@
 <script th:src="@{/js/date-time-picker.js}" defer></script>
 </body>
 </html>
-

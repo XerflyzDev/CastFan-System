@@ -1,4 +1,4 @@
-.notification-content { padding-top: 17px; }
+.notification-content { padding-top: calc(17px + env(safe-area-inset-top)); }
 .notification-heading { margin: 22px 0 18px; }
 .notification-heading p,
 .notification-heading h1 { margin: 0; }

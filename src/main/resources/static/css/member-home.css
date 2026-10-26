@@ -89,7 +89,7 @@ summary:focus-visible {
     z-index: 1;
     height: 100%;
     overflow-y: auto;
-    padding: 17px 15px calc(112px + env(safe-area-inset-bottom));
+    padding: calc(17px + env(safe-area-inset-top)) 15px calc(112px + env(safe-area-inset-bottom));
     scrollbar-width: none;
 }
 
@@ -103,6 +103,8 @@ summary:focus-visible {
     align-items: center;
     justify-content: space-between;
 }
+
+.top-actions { min-height: 40px; }
 
 .action-group { gap: 8px; }
 
@@ -121,7 +123,8 @@ summary:focus-visible {
 	text-decoration: none;
 }
 
-.wordmark { color: var(--ink); font-size: 1.15rem; line-height: 1; font-weight: 700; text-decoration: none; }
+.wordmark { display: inline-flex; min-height: 38px; align-items: center; color: var(--ink); font-size: 1.22rem; line-height: 1; font-weight: 800; text-decoration: none; }
+.page-back-button { flex: 0 0 38px; }
 
 .confirmation-dialog { width: min(326px, calc(100vw - 36px)); max-width: none; padding: 0; border: 0; border-radius: 18px; color: var(--ink); background: transparent; box-shadow: 0 24px 70px rgba(30, 32, 38, 0.24); }
 .confirmation-dialog::backdrop { background: rgba(17, 19, 24, 0.42); backdrop-filter: blur(5px); }
@@ -150,7 +153,7 @@ summary:focus-visible {
 .greeting h1 span { color: #686a70; font-weight: 400; }
 
 /* Shared presentation for audience-facing pages; workflows remain role-specific. */
-.shared-page-content { padding: 17px 15px calc(112px + env(safe-area-inset-bottom)); }
+.shared-page-content { padding: calc(17px + env(safe-area-inset-top)) 15px calc(112px + env(safe-area-inset-bottom)); }
 .shared-page-shell .profile-button {
     display: grid;
     width: 38px;
@@ -205,7 +208,7 @@ summary:focus-visible {
 .shared-page-shell .section-heading h2 { font-size: 0.88rem; }
 .shared-page-shell .form-alert { border-radius: 14px; box-shadow: none; }
 
-.phone.settings-shell .cast-settings-content { padding: 17px 15px calc(112px + env(safe-area-inset-bottom)); }
+.phone.settings-shell .cast-settings-content { padding: calc(17px + env(safe-area-inset-top)) 15px calc(112px + env(safe-area-inset-bottom)); }
 .phone.settings-shell .settings-heading { margin: 24px 0 16px; }
 .phone.settings-shell .settings-identity {
     grid-template-columns: 68px minmax(0, 1fr);

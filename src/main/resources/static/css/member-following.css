@@ -1,4 +1,4 @@
-.following-content { padding-top: 17px; }
+.following-content { padding-top: calc(17px + env(safe-area-inset-top)); }
 
 .following-heading { margin: 22px 0 16px; }
 .following-heading p,

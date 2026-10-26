@@ -15,7 +15,7 @@
     <section class="phone" aria-label="Member profile settings">
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content profile-content">
-            <div class="top-actions"><a class="round-button" th:href="@{/account}" aria-label="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/account}" aria-label="Back to Profile" title="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="profile-heading"><p>Your public details</p><h1>Edit profile</h1></header>
 
             <div class="profile-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Profile saved.</div>

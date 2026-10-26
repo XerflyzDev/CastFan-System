@@ -2,6 +2,7 @@ package com.castfan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -82,9 +83,12 @@ class CastContentWorkflowTests {
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published=true"));
 		mockMvc.perform(get("/casts/{id}", castProfileId))
 			.andExpect(status().isOk()).andExpect(content().string(containsString("Public content body")));
-		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()))
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()).with(castUser()))
 			.andExpect(status().isOk()).andExpect(view().name("public/content-detail"))
-			.andExpect(content().string(containsString("Public content body")));
+			.andExpect(content().string(containsString("Public content body")))
+			.andExpect(content().string(matchesPattern(
+				"(?s).*href=\"/cast/public-profile\" aria-label=\"Cast Profile\".*?aria-current=\"page\".*"
+			)));
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}/image", castProfileId, post.getId()))
 			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
 

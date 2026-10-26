@@ -26,7 +26,8 @@ The previous pink-led visual theme and the older full-width desktop application 
 - Use a centered phone-style application surface on tablet and desktop, with a maximum width of approximately `390px` and a maximum working height of approximately `844px`.
 - At viewports up to `470px`, the application surface becomes full-width and full-height with no outer border, radius, or desktop shadow.
 - Use a white content canvas over a `#F5F5F5` page background.
-- Use the `CastFan` wordmark at the upper left and one contextual circular action at the upper right when needed.
+- Use the `CastFan` wordmark at the upper left with the shared `1.22rem`, extra-bold treatment and safe-area-aware top spacing. Do not reduce its size for individual roles or account pages.
+- Non-root workflow pages place a circular arrow-back action at the upper right. Its accessible label names the destination (`Back to Home`, `Back to Profile`, `Back to Cast workspace`, or `Back to Owner dashboard`) and it returns to the documented parent page. Other contextual actions may remain beside it.
 - Keep the main content independently scrollable and reserve bottom space for persistent navigation.
 - Use the same shell, spacing rhythm, heading hierarchy, card treatment, and navigation behavior for Member, Cast, and Owner pages.
 - Role differences belong in information, permissions, actions, and navigation destinations—not in a separate visual theme.
@@ -90,7 +91,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Active items use black text and icons on a solid white inner pill with a restrained shadow. Use the same selected treatment for anonymous, Member, Cast, and Owner navigation; dusty rose remains available for semantic content accents rather than global navigation state.
 - Navigation remains visible without covering page content.
 - Navigation labels remain concise and must not wrap or overlap at `320px`.
-- Page headers use the `CastFan` wordmark, generous whitespace, and an optional circular contextual action instead of the retired full-width desktop header bar.
+- Page headers use the consistently sized `CastFan` wordmark, generous safe-area-aware whitespace, and an optional circular contextual action instead of the retired full-width desktop header bar.
 
 ### Buttons
 

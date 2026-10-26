@@ -1,4 +1,4 @@
-.schedule-content { padding-top: 17px; }
+.schedule-content { padding-top: calc(17px + env(safe-area-inset-top)); }
 
 .schedule-heading {
     display: flex;

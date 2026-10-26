@@ -16,7 +16,7 @@
     <section class="phone" aria-label="Cast schedule">
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content cast-content">
-            <div class="top-actions"><a class="wordmark" th:href="@{/cast}">CastFan</a><a class="round-button" th:href="@{/cast}" aria-label="Back to dashboard" title="Dashboard"><i class="bi bi-grid" aria-hidden="true"></i></a></div>
+            <div class="top-actions"><a class="wordmark" th:href="@{/cast}">CastFan</a><a class="round-button page-back-button" th:href="@{/cast}" aria-label="Back to Cast workspace" title="Back to Cast workspace"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="cast-heading"><p>Availability</p><h1>Schedule</h1></header>
 
             <div class="inline-alert success" th:if="${param.submitted}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Shift submitted for Owner review.</div>

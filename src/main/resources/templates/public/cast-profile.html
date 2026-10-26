@@ -14,7 +14,7 @@
 <main class="concept-stage">
     <section class="phone cast-phone" th:attr="aria-label=${cast.stageName + ' Cast profile'}">
         <div class="detail-actions">
-            <a th:href="@{/}" aria-label="Back to Home" title="Back"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            <a class="page-back-button" th:href="@{/}" aria-label="Back to Home" title="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
             <button type="button" data-share-profile th:attr="data-share-title=${cast.stageName + ' on CastFan'}" aria-label="Share profile" title="Share"><i class="bi bi-share" aria-hidden="true"></i></button>
         </div>
         <div class="screen-content cast-content">

@@ -1,3 +1,4 @@
+
 package com.castfan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,6 +119,31 @@ class HomeServiceTests {
 			assertThat(item.bodyPreview()).contains("following Mina");
 			assertThat(item.accessible()).isTrue();
 		});
+	}
+
+	@Test
+	void homeGreetingUsesLatestMemberDisplayName() {
+		var member = account("member-greeting@test.local", "Original Member", UserRole.MEMBER);
+		memberProfileRepository.save(new MemberProfile(member, null, null));
+
+		member.updateDisplayName("Aruna Fan");
+		userAccountRepository.saveAndFlush(member);
+
+		var home = homeService.load(member.getEmail());
+
+		assertThat(home.memberName()).isEqualTo("Aruna Fan");
+	}
+
+	@Test
+	void homeGreetingUsesCurrentCastStageName() {
+		var castAccount = account("cast-greeting@test.local", "Old Account Name", UserRole.CAST);
+		castProfileRepository.saveAndFlush(new CastProfile(
+			castAccount, "New Stage Name", "new-stage-name", null, null, true
+		));
+
+		var home = homeService.load(castAccount.getEmail());
+
+		assertThat(home.memberName()).isEqualTo("New Stage Name");
 	}
 
 	private UserAccount account(String email, String name, UserRole role) {

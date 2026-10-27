@@ -1,3 +1,4 @@
+
 package com.castfan.service;
 
 import java.time.Instant;
@@ -17,6 +18,7 @@ import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
 import com.castfan.repository.CastContentRepository;
+import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreEventRepository;
@@ -41,6 +43,7 @@ public class HomeService {
 	private final StoreEventRepository storeEventRepository;
 	private final StorePromotionRepository storePromotionRepository;
 	private final UserAccountRepository userAccountRepository;
+	private final CastProfileRepository castProfileRepository;
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastFollowRepository castFollowRepository;
 	private final CastContentRepository castContentRepository;
@@ -55,6 +58,7 @@ public class HomeService {
 		StoreEventRepository storeEventRepository,
 		StorePromotionRepository storePromotionRepository,
 		UserAccountRepository userAccountRepository,
+		CastProfileRepository castProfileRepository,
 		MemberProfileRepository memberProfileRepository,
 		CastFollowRepository castFollowRepository,
 		CastContentRepository castContentRepository,
@@ -68,6 +72,7 @@ public class HomeService {
 		this.storeEventRepository = storeEventRepository;
 		this.storePromotionRepository = storePromotionRepository;
 		this.userAccountRepository = userAccountRepository;
+		this.castProfileRepository = castProfileRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castFollowRepository = castFollowRepository;
 		this.castContentRepository = castContentRepository;
@@ -184,8 +189,17 @@ public class HomeService {
 			return "there";
 		}
 		return userAccountRepository.findByEmailIgnoreCase(email)
-			.map(account -> account.getDisplayName())
-			.filter(name -> !name.isBlank())
+			.filter(account -> account.getStatus() == UserStatus.ACTIVE)
+			.map(account -> {
+				if (account.getRole() == UserRole.CAST) {
+					return castProfileRepository.findByUserAccountId(account.getId())
+						.map(profile -> profile.getStageName())
+						.filter(name -> name != null && !name.isBlank())
+						.orElse(account.getDisplayName());
+				}
+				return account.getDisplayName();
+			})
+			.filter(name -> name != null && !name.isBlank())
 			.orElse("there");
 	}
 

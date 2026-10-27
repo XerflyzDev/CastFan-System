@@ -116,6 +116,7 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"profile-compose-fab\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/cast/content#composer\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("New post")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-current=\"page\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("<span>Follow</span>"))));
 	}

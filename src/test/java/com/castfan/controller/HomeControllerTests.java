@@ -58,6 +58,9 @@ class HomeControllerTests {
 			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
 			.andExpect(content().string(containsString("href=\"/cast/profile\"")))
 			.andExpect(content().string(containsString("href=\"/cast\"")))
+			.andExpect(content().string(containsString("aria-label=\"Cast Profile\"")))
+			.andExpect(content().string(containsString("aria-label=\"Profile\"")))
+			.andExpect(content().string(containsString("aria-label=\"Cast\"")))
 			.andExpect(content().string(matchesPattern(
 				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
 					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"

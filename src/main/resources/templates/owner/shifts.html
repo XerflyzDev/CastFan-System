@@ -17,7 +17,7 @@
         <div class="ambient-top" aria-hidden="true"></div>
 
         <div class="screen-content owner-content">
-            <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/owner}" aria-label="Back to dashboard" title="Dashboard"><i class="bi bi-grid" aria-hidden="true"></i></a></div>
+            <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button page-back-button" th:href="@{/owner}" aria-label="Back to Owner dashboard" title="Back to Owner dashboard"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="owner-heading"><p>Store schedule</p><h1>Shift review</h1></header>
 
             <div class="owner-alert success" th:if="${param.approved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Shift approved.</div>

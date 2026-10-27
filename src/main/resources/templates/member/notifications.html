@@ -15,7 +15,7 @@
     <section class="phone" aria-label="Member notifications">
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content notification-content">
-            <div class="top-actions"><a class="round-button" th:href="@{/}" aria-label="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/}" aria-label="Back to Home" title="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="notification-heading"><p>Your activity</p><div><h1>Notifications</h1><span th:text="${notifications.totalCount}">0</span></div></header>
 
             <section class="notification-section" aria-labelledby="cast-update-heading">

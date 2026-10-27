@@ -9,7 +9,7 @@
 <body><main class="concept-stage"><section class="phone content-detail-phone" aria-label="Cast content detail">
     <div class="ambient-top" aria-hidden="true"></div>
     <div class="screen-content content-detail-content">
-        <div class="top-actions"><a class="round-button" th:href="@{/casts/{id}(id=${content.castProfileId})}" aria-label="Back to Cast profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a><a class="wordmark" th:href="@{/}">CastFan</a></div>
+        <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/casts/{id}(id=${content.castProfileId})}" aria-label="Back to Cast Profile" title="Back to Cast Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
         <header class="content-author"><img th:if="${content.castAvatarUrl != null}" th:src="${content.castAvatarUrl}" th:alt="${content.castName}"><span th:unless="${content.castAvatarUrl != null}" th:text="${content.castInitials}">MN</span><div><strong th:text="${content.castName}">Mina</strong><small th:text="${content.publishedLabel}">Tuesday, 14 October</small></div></header>
         <img class="content-detail-image" th:if="${content.imageUrl != null}" th:src="${content.imageUrl}" th:alt="${content.title}">
         <article class="content-detail-card" th:classappend="${!content.accessible} ? ' locked'">
@@ -20,5 +20,5 @@
         </article>
         <a class="back-to-cast" th:href="@{/casts/{id}(id=${content.castProfileId})}"><i class="bi bi-person" aria-hidden="true"></i>View <span th:text="${content.castName}">Cast</span>'s profile</a>
     </div>
-    <th:block sec:authorize="isAnonymous()" th:replace="~{fragments/navigation :: anonymous('following')}"></th:block><th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('following')}"></th:block><th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('')}"></th:block>
+    <th:block sec:authorize="isAnonymous()" th:replace="~{fragments/navigation :: anonymous('following')}"></th:block><th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('following')}"></th:block><th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('cast-profile')}"></th:block>
 </section></main><script th:src="@{/js/public-detail.js}" defer></script></body></html>

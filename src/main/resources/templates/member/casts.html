@@ -17,8 +17,8 @@
     <div class="screen-content shared-page-content">
     <div class="top-actions">
         <a class="wordmark" th:href="@{/}">CastFan</a>
-        <a class="profile-button" sec:authorize="hasRole('MEMBER')" th:href="@{/account}" aria-label="Open profile" title="Profile"><i class="bi bi-person-fill" aria-hidden="true"></i></a>
-        <a class="profile-button" sec:authorize="hasRole('CAST')" th:href="@{/cast/profile}" aria-label="Edit profile" title="Edit profile"><i class="bi bi-pencil-square" aria-hidden="true"></i></a>
+        <a class="round-button page-back-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}" aria-label="Back to Following" title="Back to Following"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+        <a class="round-button page-back-button" sec:authorize="hasRole('CAST')" th:href="@{/}" aria-label="Back to Home" title="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
     </div>
 
     <header class="shared-page-heading">

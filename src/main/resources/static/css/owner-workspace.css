@@ -1,4 +1,4 @@
-.owner-content { padding-top: 17px; }
+.owner-content { padding-top: calc(17px + env(safe-area-inset-top)); }
 .owner-heading { margin: 22px 0 16px; }
 .owner-heading p,
 .owner-heading h1 { margin: 0; }

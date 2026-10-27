@@ -1,4 +1,4 @@
-.cast-content { padding-top: 17px; }
+.cast-content { padding-top: calc(17px + env(safe-area-inset-top)); }
 
 .cast-heading { margin: 22px 0 16px; }
 .cast-heading p,
@@ -70,6 +70,8 @@
 .card-heading small { color: var(--muted); font-size: 0.53rem; }
 .card-heading h2 { margin: 0; font-size: 0.82rem; }
 .card-heading > span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.7rem; }
+.card-heading-action { display: grid; width: 100%; height: 100%; place-items: center; padding: 0; border: 0; color: inherit; background: none; font: inherit; text-decoration: none; }
+.card-heading-action:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .cast-form { display: grid; gap: 11px; }
 .cast-form label { display: grid; gap: 5px; color: #55575d; font-size: 0.57rem; font-weight: 700; }
@@ -189,7 +191,7 @@
 .account-card small { overflow: hidden; color: var(--muted); font-size: 0.53rem; text-overflow: ellipsis; white-space: nowrap; }
 .sign-out-action { display: flex; width: 100%; min-height: 43px; align-items: center; justify-content: center; gap: 7px; margin-top: 12px; border: 1px solid rgba(154, 73, 98, 0.12); border-radius: 14px; color: var(--rose-dark); background: rgba(255, 255, 255, 0.52); font-size: 0.61rem; font-weight: 700; cursor: pointer; }
 
-.cast-settings-content { padding-top: 14px; }
+.cast-settings-content { padding-top: calc(14px + env(safe-area-inset-top)); }
 .settings-heading { margin-top: 20px; }
 .settings-identity { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px; border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
 .settings-identity > img,
@@ -227,7 +229,7 @@
 .settings-row:focus-visible { position: relative; z-index: 1; outline: 3px solid rgba(154, 73, 98, 0.18); outline-offset: -3px; }
 
 /* Keep Cast profile settings in the same account language as Member and Owner. */
-.cast-account-prototype .cast-settings-content { padding: 16px 16px calc(112px + env(safe-area-inset-bottom)); }
+.cast-account-prototype .cast-settings-content { padding: calc(16px + env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom)); }
 .cast-account-prototype .inline-alert { margin-bottom: 12px; }
 .cast-account-prototype .cast-profile-editor { border-top: 1px solid var(--profile-line); background: #fff; }
 .cast-account-prototype .cast-profile-editor > summary {

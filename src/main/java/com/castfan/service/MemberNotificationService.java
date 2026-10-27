@@ -12,7 +12,6 @@ import com.castfan.dto.MemberNotificationView;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.MemberProfile;
-import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastContentRepository;

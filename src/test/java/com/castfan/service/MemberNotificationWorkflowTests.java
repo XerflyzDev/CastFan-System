@@ -106,11 +106,19 @@ class MemberNotificationWorkflowTests {
 	}
 
 	@Test
-	void notificationCenterRequiresMemberAuthentication() throws Exception {
-		var cast = account("notice-role-cast-" + System.nanoTime() + "@test.local", "Cast", UserRole.CAST);
+	void notificationCenterRequiresAuthenticationAndSupportsCastAccounts() throws Exception {
 		mockMvc.perform(get("/member/notifications"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
-		mockMvc.perform(get("/member/notifications").with(user(cast.getEmail()).roles("CAST")))
+
+		var castProfile = cast("notice-role-cast-" + System.nanoTime() + "@test.local", "Cast");
+		mockMvc.perform(get("/member/notifications")
+				.with(user(castProfile.getUserAccount().getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/notifications"))
+			.andExpect(content().string(not(containsString("Cast updates"))));
+
+		var owner = account("notice-role-owner-" + System.nanoTime() + "@test.local", "Owner", UserRole.OWNER);
+		mockMvc.perform(get("/member/notifications").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isForbidden());
 	}
 

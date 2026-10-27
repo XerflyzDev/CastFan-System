@@ -6,6 +6,8 @@ import com.castfan.dto.MemberProfileForm;
 import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.ProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,10 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class MemberProfileController {
@@ -55,16 +55,15 @@ public class MemberProfileController {
 	@PreAuthorize("hasRole('MEMBER')")
 	@ResponseBody
 	public ResponseEntity<Void> updateNotificationPreference(
-        Principal principal,
-        @RequestParam("preference") String preference,
-        @RequestParam("enabled") boolean enabled) {
-
-    profileService.updateMemberNotificationPreference(
-            principal.getName(),
-            preference,
-            enabled
-    );
-
-    return ResponseEntity.noContent().build();
+		Principal principal,
+		@RequestParam("preference") String preference,
+		@RequestParam("enabled") boolean enabled
+	) {
+		try {
+			profileService.updateMemberNotificationPreference(principal.getName(), preference, enabled);
+			return ResponseEntity.noContent().build();
+		} catch (DomainRuleViolationException exception) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 }

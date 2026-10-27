@@ -41,6 +41,10 @@ class RoleAuthorizationTests {
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"));
 
+		mockMvc.perform(get("/member/notifications"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/login"));
+
 		mockMvc.perform(get("/cast"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/login"));
@@ -95,6 +99,23 @@ class RoleAuthorizationTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("member/following"));
 		mockMvc.perform(get("/owner").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isForbidden());
+	}
+
+	@Test
+	void castCanOpenNotificationsButOwnerCannot() throws Exception {
+		var cast = provisioningService.provisionCast(
+			"cast-notifications@castfan.test", "secure-cast-pass-123", "Cast Notifications", "Notifications Cast"
+		);
+		var owner = saveAccount("owner-notifications@castfan.test", UserRole.OWNER);
+
+		mockMvc.perform(get("/member/notifications").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/notifications"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Notifications")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-label=\"Cast navigation\"")));
+
+		mockMvc.perform(get("/member/notifications").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isForbidden());
 	}
 

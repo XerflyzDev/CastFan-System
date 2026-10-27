@@ -40,7 +40,7 @@ public class SecurityConfig {
 					authorize.requestMatchers("/concepts/**", "/h2-console/**").denyAll();
 				}
 				authorize
-					.requestMatchers("/member/schedule", "/member/casts/**", "/member/following")
+					.requestMatchers("/member/schedule", "/member/casts/**", "/member/following", "/member/notifications")
 					.hasAnyRole("MEMBER", "CAST")
 					.requestMatchers("/cast/**").hasRole("CAST")
 					.requestMatchers("/owner/**").hasRole("OWNER")

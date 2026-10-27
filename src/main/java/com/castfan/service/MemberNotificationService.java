@@ -36,8 +36,8 @@ public class MemberNotificationService {
 
 	public MemberNotificationService(UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository, CastContentRepository castContentRepository,
-		StoreEventRepository storeEventRepository, ContentAccessService contentAccessService,
-		StoreEventImageService storeEventImageService) {
+		StoreEventRepository storeEventRepository,
+		ContentAccessService contentAccessService, StoreEventImageService storeEventImageService) {
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castContentRepository = castContentRepository;
@@ -48,32 +48,37 @@ public class MemberNotificationService {
 
 	@Transactional(readOnly = true)
 	public MemberNotificationView load(String email) {
-		var member = userAccountRepository.findByEmailIgnoreCase(email)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
-			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()))
+		var account = userAccountRepository.findByEmailIgnoreCase(email)
+			.filter(candidate -> (candidate.getRole() == UserRole.MEMBER || candidate.getRole() == UserRole.CAST)
+				&& candidate.getStatus() == UserStatus.ACTIVE)
+			.orElseThrow(() -> new DomainRuleViolationException("Active member or cast account not found."));
+
+		var member = memberProfileRepository.findByUserAccountId(account.getId())
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
-		var updates = (member.isCastUpdateNotifications() ? castContentRepository.findFeedForMember(
-			member.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE, PageRequest.of(0, 20)
-		) : java.util.List.<com.castfan.entity.CastContent>of()).stream().map(content -> {
-			var access = contentAccessService.access(content, email);
-			var cast = content.getCastProfile();
-			return new MemberNotificationView.ContentNotice(
-				content.getId(), cast.getId(), cast.getStageName(), initials(cast.getStageName()), cast.getAvatarUrl(),
-				content.getTitle(), access.accessible() ? preview(content.getBody()) : null,
-				contentAccessService.audienceLabel(content), DATE.format(content.getPublishedAt().atZone(DEFAULT_ZONE)),
-				access.accessible()
-			);
-		}).toList();
-		var events = (member.isEventNotifications() ? storeEventRepository.findUpcomingPublicEvents(
-			EventStatus.PUBLISHED, Instant.now(), PageRequest.of(0, 8)
-		) : java.util.List.<com.castfan.entity.StoreEvent>of()).stream().map(event -> {
-			var zone = safeZone(event.getStore().getTimezone());
-			return new MemberNotificationView.EventNotice(
-				event.getId(), event.getTitle(), event.getStore().getName(),
-				DATE.format(event.getStartsAt().atZone(zone)), TIME.format(event.getStartsAt().atZone(zone)),
-				storeEventImageService.publicImageUrl(event)
-			);
-		}).toList();
+
+		var updates = (member.isCastUpdateNotifications()
+			? castContentRepository.findFeedForMember(member.getId(), ContentStatus.PUBLISHED,
+				UserStatus.ACTIVE, PageRequest.of(0, 20))
+			: java.util.List.<com.castfan.entity.CastContent>of()).stream().map(content -> {
+				var access = contentAccessService.access(content, email);
+				var cast = content.getCastProfile();
+				return new MemberNotificationView.ContentNotice(
+					content.getId(), cast.getId(), cast.getStageName(), initials(cast.getStageName()), cast.getAvatarUrl(),
+					content.getTitle(), access.accessible() ? preview(content.getBody()) : null,
+					contentAccessService.audienceLabel(content), DATE.format(content.getPublishedAt().atZone(DEFAULT_ZONE)),
+					access.accessible()
+				);
+			}).toList();
+		var events = (member.isEventNotifications()
+			? storeEventRepository.findUpcomingPublicEvents(EventStatus.PUBLISHED, Instant.now(), PageRequest.of(0, 8))
+			: java.util.List.<com.castfan.entity.StoreEvent>of()).stream().map(event -> {
+				var zone = safeZone(event.getStore().getTimezone());
+				return new MemberNotificationView.EventNotice(
+					event.getId(), event.getTitle(), event.getStore().getName(),
+					DATE.format(event.getStartsAt().atZone(zone)), TIME.format(event.getStartsAt().atZone(zone)),
+					storeEventImageService.publicImageUrl(event)
+				);
+			}).toList();
 		return new MemberNotificationView(updates.size() + events.size(), updates, events);
 	}
 

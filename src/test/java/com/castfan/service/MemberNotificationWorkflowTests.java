@@ -106,11 +106,28 @@ class MemberNotificationWorkflowTests {
 	}
 
 	@Test
-	void notificationCenterRequiresMemberAuthentication() throws Exception {
-		var cast = account("notice-role-cast-" + System.nanoTime() + "@test.local", "Cast", UserRole.CAST);
+	void notificationCenterRequiresAuthenticationAndSupportsCastAccounts() throws Exception {
 		mockMvc.perform(get("/member/notifications"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
-		mockMvc.perform(get("/member/notifications").with(user(cast.getEmail()).roles("CAST")))
+
+		var suffix = Long.toString(System.nanoTime());
+		var castProfile = cast("notice-role-cast-" + suffix + "@test.local", "Cast");
+		var castAudience = memberProfileRepository.save(new MemberProfile(castProfile.getUserAccount(), null, null));
+		var followedCast = cast("notice-followed-cast-" + suffix + "@test.local", "Followed Cast " + suffix);
+		castFollowRepository.save(new CastFollow(castAudience, followedCast));
+		publish(followedCast, "Cast-visible update", "Visible to the following Cast account",
+			ContentAudience.PUBLIC, null);
+
+		mockMvc.perform(get("/member/notifications")
+				.with(user(castProfile.getUserAccount().getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/notifications"))
+			.andExpect(content().string(containsString("Cast updates")))
+			.andExpect(content().string(containsString("Cast-visible update")))
+			.andExpect(content().string(containsString("aria-label=\"Cast navigation\"")));
+
+		var owner = account("notice-role-owner-" + System.nanoTime() + "@test.local", "Owner", UserRole.OWNER);
+		mockMvc.perform(get("/member/notifications").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isForbidden());
 	}
 

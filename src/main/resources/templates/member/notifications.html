@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -44,7 +44,8 @@
                 <div class="notification-empty" th:if="${notifications.upcomingEvents.empty}"><i class="bi bi-calendar2" aria-hidden="true"></i><div><strong>No upcoming events</strong><span>Published events will appear here.</span></div></div>
             </section>
         </div>
-        <nav th:replace="~{fragments/navigation :: member('home')}"></nav>
+        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('home')}"></th:block>
+        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('home')}"></th:block>
     </section>
 </main>
 <script th:src="@{/js/member-profile.js}" defer></script>

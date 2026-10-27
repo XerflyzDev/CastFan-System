@@ -19,6 +19,7 @@
                 <a class="wordmark" th:href="@{/}">CastFan</a>
                 <div class="action-group">
                     <a class="round-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                    <a class="round-button" sec:authorize="hasRole('CAST')" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
                     <a class="round-button" sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in for notifications" title="Sign in"><i class="bi bi-bell" aria-hidden="true"></i></a>
                 </div>
             </div>

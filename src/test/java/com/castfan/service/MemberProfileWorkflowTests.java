@@ -55,7 +55,9 @@ class MemberProfileWorkflowTests {
 	void memberCanOpenAndUpdateOwnProfile() throws Exception {
 		mockMvc.perform(get("/member/profile").with(memberUser()))
 			.andExpect(status().isOk()).andExpect(view().name("member/profile"))
-			.andExpect(content().string(containsString("Original Member")));
+			.andExpect(content().string(containsString("Original Member")))
+			.andExpect(content().string(containsString("href=\"/member/notifications\"")))
+			.andExpect(content().string(containsString("Notification center")));
 
 		var image = new MockMultipartFile("image", "avatar.png", "image/png",
 			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1});

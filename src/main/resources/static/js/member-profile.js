@@ -173,3 +173,51 @@ imageClear?.addEventListener("click", () => {
     if (imageRemove) imageRemove.value = "true";
     imageClear.hidden = true;
 });
+
+document
+    .querySelectorAll("[data-notification-preference]")
+    .forEach((toggle) => {
+        toggle.addEventListener("change", async () => {
+            const previousValue = !toggle.checked;
+            const form = toggle.closest("form");
+            const csrfInput = form?.querySelector('input[name="_csrf"]');
+
+            if (!form || !csrfInput?.value) {
+                toggle.checked = previousValue;
+                alert("Unable to save notification preference. Please reload the page.");
+                return;
+            }
+
+            toggle.disabled = true;
+
+            try {
+                const response = await fetch(
+                    "/member/profile/notification-preferences",
+                    {
+                        method: "POST",
+                        credentials: "same-origin",
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded;charset=UTF-8",
+                            "X-CSRF-TOKEN": csrfInput.value
+                        },
+                        body: new URLSearchParams({
+                            preference: toggle.name,
+                            enabled: String(toggle.checked)
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to save notification preference.");
+                }
+            } catch (error) {
+                toggle.checked = previousValue;
+                alert(
+                    "Could not save your notification preference. Please try again."
+                );
+            } finally {
+                toggle.disabled = false;
+            }
+        });
+    });

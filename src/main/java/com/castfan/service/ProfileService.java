@@ -77,6 +77,21 @@ public class ProfileService {
 	}
 
 	@Transactional
+	public void updateMemberNotificationPreference(String email, String preference, boolean enabled) {
+		var profile = requireMemberProfile(email);
+		switch (preference) {
+			case "castUpdateNotifications" -> profile.updateDetails(
+				profile.getBio(), profile.getAvatarUrl(), enabled, profile.isEventNotifications()
+			);
+			case "eventNotifications" -> profile.updateDetails(
+				profile.getBio(), profile.getAvatarUrl(), profile.isCastUpdateNotifications(), enabled
+			);
+			default -> throw new DomainRuleViolationException("Invalid notification preference.");
+		}
+		memberProfileRepository.saveAndFlush(profile);
+	}
+
+	@Transactional
 	public CastProfile createCastProfile(
 		UserAccount account,
 		String stageName,

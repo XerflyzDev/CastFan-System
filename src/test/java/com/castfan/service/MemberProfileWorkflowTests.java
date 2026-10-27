@@ -108,8 +108,50 @@ class MemberProfileWorkflowTests {
 		mockMvc.perform(post("/member/profile").with(memberUser())
 				.param("displayName", "No CSRF").param("bio", "Rejected"))
 			.andExpect(status().isForbidden());
+		mockMvc.perform(post("/member/profile/notification-preferences")
+				.with(user(cast.getEmail()).roles("CAST")).with(csrf())
+				.param("preference", "eventNotifications")
+				.param("enabled", "false"))
+			.andExpect(status().isForbidden());
 		assertThat(userAccountRepository.findById(member.getId()).orElseThrow().getDisplayName())
 			.isEqualTo("Original Member");
+	}
+
+	@Test
+	void memberCanUpdateNotificationPreferencesIndependently() throws Exception {
+		mockMvc.perform(post("/member/profile/notification-preferences")
+				.with(memberUser()).with(csrf())
+				.param("preference", "castUpdateNotifications")
+				.param("enabled", "false"))
+			.andExpect(status().isNoContent());
+
+		var stored = memberProfileRepository.findByUserAccountId(member.getId()).orElseThrow();
+		assertThat(stored.isCastUpdateNotifications()).isFalse();
+		assertThat(stored.isEventNotifications()).isTrue();
+
+		mockMvc.perform(post("/member/profile/notification-preferences")
+				.with(memberUser()).with(csrf())
+				.param("preference", "eventNotifications")
+				.param("enabled", "false"))
+			.andExpect(status().isNoContent());
+
+		assertThat(memberProfileRepository.findByUserAccountId(member.getId()).orElseThrow().isEventNotifications())
+			.isFalse();
+	}
+
+	@Test
+	void notificationPreferenceUpdateRejectsInvalidRequests() throws Exception {
+		mockMvc.perform(post("/member/profile/notification-preferences")
+				.with(memberUser()).with(csrf())
+				.param("preference", "unsupportedPreference")
+				.param("enabled", "false"))
+			.andExpect(status().isBadRequest());
+
+		mockMvc.perform(post("/member/profile/notification-preferences")
+				.with(memberUser())
+				.param("preference", "eventNotifications")
+				.param("enabled", "false"))
+			.andExpect(status().isForbidden());
 	}
 
 	private UserRequestPostProcessor memberUser() {

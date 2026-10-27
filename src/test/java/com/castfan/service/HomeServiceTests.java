@@ -1,4 +1,3 @@
-
 package com.castfan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;

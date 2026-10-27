@@ -1,4 +1,3 @@
-
 package com.castfan.service;
 
 import java.time.Instant;

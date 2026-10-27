@@ -49,7 +49,8 @@ public class MemberNotificationService {
 	@Transactional(readOnly = true)
 	public MemberNotificationView load(String email) {
 		var member = userAccountRepository.findByEmailIgnoreCase(email)
-			.filter(account -> account.getRole() == UserRole.MEMBER && account.getStatus() == UserStatus.ACTIVE)
+			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
+				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()))
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
 		var updates = (member.isCastUpdateNotifications() ? castContentRepository.findFeedForMember(

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class MemberProfileController {
@@ -46,5 +49,22 @@ public class MemberProfileController {
 		}
 		model.addAttribute("profile", profileService.memberProfile(principal.getName()));
 		return "member/profile";
+	}
+
+	@PostMapping("/member/profile/notification-preferences")
+	@PreAuthorize("hasRole('MEMBER')")
+	@ResponseBody
+	public ResponseEntity<Void> updateNotificationPreference(
+        Principal principal,
+        @RequestParam("preference") String preference,
+        @RequestParam("enabled") boolean enabled) {
+
+    profileService.updateMemberNotificationPreference(
+            principal.getName(),
+            preference,
+            enabled
+    );
+
+    return ResponseEntity.noContent().build();
 	}
 }

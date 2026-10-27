@@ -36,8 +36,37 @@
                     <label class="media-upload"><span>Profile photo <small>Optional</small></span><input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-image-input><input type="hidden" th:field="*{removeImage}" data-image-remove><span class="media-picker"><img th:if="${profile.avatarUrl != null}" th:src="${profile.avatarUrl}" alt="Current profile photo" data-image-preview><img th:unless="${profile.avatarUrl != null}" alt="Selected profile photo preview" data-image-preview hidden><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><span><strong data-image-name th:text="${profile.avatarUrl != null ? 'Replace photo' : 'Choose photo'}">Choose photo</strong><small>JPG, PNG, or WebP · Maximum 2 MB</small></span></span></label>
                     <button class="media-clear" type="button" data-image-clear th:hidden="${profile.avatarUrl == null}"><i class="bi bi-x-circle" aria-hidden="true"></i>Clear photo</button>
                     <fieldset class="notification-preferences"><legend>Notification preferences</legend>
-                        <label class="preference-toggle"><span><strong>Cast updates</strong><small>Show new posts from Cast you follow.</small></span><input type="checkbox" th:field="*{castUpdateNotifications}"><i aria-hidden="true"></i></label>
-                        <label class="preference-toggle"><span><strong>Event reminders</strong><small>Show upcoming published store events.</small></span><input type="checkbox" th:field="*{eventNotifications}"><i aria-hidden="true"></i></label>
+                        <label class="preference-toggle">
+                            <span>
+                                <strong>Cast updates</strong>
+                                <small>Show new posts from Cast you follow.</small>
+                            </span>
+                        
+                            <input
+                                type="checkbox"
+                                th:field="*{castUpdateNotifications}"
+                                data-notification-preference
+                                aria-label="Enable Cast update notifications"
+                            >
+                        
+                            <i aria-hidden="true"></i>
+                        </label>
+                        
+                        <label class="preference-toggle">
+                            <span>
+                                <strong>Event reminders</strong>
+                                <small>Show upcoming published store events.</small>
+                            </span>
+                        
+                            <input
+                                type="checkbox"
+                                th:field="*{eventNotifications}"
+                                data-notification-preference
+                                aria-label="Enable event reminders"
+                            >
+                        
+                            <i aria-hidden="true"></i>
+                        </label>
                     </fieldset>
                     <button class="save-profile-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Save profile</button>
                 </form>

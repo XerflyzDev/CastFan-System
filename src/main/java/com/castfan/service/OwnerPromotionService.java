@@ -13,7 +13,6 @@ import com.castfan.entity.StorePromotion;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.StorePromotionRepository;
-import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -26,14 +25,14 @@ public class OwnerPromotionService {
 	private static final DateTimeFormatter RANGE_FORMAT = DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.ENGLISH);
 
 	private final UserAccountRepository userAccountRepository;
-	private final StoreRepository storeRepository;
+	private final SystemStoreService systemStoreService;
 	private final StorePromotionRepository storePromotionRepository;
 	private final StorePromotionImageService storePromotionImageService;
 
-	public OwnerPromotionService(UserAccountRepository userAccountRepository, StoreRepository storeRepository,
+	public OwnerPromotionService(UserAccountRepository userAccountRepository, SystemStoreService systemStoreService,
 		StorePromotionRepository storePromotionRepository, StorePromotionImageService storePromotionImageService) {
 		this.userAccountRepository = userAccountRepository;
-		this.storeRepository = storeRepository;
+		this.systemStoreService = systemStoreService;
 		this.storePromotionRepository = storePromotionRepository;
 		this.storePromotionImageService = storePromotionImageService;
 	}
@@ -41,11 +40,7 @@ public class OwnerPromotionService {
 	@Transactional(readOnly = true)
 	public OwnerPromotionView load(String email, Long editingPromotionId) {
 		var owner = requireOwner(email);
-		var stores = storeRepository.findAllByOwnerIdOrderByNameAsc(owner.getId());
 		return new OwnerPromotionView(
-			stores.stream().filter(Store::isActive)
-				.map(store -> new OwnerPromotionView.StoreOption(store.getId(), store.getName(), store.getTimezone()))
-				.toList(),
 			storePromotionRepository.findAllForOwner(email).stream().map(this::toItem).toList(),
 			editingPromotionId,
 			editingPromotionId == null ? null : storePromotionRepository.findById(editingPromotionId)
@@ -61,7 +56,6 @@ public class OwnerPromotionService {
 		var startsAt = promotion.getStartsAt().atZone(zone);
 		var endsAt = promotion.getEndsAt().atZone(zone);
 		var form = new OwnerPromotionForm();
-		form.setStoreId(promotion.getStore().getId());
 		form.setTitle(promotion.getTitle());
 		form.setDescription(promotion.getDescription());
 		form.setCode(promotion.getCode());
@@ -75,7 +69,7 @@ public class OwnerPromotionService {
 	@Transactional
 	public StorePromotion create(String email, OwnerPromotionForm form, MultipartFile image) {
 		var owner = requireOwner(email);
-		var store = requireOwnedStore(owner.getId(), form.getStoreId());
+		var store = systemStoreService.requireForOwner(owner);
 		var code = cleanCode(form.getCode());
 		requireUniqueCode(code, null);
 		var range = range(form, store);
@@ -95,9 +89,6 @@ public class OwnerPromotionService {
 	@Transactional
 	public void update(String email, Long promotionId, OwnerPromotionForm form, MultipartFile image) {
 		var promotion = requireOwnedPromotionForUpdate(email, promotionId);
-		if (!promotion.getStore().getId().equals(form.getStoreId())) {
-			throw new DomainRuleViolationException("A promotion cannot be moved to another store.");
-		}
 		var code = cleanCode(form.getCode());
 		requireUniqueCode(code, promotionId);
 		var range = range(form, promotion.getStore());
@@ -135,7 +126,7 @@ public class OwnerPromotionService {
 			: !now.isBefore(promotion.getEndsAt()) ? "Expired" : "Live";
 		return new OwnerPromotionView.PromotionItem(
 			promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
-			storePromotionImageService.ownerUrl(promotion), promotion.getStore().getName(),
+			storePromotionImageService.ownerUrl(promotion),
 			RANGE_FORMAT.format(promotion.getStartsAt().atZone(zone)) + " - "
 				+ RANGE_FORMAT.format(promotion.getEndsAt().atZone(zone)),
 			state, state.toLowerCase(Locale.ENGLISH), true,
@@ -155,12 +146,6 @@ public class OwnerPromotionService {
 		return userAccountRepository.findByEmailIgnoreCase(email)
 			.filter(account -> account.getRole() == UserRole.OWNER && account.getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
-	}
-
-	private Store requireOwnedStore(Long ownerId, Long storeId) {
-		return storeRepository.findById(storeId)
-			.filter(store -> store.isActive() && store.getOwner().getId().equals(ownerId))
-			.orElseThrow(() -> new DomainRuleViolationException("Active store not found."));
 	}
 
 	private StorePromotion requireOwnedPromotion(String email, Long promotionId) {

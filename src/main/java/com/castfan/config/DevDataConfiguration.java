@@ -54,12 +54,12 @@ public class DevDataConfiguration {
 
 			var password = passwordEncoder.encode("dev-only-password");
 			var owner = userAccountRepository.save(new UserAccount(
-				"owner@castfan.local", password, "Hoshi Owner", UserRole.OWNER, UserStatus.ACTIVE
+				"owner@castfan.local", password, "CastFan Owner", UserRole.OWNER, UserStatus.ACTIVE
 			));
 			var store = storeRepository.save(new Store(
 				owner,
-				"Hoshi Cafe",
-				"hoshi-cafe",
+				"CastFan",
+				"castfan",
 				"A single-store Cast cafe in Bangkok.",
 				"Bangkok, Thailand",
 				STORE_ZONE.getId(),
@@ -95,7 +95,7 @@ public class DevDataConfiguration {
 				store,
 				owner,
 				"Autumn Sweet Night",
-				"Seasonal strawberry desserts and a special evening with the Hoshi Cafe Cast.",
+				"Seasonal strawberry desserts and a special evening with the CastFan Cast.",
 				"/images/autumn-cafe-event.png",
 				eventStartsAt,
 				eventStartsAt.plusSeconds(5 * 60 * 60),

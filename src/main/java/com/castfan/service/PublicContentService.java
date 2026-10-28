@@ -138,7 +138,7 @@ public class PublicContentService {
 		return new PublicCastProfileView(
 			profile.getId(), profile.getStageName(), "@" + profile.getStageNameKey(), profile.getBio(),
 			profile.getAvatarUrl(), initials(profile.getStageName()),
-			assignment.map(value -> value.getStore().getName()).orElse("CastFan"),
+			SystemStoreService.DISPLAY_NAME,
 			castFollowRepository.countByCastProfileId(castProfileId), isFollowed,
 			nextShift, tiers, content
 		);
@@ -178,8 +178,8 @@ public class PublicContentService {
 		return new PublicEventView(
 			event.getId(), event.getTitle(), event.getDescription(), storeEventImageService.publicImageUrl(event),
 			DATE.format(event.getStartsAt().atZone(zone)), formatRange(event.getStartsAt(), event.getEndsAt(), zone),
-			event.getStore().getName(),
-			event.getStore().getAddress() == null ? event.getStore().getName() : event.getStore().getAddress(),
+			SystemStoreService.DISPLAY_NAME,
+			event.getStore().getAddress() == null ? SystemStoreService.DISPLAY_NAME : event.getStore().getAddress(),
 			java.util.List.copyOf(castByProfile.values())
 		);
 	}
@@ -195,7 +195,7 @@ public class PublicContentService {
 			+ "DTEND:" + ICS_DATE_TIME.format(event.getEndsAt().atZone(ZoneId.of("UTC"))) + "\r\n"
 			+ "SUMMARY:" + ics(event.getTitle()) + "\r\n"
 			+ "DESCRIPTION:" + ics(event.getDescription()) + "\r\n"
-			+ "LOCATION:" + ics(event.getStore().getAddress() == null ? event.getStore().getName() : event.getStore().getAddress()) + "\r\n"
+			+ "LOCATION:" + ics(event.getStore().getAddress() == null ? SystemStoreService.DISPLAY_NAME : event.getStore().getAddress()) + "\r\n"
 			+ "END:VEVENT\r\nEND:VCALENDAR\r\n";
 	}
 

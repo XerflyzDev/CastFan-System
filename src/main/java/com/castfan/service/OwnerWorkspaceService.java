@@ -59,8 +59,8 @@ public class OwnerWorkspaceService {
 	public OwnerWorkspaceView load(String email, LocalDate requestedDate) {
 		var account = userAccountRepository.findByEmailIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
-		var stores = storeRepository.findAllByOwnerIdOrderByNameAsc(account.getId());
-		var zone = stores.stream().filter(store -> store.isActive()).findFirst()
+		var stores = storeRepository.findFirstByOwnerIdAndActiveTrueOrderByIdAsc(account.getId()).stream().toList();
+		var zone = stores.stream().findFirst()
 			.map(store -> safeZone(store.getTimezone())).orElse(DEFAULT_ZONE);
 		var today = LocalDate.now(zone);
 		var selectedDate = requestedDate == null ? today : requestedDate;
@@ -83,7 +83,7 @@ public class OwnerWorkspaceService {
 			account.getDisplayName(),
 			account.getEmail(),
 			stores.stream().map(store -> new OwnerWorkspaceView.StoreItem(
-				store.getId(), store.getName(), store.getAddress(), store.getTimezone(), store.isActive()
+				store.getId(), SystemStoreService.DISPLAY_NAME, store.getAddress(), store.getTimezone(), store.isActive()
 			)).toList(),
 			assignments.stream().map(assignment -> assignment.getCastProfile().getId()).distinct().count(),
 			shiftScheduleRepository.countForOwnerByStatus(email, ShiftStatus.SUBMITTED),
@@ -125,7 +125,7 @@ public class OwnerWorkspaceService {
 			profile.getStageName(),
 			initials(profile.getStageName()),
 			profile.getAvatarUrl(),
-			store.getName(),
+			SystemStoreService.DISPLAY_NAME,
 			SHORT_DATE.format(startsAt),
 			TIME.format(startsAt) + " - " + TIME.format(endsAt),
 			statusLabel(schedule.getStatus()),

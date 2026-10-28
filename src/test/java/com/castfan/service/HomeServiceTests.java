@@ -104,7 +104,7 @@ class HomeServiceTests {
 		var home = homeService.load(member.getEmail());
 
 		assertThat(home.memberName()).isEqualTo("Aruna");
-		assertThat(home.storeName()).isEqualTo("Hoshi Cafe");
+		assertThat(home.storeName()).isEqualTo("CastFan");
 		assertThat(home.workingToday()).singleElement().satisfies(cast -> {
 			assertThat(cast.name()).isEqualTo("Mina");
 			assertThat(cast.followed()).isTrue();

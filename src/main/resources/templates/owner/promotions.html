@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="Manage store promotions and public banners on CastFan.">
+    <meta name="description" content="Manage CastFan promotions and public banners.">
     <title>Promotion Management | CastFan</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -17,7 +17,7 @@
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content owner-content promotion-management">
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><div class="action-group"><a class="round-button" th:href="@{/}" aria-label="Preview public home" title="Preview public home"><i class="bi bi-eye" aria-hidden="true"></i></a><a class="round-button page-back-button" th:href="@{/owner}" aria-label="Back to Owner dashboard" title="Back to Owner dashboard"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div></div>
-            <header class="owner-heading"><p>Store marketing</p><h1>Promotions &amp; banners</h1></header>
+            <header class="owner-heading"><p>CastFan marketing</p><h1>Promotions &amp; banners</h1></header>
 
             <div class="owner-alert success" th:if="${param.created}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Promotion created in paused state.</div>
             <div class="owner-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Promotion changes saved.</div>
@@ -32,7 +32,7 @@
                         <img class="promotion-thumb" th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
                         <span class="promotion-thumb promotion-placeholder" th:unless="${promotion.bannerUrl != null}"><i class="bi bi-card-image" aria-hidden="true"></i></span>
                         <div class="promotion-card-copy">
-                            <div><span class="status-pill" th:classappend="${promotion.statusTone}" th:text="${promotion.status}">Paused</span><small th:text="${promotion.storeName}">Hoshi Cafe</small></div>
+                            <div><span class="status-pill" th:classappend="${promotion.statusTone}" th:text="${promotion.status}">Paused</span><small>CastFan</small></div>
                             <h3 th:text="${promotion.title}">Member welcome offer</h3>
                             <p th:text="${promotion.rangeLabel}">14 Oct 2026, 09:00 - 31 Oct 2026, 23:59</p>
                             <code th:if="${promotion.code != null}" th:text="${promotion.code}">WELCOME10</code>
@@ -51,7 +51,6 @@
                 <div class="section-title"><div><small th:text="${promotionView.editingPromotionId == null ? 'New campaign' : 'Update campaign'}">New campaign</small><h2 id="promotion-form-heading" th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Edit promotion'}">Create promotion</h2></div><a th:if="${promotionView.editingPromotionId != null}" th:href="@{/owner/promotions}" aria-label="Cancel editing"><i class="bi bi-x-lg" aria-hidden="true"></i></a></div>
                 <form class="owner-event-form" th:action="${promotionFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save promotion.</span></div>
-                    <label><span>Store</span><select th:field="*{storeId}" required><option value="">Choose a store</option><option th:each="store : ${promotionView.stores}" th:value="${store.id}" th:text="${store.name}">Hoshi Cafe</option></select><small class="field-error" th:if="${#fields.hasErrors('storeId')}" th:errors="*{storeId}">Store is required</small></label>
                     <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" placeholder="Member welcome offer" required><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title is required</small></label>
                     <label><span>Description</span><textarea th:field="*{description}" maxlength="2000" rows="4" placeholder="Describe the benefit and redemption terms." required></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is required</small></label>
                     <label><span>Promotion code <em>Optional, globally unique</em></span><input type="text" th:field="*{code}" maxlength="64" placeholder="WELCOME10"><small class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">Use a valid code</small></label>

@@ -126,7 +126,7 @@ class RoleAuthorizationTests {
 		mockMvc.perform(get("/owner").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/dashboard"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Store operations")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan operations")));
 		mockMvc.perform(get("/cast").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isForbidden());
 	}

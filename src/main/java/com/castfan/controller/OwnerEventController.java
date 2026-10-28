@@ -140,15 +140,10 @@ public class OwnerEventController {
 	}
 
 	private void populate(Principal principal, Model model, Long editingEventId) {
-		var eventView = ownerEventService.load(principal.getName(), editingEventId);
-		model.addAttribute("eventView", eventView);
+		model.addAttribute("eventView", ownerEventService.load(principal.getName(), editingEventId));
 		model.addAttribute("eventFormAction", editingEventId == null
 			? "/owner/events"
 			: "/owner/events/" + editingEventId);
-		if (model.getAttribute("form") instanceof OwnerEventForm form
-			&& form.getStoreId() == null && !eventView.stores().isEmpty()) {
-			form.setStoreId(eventView.stores().getFirst().id());
-		}
 	}
 
 	private OwnerEventForm defaultForm() {

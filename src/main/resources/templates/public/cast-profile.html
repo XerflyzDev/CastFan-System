@@ -26,7 +26,7 @@
 
             <div class="cast-details">
                 <header class="cast-identity">
-                    <div><p th:text="${cast.storeName + ' Cast'}">Hoshi Cafe Cast</p><h1 th:text="${cast.stageName}">Mina</h1><span th:text="${cast.handle}">@mina</span></div>
+                    <div><p th:text="${cast.storeName + ' Cast'}">CastFan Cast</p><h1 th:text="${cast.stageName}">Mina</h1><span th:text="${cast.handle}">@mina</span></div>
                     <form sec:authorize="hasAnyRole('MEMBER','CAST')" th:if="${!ownProfile and !cast.followed}" th:action="@{/member/casts/{id}/follow-profile(id=${cast.id})}" method="post">
                         <button class="primary-follow" type="submit"><i class="bi bi-heart" aria-hidden="true"></i><span>Follow</span></button>
                     </form>
@@ -45,7 +45,7 @@
 
                 <section class="next-shift" th:if="${cast.nextShift != null}" aria-labelledby="next-shift-heading">
                     <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
-                    <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">Hoshi Cafe</p></div>
+                    <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">CastFan</p></div>
                     <a sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/schedule}" aria-label="Open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 </section>

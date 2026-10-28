@@ -10,12 +10,11 @@ import com.castfan.entity.CastContent;
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.ContentAudience;
 import com.castfan.entity.ContentStatus;
-import com.castfan.entity.MemberTier;
+import com.castfan.entity.StoreMembershipTier;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.CastProfileRepository;
-import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,28 +27,25 @@ public class CastContentService {
 
 	private final UserAccountRepository userAccountRepository;
 	private final CastProfileRepository castProfileRepository;
-	private final MemberTierRepository memberTierRepository;
 	private final CastContentRepository castContentRepository;
 	private final CastContentImageService castContentImageService;
 
 	public CastContentService(UserAccountRepository userAccountRepository, CastProfileRepository castProfileRepository,
-		MemberTierRepository memberTierRepository, CastContentRepository castContentRepository,
+		CastContentRepository castContentRepository,
 		CastContentImageService castContentImageService) {
 		this.userAccountRepository = userAccountRepository;
 		this.castProfileRepository = castProfileRepository;
-		this.memberTierRepository = memberTierRepository;
 		this.castContentRepository = castContentRepository;
 		this.castContentImageService = castContentImageService;
 	}
 
 	@Transactional(readOnly = true)
 	public CastContentView load(String email, Long editingContentId) {
-		var profile = requireCast(email);
+		requireCast(email);
 		return new CastContentView(
 			castContentRepository.findAllOwned(email).stream().map(this::toItem).toList(),
-			memberTierRepository.findAllByCastProfileIdOrderByRankAsc(profile.getId()).stream()
-				.map(tier -> new CastContentView.TierOption(tier.getId(), tier.getName(), tier.getRank(), tier.isActive()))
-				.toList(),
+			java.util.Arrays.stream(StoreMembershipTier.values()).filter(tier -> tier != StoreMembershipTier.NONE)
+				.map(tier -> new CastContentView.StoreTierOption(tier.getRank(), storeTierLabel(tier), tier.getMinimumPoints())).toList(),
 			editingContentId,
 			editingContentId == null ? null : castContentImageService.ownerUrl(requireOwned(email, editingContentId, false))
 		);
@@ -65,7 +61,7 @@ public class CastContentService {
 		form.setTitle(content.getTitle());
 		form.setBody(content.getBody());
 		form.setAudience(content.getAudience());
-		form.setMinimumTierId(content.getMinimumTier() == null ? null : content.getMinimumTier().getId());
+		form.setMinimumStoreTierRank(content.getMinimumStoreTierRank());
 		return form;
 	}
 
@@ -83,9 +79,9 @@ public class CastContentService {
 
 	private CastContent createContent(String email, CastContentForm form, MultipartFile image) {
 		var profile = requireCast(email);
-		var tier = resolveTier(profile, form);
+		var tier = resolveStoreTier(form);
 		var body = cleanRequired(form.getBody(), "Content", 5000);
-		var content = castContentRepository.saveAndFlush(new CastContent(
+		var content = castContentRepository.saveAndFlush(CastContent.forStoreTier(
 			profile, contentTitle(form.getTitle(), body), body,
 			null, form.getAudience(), tier
 		));
@@ -104,10 +100,10 @@ public class CastContentService {
 		var content = requireOwnedForUpdate(profile, contentId);
 		try {
 			var body = cleanRequired(form.getBody(), "Content", 5000);
-			content.updateDetails(
+			content.updateStoreTierDetails(
 				contentTitle(form.getTitle(), body), body,
 				(form.isRemoveImage() || (image != null && !image.isEmpty())) ? null : content.getImageUrl(),
-				form.getAudience(), resolveTier(profile, form)
+				form.getAudience(), resolveStoreTier(form)
 			);
 		} catch (IllegalArgumentException | IllegalStateException exception) {
 			throw new DomainRuleViolationException(exception.getMessage());
@@ -135,16 +131,20 @@ public class CastContentService {
 		castContentRepository.saveAndFlush(content);
 	}
 
-	private MemberTier resolveTier(CastProfile profile, CastContentForm form) {
+	private StoreMembershipTier resolveStoreTier(CastContentForm form) {
 		if (form.getAudience() == null) throw new DomainRuleViolationException("Audience is required.");
 		if (form.getAudience() != ContentAudience.MEMBERS) {
-			if (form.getMinimumTierId() != null) throw new DomainRuleViolationException("Only member content can require a tier.");
+			if (form.getMinimumStoreTierRank() != null) throw new DomainRuleViolationException("Only member content can require a tier.");
 			return null;
 		}
-		if (form.getMinimumTierId() == null) throw new DomainRuleViolationException("Choose a minimum tier for member content.");
-		return memberTierRepository.findById(form.getMinimumTierId())
-			.filter(tier -> tier.getCastProfile().getId().equals(profile.getId()) && tier.isActive())
-			.orElseThrow(() -> new DomainRuleViolationException("Active membership tier not found."));
+		if (form.getMinimumStoreTierRank() == null) throw new DomainRuleViolationException("Choose a minimum tier for member content.");
+		try {
+			var tier = StoreMembershipTier.fromRank(form.getMinimumStoreTierRank());
+			if (tier == StoreMembershipTier.NONE) throw new IllegalArgumentException();
+			return tier;
+		} catch (IllegalArgumentException exception) {
+			throw new DomainRuleViolationException("Choose a valid store membership tier.");
+		}
 	}
 
 	private CastProfile requireCast(String email) {
@@ -171,7 +171,7 @@ public class CastContentService {
 	private CastContentView.ContentItem toItem(CastContent content) {
 		return new CastContentView.ContentItem(
 			content.getId(), content.getTitle(), content.getBody(), castContentImageService.ownerUrl(content), audienceLabel(content),
-			content.getMinimumTier() == null ? null : content.getMinimumTier().getName(),
+			content.getMinimumStoreTier() == null ? null : storeTierLabel(content.getMinimumStoreTier()),
 			statusLabel(content.getStatus()), content.getStatus().name().toLowerCase(Locale.ENGLISH),
 			content.getPublishedAt() == null ? null : PUBLISHED.format(content.getPublishedAt().atZone(DISPLAY_ZONE)),
 			content.getStatus() != ContentStatus.ARCHIVED, content.getStatus() == ContentStatus.DRAFT,
@@ -183,8 +183,12 @@ public class CastContentService {
 		return switch (content.getAudience()) {
 			case PUBLIC -> "Public";
 			case FOLLOWERS -> "Followers";
-			case MEMBERS -> content.getMinimumTier().getName() + "+";
+			case MEMBERS -> storeTierLabel(content.getMinimumStoreTier()) + "+";
 		};
+	}
+
+	private String storeTierLabel(StoreMembershipTier tier) {
+		return "Tier " + tier.getRank();
 	}
 
 	private String statusLabel(ContentStatus status) {

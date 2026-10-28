@@ -22,15 +22,29 @@
 
     <header class="shared-page-heading">
         <p class="eyebrow">Member access</p>
-        <h1>Memberships</h1>
-        <span>Manage your active Cast tiers and explore available memberships.</span>
+        <h1>Membership points</h1>
+        <span>Your tier is based on points earned across the store.</span>
     </header>
+
+    <section class="membership-section" aria-label="Membership points summary">
+        <div class="section-heading"><div><p class="eyebrow">Available points</p><h2 th:text="${#numbers.formatInteger(points.pointsBalance, 1, 'COMMA')}">0</h2></div><span class="count-label" th:text="${points.tier == T(com.castfan.entity.StoreMembershipTier).NONE ? 'NONE' : 'Tier ' + points.tier.rank}">NONE</span></div>
+        <p th:if="${points.tier == T(com.castfan.entity.StoreMembershipTier).NONE}">Earn 1 point to reach Tier 1.</p>
+        <p th:if="${points.tier == T(com.castfan.entity.StoreMembershipTier).TIER_1}" th:text="${#numbers.formatInteger(5000 - points.pointsBalance, 1, 'COMMA') + ' points until Tier 2'}">Points until Tier 2</p>
+        <p th:if="${points.tier == T(com.castfan.entity.StoreMembershipTier).TIER_2}" th:text="${#numbers.formatInteger(20000 - points.pointsBalance, 1, 'COMMA') + ' points until Tier 3'}">Points until Tier 3</p>
+        <p th:if="${points.tier == T(com.castfan.entity.StoreMembershipTier).TIER_3}">You have reached the highest tier.</p>
+    </section>
+
+    <section class="membership-section" aria-labelledby="point-history-heading">
+        <div class="section-heading"><div><p class="eyebrow">Read only</p><h2 id="point-history-heading">Point history</h2></div><span class="count-label" th:text="${points.transactions.size()}">0</span></div>
+        <div class="tier-list" th:if="${!points.transactions.empty}"><article class="tier-row" th:each="entry : ${points.transactions}"><div class="tier-rank"><i class="bi bi-receipt" aria-hidden="true"></i></div><div class="tier-copy"><h3 th:text="${entry.type}">EARN</h3><p class="tier-cast-name" th:text="${#temporals.format(entry.createdAt, 'd MMM yyyy, HH:mm')}">Date</p></div><strong th:text="${entry.pointsDelta >= 0 ? '+' : ''} + ${entry.pointsDelta}">+0</strong></article></div>
+        <div class="directory-empty compact-empty" th:if="${points.transactions.empty}"><i class="bi bi-receipt" aria-hidden="true"></i><h2>No point transactions yet</h2><p>Your history appears here after an Owner records points.</p></div>
+    </section>
 
     <div class="form-alert success" th:if="${membershipSuccess}" th:text="${membershipSuccess}" role="status">Membership activated.</div>
     <div class="form-alert" th:if="${membershipError}" th:text="${membershipError}" role="alert">Membership conflict.</div>
     <div class="form-alert neutral" th:if="${param.cancelled}" role="status">Membership cancelled.</div>
 
-    <section class="membership-section" aria-labelledby="active-memberships-heading">
+    <section class="membership-section" th:if="${false}" aria-labelledby="active-memberships-heading">
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Current access</p>
@@ -58,7 +72,7 @@
         </div>
     </section>
 
-    <section class="membership-section" aria-labelledby="available-tiers-heading">
+    <section class="membership-section" th:if="${false}" aria-labelledby="available-tiers-heading">
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Explore</p>

@@ -2,12 +2,10 @@ package com.castfan.service;
 
 import com.castfan.entity.CastContent;
 import com.castfan.entity.ContentAudience;
-import com.castfan.entity.MembershipStatus;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
 import com.castfan.repository.MemberProfileRepository;
-import com.castfan.repository.TierMembershipRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,15 +15,15 @@ public class ContentAccessService {
 	private final UserAccountRepository userAccountRepository;
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastFollowRepository castFollowRepository;
-	private final TierMembershipRepository tierMembershipRepository;
+	private final MembershipService membershipService;
 
 	public ContentAccessService(UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository, CastFollowRepository castFollowRepository,
-		TierMembershipRepository tierMembershipRepository) {
+		MembershipService membershipService) {
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.castFollowRepository = castFollowRepository;
-		this.tierMembershipRepository = tierMembershipRepository;
+		this.membershipService = membershipService;
 	}
 
 	@Transactional(readOnly = true)
@@ -44,12 +42,11 @@ public class ContentAccessService {
 		var followed = castFollowRepository.existsByMemberProfileIdAndCastProfileId(
 			member.get().getId(), content.getCastProfile().getId()
 		);
-		var rank = tierMembershipRepository.findActiveForCast(
-			member.get().getId(), content.getCastProfile().getId(), MembershipStatus.ACTIVE
-		).map(membership -> membership.getMemberTier().getRank()).orElse(0);
+		var rank = member.get().getStoreMembershipTier().getRank();
 		var accessible = content.getAudience() == ContentAudience.FOLLOWERS
 			? followed
-			: content.getAudience() == ContentAudience.MEMBERS && rank >= content.getMinimumTier().getRank();
+			: content.getAudience() == ContentAudience.MEMBERS
+				&& membershipService.hasStoreTierAccess(authenticatedEmail, content.getMinimumStoreTierRank());
 		return new Access(accessible, followed, rank);
 	}
 
@@ -57,7 +54,7 @@ public class ContentAccessService {
 		return switch (content.getAudience()) {
 			case PUBLIC -> "Public";
 			case FOLLOWERS -> "Followers";
-			case MEMBERS -> content.getMinimumTier().getName() + "+ members";
+			case MEMBERS -> "Tier " + content.getMinimumStoreTierRank() + "+ members";
 		};
 	}
 

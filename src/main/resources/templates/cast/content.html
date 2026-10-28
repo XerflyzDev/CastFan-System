@@ -64,7 +64,7 @@
                         <small class="field-error" th:if="${#fields.hasErrors('audience')}" th:errors="*{audience}">Audience error</small>
                     </fieldset>
 
-                    <label data-tier-field><span>Minimum membership tier</span><select th:field="*{minimumTierId}"><option value="">Choose a tier</option><option th:each="tier : ${contentView.tiers}" th:if="${tier.active}" th:value="${tier.id}" th:text="${tier.name + ' · Rank ' + tier.rank}">Silver</option></select><small class="field-error" th:if="${#fields.hasErrors('minimumTierId')}" th:errors="*{minimumTierId}">Tier error</small></label>
+                    <label data-tier-field><span>Minimum store tier</span><select th:field="*{minimumStoreTierRank}"><option value="">Choose a tier</option><option th:each="tier : ${contentView.storeTiers}" th:value="${tier.rank}" th:text="${tier.name + ' · ' + #numbers.formatInteger(tier.minimumPoints, 1, 'COMMA') + '+ points'}">Tier 1</option></select><small class="field-error" th:if="${#fields.hasErrors('minimumStoreTierRank')}" th:errors="*{minimumStoreTierRank}">Tier error</small></label>
 
                     <details class="composer-options" th:attr="open=${#fields.hasErrors('title')} ? 'open' : null">
                         <summary><i class="bi bi-type" aria-hidden="true"></i>Add a headline <span>Optional</span></summary>

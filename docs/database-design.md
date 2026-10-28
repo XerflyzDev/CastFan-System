@@ -148,14 +148,14 @@ The service must ensure that a Member has no more than one active tier for the s
 
 ### CastContent
 
-Content published by a Cast. `minimumStoreTierRank` is the target access field for store-tier content. The legacy `minimumTierId` remains temporarily while the Member and Cast UI migration is completed.
+Content published by a Cast. `minimumStoreTierRank` is the required access field for store-tier content. The legacy `minimumTierId` remains temporarily while the Member and Cast UI migration is completed, but it is no longer accepted as the database access boundary by itself.
 
 Rules:
 
 - The selected minimum tier must belong to the same Cast as the content.
 - Only the owning Cast can edit, publish, archive, or delete a draft.
 - Published content requires `publishedAt`.
-- `audience` is `PUBLIC`, `FOLLOWERS`, or `MEMBERS`; member content requires `minimumTierId`.
+- `audience` is `PUBLIC`, `FOLLOWERS`, or `MEMBERS`; member content requires `minimumStoreTierRank`.
 - Members with a tier rank equal to or higher than the required tier can read the full content.
 - `minimumStoreTierRank`, when present, is between `1` and `3`.
 - Archived content is retained for audit history and is excluded from public profile queries.

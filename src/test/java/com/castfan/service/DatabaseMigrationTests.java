@@ -45,7 +45,7 @@ class DatabaseMigrationTests {
 			""", String.class);
 
 		assertThat(tables).containsAll(EXPECTED_TABLES);
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("7");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

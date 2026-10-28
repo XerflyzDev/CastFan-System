@@ -78,7 +78,7 @@ The core uses the fixed `StoreMembershipTier` definition `NONE`, `TIER_1`, `TIER
 
 ### CastContent
 
-`minimumStoreTierRank` is available as an optional field for the replacement content workflow. Cast may still choose whether content is public, follower-only, or restricted to Members at or above a store tier, but Cast cannot create or assign store tiers. The legacy field remains until the dependent UI work migrates existing forms and access queries.
+`minimumStoreTierRank` is required when the audience is `MEMBERS` and must be absent for public or follower-only content. `CastContent.forStoreTier(...)` and `updateStoreTierDetails(...)` provide the entity contract for the replacement workflow. The legacy field remains temporarily so existing screens compile, but legacy writes also populate the store-tier rank and it is no longer sufficient by itself at the database boundary.
 
 ## Service And View Contract
 

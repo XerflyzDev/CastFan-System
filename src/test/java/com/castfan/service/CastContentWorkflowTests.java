@@ -20,6 +20,7 @@ import com.castfan.dto.CastContentForm;
 import com.castfan.dto.MemberTierForm;
 import com.castfan.entity.ContentAudience;
 import com.castfan.entity.ContentStatus;
+import com.castfan.entity.StoreMembershipTier;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -110,6 +111,25 @@ class CastContentWorkflowTests {
 		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
 		assertThat(post.getTitle()).isEqualTo("A quick update for everyone");
 		assertThat(post.getStatus()).isEqualTo(ContentStatus.PUBLISHED);
+	}
+
+	@Test
+	void storeTierContentUsesTheStoreWideRankWithoutALegacyCastTier() {
+		var castProfile = castProfileRepository.findById(castProfileId).orElseThrow();
+		var content = com.castfan.entity.CastContent.forStoreTier(
+			castProfile,
+			"Tier 2 Update",
+			"Store-wide member content",
+			null,
+			ContentAudience.MEMBERS,
+			StoreMembershipTier.TIER_2
+		);
+
+		var saved = castContentRepository.saveAndFlush(content);
+
+		assertThat(saved.getMinimumTier()).isNull();
+		assertThat(saved.getMinimumStoreTier()).isEqualTo(StoreMembershipTier.TIER_2);
+		assertThat(saved.getMinimumStoreTierRank()).isEqualTo(2);
 	}
 
 	@Test

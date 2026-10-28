@@ -51,7 +51,7 @@ class DatabaseMySqlMigrationTests {
 			""", String.class);
 
 		assertThat(tables).containsExactlyInAnyOrderElementsOf(EXPECTED_TABLES);
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("7");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

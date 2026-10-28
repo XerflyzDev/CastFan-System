@@ -77,6 +77,15 @@ public class CastContent {
 		updateDetails(title, body, imageUrl, audience, minimumTier);
 	}
 
+	public static CastContent forStoreTier(CastProfile castProfile, String title, String body, String imageUrl,
+		ContentAudience audience, StoreMembershipTier minimumStoreTier) {
+		var content = new CastContent();
+		content.castProfile = castProfile;
+		content.status = ContentStatus.DRAFT;
+		content.updateStoreTierDetails(title, body, imageUrl, audience, minimumStoreTier);
+		return content;
+	}
+
 	public void updateDetails(String title, String body, String imageUrl,
 		ContentAudience audience, MemberTier minimumTier) {
 		if (status == ContentStatus.ARCHIVED) throw new IllegalStateException("Archived content cannot be edited.");
@@ -91,7 +100,25 @@ public class CastContent {
 		this.imageUrl = imageUrl;
 		this.audience = audience;
 		this.minimumTier = minimumTier;
-		if (audience != ContentAudience.MEMBERS) this.minimumStoreTierRank = null;
+		this.minimumStoreTierRank = minimumTier == null ? null : Math.min(3, minimumTier.getRank());
+	}
+
+	public void updateStoreTierDetails(String title, String body, String imageUrl,
+		ContentAudience audience, StoreMembershipTier minimumStoreTier) {
+		if (status == ContentStatus.ARCHIVED) throw new IllegalStateException("Archived content cannot be edited.");
+		if (audience == ContentAudience.MEMBERS
+			&& (minimumStoreTier == null || minimumStoreTier == StoreMembershipTier.NONE)) {
+			throw new IllegalArgumentException("A paid store tier is required for member content.");
+		}
+		if (audience != ContentAudience.MEMBERS && minimumStoreTier != null) {
+			throw new IllegalArgumentException("A minimum store tier can be used only for member content.");
+		}
+		this.title = title;
+		this.body = body;
+		this.imageUrl = imageUrl;
+		this.audience = audience;
+		this.minimumTier = null;
+		this.minimumStoreTierRank = minimumStoreTier == null ? null : minimumStoreTier.getRank();
 	}
 
 	public void updateMinimumStoreTier(StoreMembershipTier minimumStoreTier) {
@@ -104,6 +131,7 @@ public class CastContent {
 		if (minimumStoreTier == null || minimumStoreTier == StoreMembershipTier.NONE) {
 			throw new IllegalArgumentException("A paid store tier is required for member content.");
 		}
+		this.minimumTier = null;
 		this.minimumStoreTierRank = minimumStoreTier.getRank();
 	}
 

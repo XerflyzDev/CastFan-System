@@ -52,6 +52,9 @@ public class CastContent {
 	@JoinColumn(name = "minimum_tier_id")
 	private MemberTier minimumTier;
 
+	@Column(name = "minimum_store_tier_rank")
+	private Integer minimumStoreTierRank;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 20)
 	private ContentStatus status;
@@ -88,6 +91,20 @@ public class CastContent {
 		this.imageUrl = imageUrl;
 		this.audience = audience;
 		this.minimumTier = minimumTier;
+		if (audience != ContentAudience.MEMBERS) this.minimumStoreTierRank = null;
+	}
+
+	public void updateMinimumStoreTier(StoreMembershipTier minimumStoreTier) {
+		if (status == ContentStatus.ARCHIVED) {
+			throw new IllegalStateException("Archived content cannot be edited.");
+		}
+		if (audience != ContentAudience.MEMBERS) {
+			throw new IllegalArgumentException("A minimum store tier can be used only for member content.");
+		}
+		if (minimumStoreTier == null || minimumStoreTier == StoreMembershipTier.NONE) {
+			throw new IllegalArgumentException("A paid store tier is required for member content.");
+		}
+		this.minimumStoreTierRank = minimumStoreTier.getRank();
 	}
 
 	public void publish() {
@@ -114,6 +131,10 @@ public class CastContent {
 	public String getImageUrl() { return imageUrl; }
 	public ContentAudience getAudience() { return audience; }
 	public MemberTier getMinimumTier() { return minimumTier; }
+	public Integer getMinimumStoreTierRank() { return minimumStoreTierRank; }
+	public StoreMembershipTier getMinimumStoreTier() {
+		return minimumStoreTierRank == null ? null : StoreMembershipTier.fromRank(minimumStoreTierRank);
+	}
 	public ContentStatus getStatus() { return status; }
 	public Instant getPublishedAt() { return publishedAt; }
 	public Instant getCreatedAt() { return createdAt; }

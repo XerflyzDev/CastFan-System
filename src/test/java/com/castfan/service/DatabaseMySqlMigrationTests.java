@@ -25,7 +25,7 @@ class DatabaseMySqlMigrationTests {
 
 	private static final List<String> EXPECTED_TABLES = List.of(
 		"account_avatars", "cast_content", "cast_content_images", "cast_follows", "cast_profiles", "flyway_schema_history",
-		"member_profiles", "member_tiers", "shift_schedules", "store_cast", "store_event_images", "store_events",
+		"member_point_transactions", "member_profiles", "member_tiers", "shift_schedules", "store_cast", "store_event_images", "store_events",
 		"store_promotion_images", "store_promotions", "stores", "tier_memberships", "user_accounts"
 	);
 
@@ -51,7 +51,7 @@ class DatabaseMySqlMigrationTests {
 			""", String.class);
 
 		assertThat(tables).containsExactlyInAnyOrderElementsOf(EXPECTED_TABLES);
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

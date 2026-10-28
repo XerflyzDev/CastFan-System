@@ -1,7 +1,6 @@
 package com.castfan.controller;
 
 import java.security.Principal;
-import java.util.List;
 
 import com.castfan.service.MembershipService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +21,6 @@ public class MemberMembershipController {
 	@GetMapping("/member/memberships")
 	public String memberships(Principal principal, Model model) {
 		model.addAttribute("points", membershipService.memberPoints(principal.getName()));
-		model.addAttribute("memberships", List.of());
-		model.addAttribute("availableTiers", List.of());
 		return "member/memberships";
 	}
 }

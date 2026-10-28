@@ -79,7 +79,11 @@ class MemberProfileWorkflowTests {
 		mockMvc.perform(get("/account").with(memberUser()))
 			.andExpect(content().string(containsString("I follow the evening Cast team.")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Owner navigation"))))
-			.andExpect(content().string(containsString("/account/avatar")));
+			.andExpect(content().string(containsString("/account/avatar")))
+			.andExpect(content().string(containsString("Membership points")))
+			.andExpect(content().string(containsString("No tier yet")))
+			.andExpect(content().string(containsString("0 points")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("No active memberships"))));
 		mockMvc.perform(get("/avatars/{id}", member.getId()))
 			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
 	}

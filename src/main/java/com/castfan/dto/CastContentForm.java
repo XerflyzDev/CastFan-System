@@ -30,14 +30,4 @@ public class CastContentForm {
 	public void setAudience(ContentAudience audience) { this.audience = audience; }
 	public Integer getMinimumStoreTierRank() { return minimumStoreTierRank; }
 	public void setMinimumStoreTierRank(Integer minimumStoreTierRank) { this.minimumStoreTierRank = minimumStoreTierRank; }
-
-	@Deprecated
-	public Long getMinimumTierId() {
-		return minimumStoreTierRank == null ? null : minimumStoreTierRank.longValue();
-	}
-
-	@Deprecated
-	public void setMinimumTierId(Long minimumTierId) {
-		this.minimumStoreTierRank = minimumTierId == null ? null : Math.toIntExact(minimumTierId);
-	}
 }

@@ -101,19 +101,18 @@
 
             <section class="profile-section" th:if="${account.role == 'MEMBER'}" aria-labelledby="membership-heading">
                 <div class="profile-section-title">
-                    <div><small>Member access</small><h2 id="membership-heading">Memberships</h2></div>
-                    <a th:href="@{/member/memberships}">Manage</a>
+                    <div><small>Member access</small><h2 id="membership-heading">Membership points</h2></div>
+                    <a th:href="@{/member/memberships}">View</a>
                 </div>
-                <div class="membership-list" th:if="${!memberships.empty}">
-                    <div class="membership-row" th:each="membership, membershipStat : ${memberships}">
-                        <span class="membership-icon" th:classappend="${membershipStat.even ? 'rose' : 'amber'}"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
-                        <div><strong th:text="${membership.tierName}">Silver Member</strong><small><span th:text="${membership.castStageName}">Mina</span> · Active</small></div>
-                        <span class="membership-price" th:text="${membership.currency == 'THB' ? '฿' + membership.monthlyPrice : membership.monthlyPrice + ' ' + membership.currency}">฿199</span>
+                <div class="membership-list">
+                    <div class="membership-row">
+                        <span class="membership-icon amber"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
+                        <div>
+                            <strong th:text="${memberPoints.tier.name() == 'NONE' ? 'No tier yet' : #strings.replace(memberPoints.tier.name(), 'TIER_', 'Tier ')}">No tier yet</strong>
+                            <small>Store-wide access tier</small>
+                        </div>
+                        <span class="membership-price" th:text="${#numbers.formatInteger(memberPoints.pointsBalance, 1, 'COMMA') + ' points'}">0 points</span>
                     </div>
-                </div>
-                <div class="profile-empty" th:if="${memberships.empty}">
-                    <i class="bi bi-star" aria-hidden="true"></i>
-                    <span><strong>No active memberships</strong><small>Explore available Cast tiers.</small></span>
                 </div>
             </section>
 

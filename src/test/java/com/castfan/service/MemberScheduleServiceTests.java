@@ -64,7 +64,7 @@ class MemberScheduleServiceTests {
 
 		var schedule = memberScheduleService.load(selectedDate);
 
-		assertThat(schedule.storeName()).isEqualTo("Hoshi Cafe");
+		assertThat(schedule.storeName()).isEqualTo("CastFan");
 		assertThat(schedule.selectedDate()).isEqualTo("2026-10-14");
 		assertThat(schedule.selectedDateLabel()).isEqualTo("Wednesday, 14 October");
 		assertThat(schedule.closingTime()).isEqualTo("20:00");

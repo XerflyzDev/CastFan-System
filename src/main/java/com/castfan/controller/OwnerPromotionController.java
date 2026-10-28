@@ -111,12 +111,9 @@ public class OwnerPromotionController {
 	}
 
 	private void populate(Principal principal, Model model, Long editingPromotionId) {
-		var view = ownerPromotionService.load(principal.getName(), editingPromotionId);
-		model.addAttribute("promotionView", view);
+		model.addAttribute("promotionView", ownerPromotionService.load(principal.getName(), editingPromotionId));
 		model.addAttribute("promotionFormAction", editingPromotionId == null
 			? "/owner/promotions" : "/owner/promotions/" + editingPromotionId);
-		if (model.getAttribute("form") instanceof OwnerPromotionForm form
-			&& form.getStoreId() == null && !view.stores().isEmpty()) form.setStoreId(view.stores().getFirst().id());
 	}
 
 	private OwnerPromotionForm defaultForm() {

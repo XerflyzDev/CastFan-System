@@ -39,11 +39,11 @@
                 <div class="cast-shift-list" th:if="${!workspace.shifts.empty}">
                     <article class="cast-shift-row" th:each="shift : ${workspace.shifts}">
                         <div class="shift-date"><strong th:text="${shift.dateLabel}">15 Oct</strong><small th:text="${shift.dayLabel}">Wednesday</small></div>
-                        <div class="shift-main"><strong th:text="${shift.storeName}">Hoshi Cafe</strong><small th:text="${shift.timeLabel}">14:00 - 20:00</small></div>
+                        <div class="shift-main"><strong th:text="${shift.storeName}">CastFan</strong><small th:text="${shift.timeLabel}">14:00 - 20:00</small></div>
                         <span class="shift-badge" th:classappend="${shift.statusTone}" th:text="${shift.workingNow ? 'Working' : shift.status}">Approved</span>
                     </article>
                 </div>
-                <div class="cast-empty" th:if="${workspace.shifts.empty}"><i class="bi bi-calendar2-plus" aria-hidden="true"></i><div><strong>No upcoming shifts</strong><small>Submit availability for your store to review.</small></div></div>
+                <div class="cast-empty" th:if="${workspace.shifts.empty}"><i class="bi bi-calendar2-plus" aria-hidden="true"></i><div><strong>No upcoming shifts</strong><small>Submit availability for Owner review.</small></div></div>
             </section>
 
             <div class="dashboard-actions"><a class="secondary-action" th:href="@{/cast/schedule}"><i class="bi bi-calendar-plus" aria-hidden="true"></i><span>Request shift</span></a></div>

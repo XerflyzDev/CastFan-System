@@ -7,9 +7,6 @@ import jakarta.validation.constraints.NotNull;
 
 public class CastShiftForm {
 
-	@NotNull(message = "Store assignment is required")
-	private Long storeCastId;
-
 	@NotNull(message = "Shift date is required")
 	private LocalDate date;
 
@@ -18,14 +15,6 @@ public class CastShiftForm {
 
 	@NotNull(message = "End time is required")
 	private LocalTime endsAt;
-
-	public Long getStoreCastId() {
-		return storeCastId;
-	}
-
-	public void setStoreCastId(Long storeCastId) {
-		this.storeCastId = storeCastId;
-	}
 
 	public LocalDate getDate() {
 		return date;

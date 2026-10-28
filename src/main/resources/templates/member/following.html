@@ -38,7 +38,7 @@
                         <span class="profile-avatar" th:unless="${cast.avatarUrl != null}" th:classappend="${castStat.index % 3 == 0 ? 'rose' : (castStat.index % 3 == 1 ? 'lavender' : 'amber')}" th:text="${cast.initials}">MN</span>
                         <span class="following-copy">
                             <span class="name-row"><strong th:text="${cast.stageName}">Mina</strong><small>Followed</small></span>
-                            <span th:text="${cast.bio != null ? cast.bio : 'Profile updates from Hoshi Cafe.'}">Profile bio</span>
+                            <span th:text="${cast.bio != null ? cast.bio : 'Profile updates from CastFan.'}">Profile bio</span>
                         </span>
                         <i class="bi bi-heart-fill followed-mark" aria-hidden="true"></i>
                     </a>
@@ -58,7 +58,7 @@
 
             <a class="discover-action" th:href="@{/member/casts}">
                 <i class="bi bi-plus" aria-hidden="true"></i>
-                <span><strong>Discover Cast</strong><small>Find more profiles at Hoshi Cafe</small></span>
+                <span><strong>Discover Cast</strong><small>Find more profiles on CastFan</small></span>
                 <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
         </div>

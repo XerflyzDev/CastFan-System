@@ -114,7 +114,7 @@ public class MemberScheduleService {
 			.orElse(null);
 
 		return new MemberScheduleView(
-			store.map(value -> value.getName()).orElse("CastFan"),
+			SystemStoreService.DISPLAY_NAME,
 			selectedDate.toString(),
 			weekView ? SHORT_DATE.format(weekStartsOn) + " - " + SHORT_DATE.format(weekStartsOn.plusDays(6)) : FULL_DATE.format(selectedDate),
 			MONTH.format(selectedDate),

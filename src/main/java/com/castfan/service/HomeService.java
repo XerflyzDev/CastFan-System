@@ -133,7 +133,7 @@ public class HomeService {
 				var promotionZone = safeZone(promotion.getStore().getTimezone());
 				return new HomeViewModel.FeaturedPromotion(
 					promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
-					storePromotionImageService.publicUrl(promotion), promotion.getStore().getName(),
+					storePromotionImageService.publicUrl(promotion), SystemStoreService.DISPLAY_NAME,
 					"Ends " + EVENT_DATE_FORMAT.format(promotion.getEndsAt().atZone(promotionZone))
 				);
 			})
@@ -155,7 +155,7 @@ public class HomeService {
 		return new HomeViewModel(
 			memberName(authenticatedEmail),
 			DAY_FORMAT.format(today),
-			store.map(value -> value.getName()).orElse("CastFan"),
+			SystemStoreService.DISPLAY_NAME,
 			promotions,
 			cast,
 			events,

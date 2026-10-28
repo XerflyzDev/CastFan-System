@@ -89,7 +89,7 @@ class OwnerWorkspaceWorkflowTests {
 		mockMvc.perform(get("/owner").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/dashboard"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Review Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Review")));
 
 		mockMvc.perform(get("/owner/shifts")

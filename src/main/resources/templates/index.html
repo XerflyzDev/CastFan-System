@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="View Hoshi Cafe events and today's Cast schedule on CastFan.">
+    <meta name="description" content="View CastFan events and today's Cast schedule.">
     <title th:text="${pageTitle} + ' | Home'">CastFan | Home</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -43,7 +43,7 @@
                     <article class="home-promotion-card" th:each="promotion : ${home.featuredPromotions}" th:attr="data-search-item=${promotion.title + ' ' + promotion.description}">
                         <img th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
                         <span class="home-promotion-art" th:unless="${promotion.bannerUrl != null}"><i class="bi bi-gift" aria-hidden="true"></i></span>
-                        <span class="home-promotion-copy"><small><span th:text="${promotion.storeName}">Hoshi Cafe</span> · <span th:text="${promotion.endsLabel}">Ends 31 Oct</span></small><strong th:text="${promotion.title}">Member welcome offer</strong><em th:text="${promotion.description}">Promotion details</em><code th:if="${promotion.code != null}" th:text="${promotion.code}">WELCOME10</code></span>
+                        <span class="home-promotion-copy"><small><span th:text="${promotion.storeName}">CastFan</span> · <span th:text="${promotion.endsLabel}">Ends 31 Oct</span></small><strong th:text="${promotion.title}">Member welcome offer</strong><em th:text="${promotion.description}">Promotion details</em><code th:if="${promotion.code != null}" th:text="${promotion.code}">WELCOME10</code></span>
                     </article>
                 </div>
             </section>
@@ -61,7 +61,7 @@
                         <span class="event-copy">
                             <small><span th:text="${event.date}">31 OCT</span> · <span th:text="${event.time}">16:00 - 21:00</span></small>
                             <strong th:text="${event.title}">Autumn Sweet Night</strong>
-                            <span th:text="${home.storeName}">Hoshi Cafe</span>
+                            <span th:text="${home.storeName}">CastFan</span>
                         </span>
                     </a>
                 </div>
@@ -89,7 +89,7 @@
                         <span class="avatar" th:unless="${cast.avatarUrl != null}" th:classappend="${cast.avatarTone}" th:text="${cast.initials}">MN</span>
                         <span class="cast-card-copy"><strong th:text="${cast.name}">Mina</strong><small th:text="${cast.shiftTime}">14:00 - 20:00</small></span>
                         <span class="cafe">
-                            <span th:text="${home.storeName}">Hoshi Cafe</span>
+                            <span th:text="${home.storeName}">CastFan</span>
                             <i th:if="${cast.workingNow}" aria-label="Working now"></i>
                         </span>
                     </a>
@@ -117,7 +117,7 @@
             <section class="current-shift" th:if="${!home.workingToday.empty}" aria-labelledby="current-shift-title">
                 <div>
                     <p th:text="${home.workingToday[0].workingNow ? 'Current shift' : 'Next shift'}">Next shift</p>
-                    <h2 id="current-shift-title"><span th:text="${home.workingToday[0].name}">Mina</span> at <span th:text="${home.storeName}">Hoshi Cafe</span></h2>
+                    <h2 id="current-shift-title"><span th:text="${home.workingToday[0].name}">Mina</span> at <span th:text="${home.storeName}">CastFan</span></h2>
                     <span th:text="${home.workingToday[0].shiftTime}">14:00 - 20:00</span>
                 </div>
                 <span class="live-badge" th:text="${home.workingToday[0].workingNow ? 'Now' : 'Today'}">Today</span>

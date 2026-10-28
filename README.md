@@ -6,13 +6,13 @@ This project is being built from scratch for three courses: **Web Application De
 
 ## Project Members
 
-| Student ID | Name |
-| :---: | --- |
-| 6831503057 | Parinya Tanunti |
-| 6831503053 | Nonnaphat Thirawatthanakamchon |
-| 6831503035 | Kunpriya Anwisat |
-| 6831503082 | Areenee Hayiuma |
-| 6831503118 | Sirimanee Jakip |
+| Student ID | Name | Contributors |
+| :---: | --- | --- |
+| 6831503057 | Parinya Tanunti | XerflyzDev |
+| 6831503053 | Nonnaphat Thirawatthanakamchon | NonnaphatTm |
+| 6831503035 | Kunpriya Anwisat | 6831503035-Kun |
+| 6831503082 | Areenee Hayiuma | niririniiii |
+| 6831503118 | Sirimanee Jakip | 6831503118-SirimaneeJakip |
 
 ## Project Language
 

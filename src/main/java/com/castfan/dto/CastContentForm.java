@@ -18,7 +18,7 @@ public class CastContentForm {
 	@NotNull(message = "Audience is required")
 	private ContentAudience audience = ContentAudience.PUBLIC;
 
-	private Long minimumTierId;
+	private Integer minimumStoreTierRank;
 
 	public String getTitle() { return title; }
 	public void setTitle(String title) { this.title = title; }
@@ -28,6 +28,6 @@ public class CastContentForm {
 	public void setRemoveImage(boolean removeImage) { this.removeImage = removeImage; }
 	public ContentAudience getAudience() { return audience; }
 	public void setAudience(ContentAudience audience) { this.audience = audience; }
-	public Long getMinimumTierId() { return minimumTierId; }
-	public void setMinimumTierId(Long minimumTierId) { this.minimumTierId = minimumTierId; }
+	public Integer getMinimumStoreTierRank() { return minimumStoreTierRank; }
+	public void setMinimumStoreTierRank(Integer minimumStoreTierRank) { this.minimumStoreTierRank = minimumStoreTierRank; }
 }

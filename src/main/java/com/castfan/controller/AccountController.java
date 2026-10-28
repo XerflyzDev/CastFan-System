@@ -50,10 +50,8 @@ public class AccountController {
 		}
 		model.addAttribute("account", AccountView.from(account, accountAvatarService.hasAvatar(account.getEmail())));
 		model.addAttribute(
-			"memberships",
-			account.getRole() == UserRole.MEMBER
-				? membershipService.activeMemberships(account.getEmail())
-				: java.util.List.of()
+			"memberPoints",
+			account.getRole() == UserRole.MEMBER ? membershipService.memberPoints(account.getEmail()) : null
 		);
 		model.addAttribute(
 			"memberProfile",

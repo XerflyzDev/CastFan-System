@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 
 import com.castfan.dto.CastContentForm;
-import com.castfan.dto.MemberTierForm;
 import com.castfan.entity.ContentAudience;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.StoreMembershipTier;
@@ -71,14 +70,14 @@ class CastContentWorkflowTests {
 		var image = png("content.png");
 		mockMvc.perform(multipart("/cast/content").file(image).with(castUser()).with(csrf())
 				.param("title", "First Update").param("body", "Public content body")
-				.param("audience", "PUBLIC").param("minimumTierId", "").param("intent", "draft"))
+				.param("audience", "PUBLIC").param("minimumStoreTierRank", "").param("intent", "draft"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?created"));
 		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
 		assertThat(post.getStatus()).isEqualTo(ContentStatus.DRAFT);
 
 		mockMvc.perform(post("/cast/content/{id}", post.getId()).with(castUser()).with(csrf())
 				.param("title", "Published Update").param("body", "Public content body")
-				.param("audience", "PUBLIC").param("minimumTierId", ""))
+				.param("audience", "PUBLIC").param("minimumStoreTierRank", ""))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?saved"));
 		mockMvc.perform(post("/cast/content/{id}/publish", post.getId()).with(castUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published=true"));
@@ -105,7 +104,7 @@ class CastContentWorkflowTests {
 	void castCanPublishSimplePostWithoutHeadline() throws Exception {
 		mockMvc.perform(post("/cast/content").with(castUser()).with(csrf())
 				.param("title", "").param("body", "A quick update for everyone")
-				.param("audience", "PUBLIC").param("minimumTierId", "").param("intent", "publish"))
+				.param("audience", "PUBLIC").param("minimumStoreTierRank", "").param("intent", "publish"))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published"));
 
 		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
@@ -135,15 +134,16 @@ class CastContentWorkflowTests {
 	@Test
 	void followerAndMemberContentIsLockedUntilViewerQualifies() throws Exception {
 		var followerPost = createAndPublish("Follower Note", "Follower secret", ContentAudience.FOLLOWERS, null);
-		var tier = membershipService.createTier(castAccount.getEmail(), tierForm("Gold", 2));
-		var goldPost = createAndPublish("Gold Note", "Gold secret", ContentAudience.MEMBERS, tier.id());
+		var tierTwoPost = createAndPublish(
+			"Tier 2 Note", "Tier 2 secret", ContentAudience.MEMBERS, StoreMembershipTier.TIER_2
+		);
 		var member = saveAccount("content-member-" + System.nanoTime() + "@castfan.test", UserRole.MEMBER);
-		profileService.createMemberProfile(member);
+		var memberProfile = profileService.createMemberProfile(member);
 
 		mockMvc.perform(get("/casts/{id}", castProfileId))
 			.andExpect(content().string(containsString("Follower Note")))
 			.andExpect(content().string(not(containsString("Follower secret"))))
-			.andExpect(content().string(not(containsString("Gold secret"))));
+			.andExpect(content().string(not(containsString("Tier 2 secret"))));
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId()))
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("This update is locked")))
@@ -152,7 +152,7 @@ class CastContentWorkflowTests {
 		memberCastService.follow(member.getEmail(), castProfileId);
 		mockMvc.perform(get("/casts/{id}", castProfileId).with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(content().string(containsString("Follower secret")))
-			.andExpect(content().string(not(containsString("Gold secret"))));
+			.andExpect(content().string(not(containsString("Tier 2 secret"))));
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId())
 				.with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(status().isOk()).andExpect(content().string(containsString("Follower secret")));
@@ -169,17 +169,28 @@ class CastContentWorkflowTests {
 			.andExpect(content().string(containsString("Follower secret")))
 			.andExpect(content().string(containsString("href=\"/cast\"")));
 
-		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, goldPost.getId())
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, tierTwoPost.getId())
 				.with(user(member.getEmail()).roles("MEMBER")))
 			.andExpect(content().string(containsString("This update is locked")))
-			.andExpect(content().string(not(containsString("Gold secret"))));
+			.andExpect(content().string(not(containsString("Tier 2 secret"))));
 
-		membershipService.subscribe(member.getEmail(), tier.id());
-		mockMvc.perform(get("/casts/{id}", castProfileId).with(user(member.getEmail()).roles("MEMBER")))
-			.andExpect(content().string(containsString("Gold secret")));
-		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, goldPost.getId())
+		var owner = saveAccount("content-owner-" + System.nanoTime() + "@castfan.test", UserRole.OWNER);
+		membershipService.recordPurchasePoints(
+			owner.getEmail(), memberProfile.getId(), new BigDecimal("4999"), "CONTENT-TIER-1"
+		);
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, tierTwoPost.getId())
 				.with(user(member.getEmail()).roles("MEMBER")))
-			.andExpect(content().string(containsString("Gold secret")));
+			.andExpect(content().string(containsString("This update is locked")))
+			.andExpect(content().string(not(containsString("Tier 2 secret"))));
+
+		membershipService.recordPurchasePoints(
+			owner.getEmail(), memberProfile.getId(), BigDecimal.ONE, "CONTENT-TIER-2"
+		);
+		mockMvc.perform(get("/casts/{id}", castProfileId).with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(content().string(containsString("Tier 2 secret")));
+		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, tierTwoPost.getId())
+				.with(user(member.getEmail()).roles("MEMBER")))
+			.andExpect(content().string(containsString("Tier 2 secret")));
 		assertThat(followerPost.getStatus()).isEqualTo(ContentStatus.PUBLISHED);
 	}
 
@@ -212,20 +223,18 @@ class CastContentWorkflowTests {
 			.isEqualTo(ContentStatus.PUBLISHED);
 	}
 
-	private com.castfan.entity.CastContent createAndPublish(String title, String body, ContentAudience audience, Long tierId) {
+	private com.castfan.entity.CastContent createAndPublish(
+		String title, String body, ContentAudience audience, StoreMembershipTier minimumTier
+	) {
 		var form = new CastContentForm();
-		form.setTitle(title); form.setBody(body); form.setAudience(audience); form.setMinimumTierId(tierId);
+		form.setTitle(title);
+		form.setBody(body);
+		form.setAudience(audience);
+		form.setMinimumStoreTierRank(minimumTier == null ? null : minimumTier.getRank());
 		castContentService.create(castAccount.getEmail(), form);
 		var post = castContentRepository.findAllOwned(castAccount.getEmail()).getFirst();
 		castContentService.publish(castAccount.getEmail(), post.getId());
 		return post;
-	}
-
-	private MemberTierForm tierForm(String name, int rank) {
-		var form = new MemberTierForm();
-		form.setName(name); form.setDescription(name + " access"); form.setRank(rank);
-		form.setMonthlyPrice(new BigDecimal("399.00"));
-		return form;
 	}
 
 	private UserAccount saveAccount(String email, UserRole role) {

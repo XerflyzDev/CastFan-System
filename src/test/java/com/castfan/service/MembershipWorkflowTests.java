@@ -148,27 +148,12 @@ class MembershipWorkflowTests {
 		mockMvc.perform(get("/member/memberships").with(castRequest))
 			.andExpect(status().isForbidden());
 		mockMvc.perform(get("/cast/tiers").with(castRequest))
-			.andExpect(status().isOk())
-			.andExpect(view().name("cast/tiers"));
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/cast/content?legacyTiers"));
 		mockMvc.perform(get("/cast/tiers").with(memberRequest))
 			.andExpect(status().isForbidden());
-
-		mockMvc.perform(post("/cast/tiers")
-				.with(castRequest)
-				.param("name", "Web Tier")
-				.param("rank", "1")
-				.param("monthlyPrice", "149.00"))
-			.andExpect(status().isForbidden());
-		mockMvc.perform(post("/cast/tiers")
-				.with(castRequest)
-				.with(csrf())
-				.param("name", "Web Tier")
-				.param("rank", "1")
-				.param("monthlyPrice", "149.00"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/cast/tiers?created"));
-
-		assertThat(memberTierRepository.count()).isEqualTo(1);
+		mockMvc.perform(post("/cast/tiers").with(castRequest).with(csrf()))
+			.andExpect(status().isMethodNotAllowed());
 	}
 
 	@Test

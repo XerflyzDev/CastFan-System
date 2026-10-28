@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 import com.castfan.entity.CastContent;
@@ -20,7 +19,7 @@ import com.castfan.entity.CastProfile;
 import com.castfan.entity.ContentAudience;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.MemberProfile;
-import com.castfan.entity.MemberTier;
+import com.castfan.entity.StoreMembershipTier;
 import com.castfan.entity.Store;
 import com.castfan.entity.StoreEvent;
 import com.castfan.entity.UserAccount;
@@ -30,7 +29,6 @@ import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.CastFollowRepository;
 import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
-import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.StoreEventRepository;
 import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
@@ -53,7 +51,6 @@ class MemberNotificationWorkflowTests {
 	@Autowired private MemberProfileRepository memberProfileRepository;
 	@Autowired private CastProfileRepository castProfileRepository;
 	@Autowired private CastFollowRepository castFollowRepository;
-	@Autowired private MemberTierRepository memberTierRepository;
 	@Autowired private CastContentRepository castContentRepository;
 	@Autowired private StoreRepository storeRepository;
 	@Autowired private StoreEventRepository storeEventRepository;
@@ -66,10 +63,8 @@ class MemberNotificationWorkflowTests {
 		var followedCast = cast("notice-cast-" + suffix + "@test.local", "Notice Mina " + suffix);
 		var otherCast = cast("other-notice-cast-" + suffix + "@test.local", "Other Notice " + suffix);
 		castFollowRepository.save(new CastFollow(member, followedCast));
-		var tier = memberTierRepository.save(new MemberTier(
-			followedCast, "Gold", "gold", "Gold access", 1, new BigDecimal("399.00"), "THB"
-		));
-		publish(followedCast, "Locked member update", "Locked notification secret", ContentAudience.MEMBERS, tier);
+		publish(followedCast, "Locked member update", "Locked notification secret",
+			ContentAudience.MEMBERS, StoreMembershipTier.TIER_1);
 		publish(otherCast, "Unfollowed update", "Must not be listed", ContentAudience.PUBLIC, null);
 
 		var owner = account("notice-owner-" + suffix + "@test.local", "Notice Owner", UserRole.OWNER);
@@ -88,7 +83,7 @@ class MemberNotificationWorkflowTests {
 		mockMvc.perform(get("/member/notifications").with(user(memberAccount.getEmail()).roles("MEMBER")))
 			.andExpect(status().isOk()).andExpect(view().name("member/notifications"))
 			.andExpect(content().string(containsString("Locked member update")))
-			.andExpect(content().string(containsString("Gold+ members")))
+			.andExpect(content().string(containsString("Tier 1+ members")))
 			.andExpect(content().string(not(containsString("Locked notification secret"))))
 			.andExpect(content().string(not(containsString("Unfollowed update"))))
 			.andExpect(content().string(containsString("Published Notice Event")))
@@ -142,8 +137,10 @@ class MemberNotificationWorkflowTests {
 		));
 	}
 
-	private void publish(CastProfile cast, String title, String body, ContentAudience audience, MemberTier tier) {
-		var content = new CastContent(cast, title, body, null, audience, tier);
+	private void publish(
+		CastProfile cast, String title, String body, ContentAudience audience, StoreMembershipTier minimumTier
+	) {
+		var content = CastContent.forStoreTier(cast, title, body, null, audience, minimumTier);
 		content.publish();
 		castContentRepository.save(content);
 	}

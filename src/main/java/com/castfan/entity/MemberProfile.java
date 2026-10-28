@@ -42,6 +42,9 @@ public class MemberProfile {
 	@Column(name = "event_notifications", nullable = false)
 	private boolean eventNotifications = true;
 
+	@Column(name = "points_balance", nullable = false)
+	private long pointsBalance;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
@@ -95,6 +98,25 @@ public class MemberProfile {
 
 	public boolean isCastUpdateNotifications() { return castUpdateNotifications; }
 	public boolean isEventNotifications() { return eventNotifications; }
+
+	public long getPointsBalance() { return pointsBalance; }
+
+	public StoreMembershipTier getStoreMembershipTier() {
+		return StoreMembershipTier.fromPoints(pointsBalance);
+	}
+
+	public void applyPointsDelta(long pointsDelta) {
+		long resultingBalance;
+		try {
+			resultingBalance = Math.addExact(pointsBalance, pointsDelta);
+		} catch (ArithmeticException exception) {
+			throw new IllegalArgumentException("Point balance is outside the supported range.", exception);
+		}
+		if (resultingBalance < 0) {
+			throw new IllegalArgumentException("Point balance cannot be negative.");
+		}
+		pointsBalance = resultingBalance;
+	}
 
 	public Instant getCreatedAt() {
 		return createdAt;

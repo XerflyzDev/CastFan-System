@@ -42,9 +42,36 @@ Constraints:
 
 Member-specific public information. Each user can have at most one Member profile.
 
-Key fields: `bio`, `avatarUrl`, `castUpdateNotifications`, `eventNotifications`.
+Key fields: `bio`, `avatarUrl`, `castUpdateNotifications`, `eventNotifications`, `pointsBalance`.
 
-Constraint: unique `userId`. Notification preferences default to enabled for new Member profiles.
+Constraints: unique `userId`; `pointsBalance >= 0`. Notification preferences default to enabled and the point balance defaults to zero for new Member profiles.
+
+The store-wide points core is implemented as follows:
+
+- Store accumulated purchase points on the Member profile and record every change in an auditable point ledger.
+- New Members start with zero points and no tier.
+- A separate membership number is not required.
+- Only the authenticated Owner records points after checking the bill outside CastFan; no bill, payment, or point-of-sale record is managed by CastFan.
+- Award points at `1 THB = 1 point`; points do not expire.
+- Derive store-wide tiers as Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+` points.
+- The legacy Cast-specific tier and Member self-subscription tables remain temporarily for UI migration compatibility. They are not the source of truth for store-wide points.
+- The workflow and service contract are specified in [`membership-points.md`](membership-points.md).
+
+### MemberPointTransaction
+
+An append-only ledger entry for every store-wide point change.
+
+Key fields: `memberProfileId`, `createdByUserId`, `type`, `purchaseAmount`, `pointsDelta`, `receiptReference`, `receiptReferenceKey`, `reason`, `originalTransactionId`, `createdAt`.
+
+Rules:
+
+- `type` is `EARN`, `CORRECTION`, or `REVERSAL`.
+- An `EARN` entry requires a positive purchase amount and a globally unique normalized receipt reference for the one-cafe release.
+- A correction or reversal requires a reason and a link to the original `EARN` entry.
+- An original earned entry can be linked to at most one correction or reversal.
+- Completed entries are never updated or deleted by the membership service.
+- The authenticated active Owner account is stored as the actor.
+- A pessimistic lock protects the Member balance while the ledger entry and balance update are committed in one transaction.
 
 ### CastProfile
 
@@ -101,6 +128,8 @@ Constraint: unique pair `(memberProfileId, castProfileId)`.
 
 A Cast-owned membership tier ordered by `rank`.
 
+This describes the current implementation only. It does not match the confirmed target and will be replaced by store-wide point tiers.
+
 Constraints:
 
 - Unique pair `(castProfileId, name)`.
@@ -111,13 +140,15 @@ Constraints:
 
 Records a Member's subscription to a Cast membership tier.
 
+This describes the current implementation only. Member self-subscription and Cast-specific membership will be removed; the target begins with no tier and derives store-wide tier status from points recorded by the Owner.
+
 Constraint: unique pair `(memberProfileId, memberTierId)` for the initial implementation.
 
 The service must ensure that a Member has no more than one active tier for the same Cast.
 
 ### CastContent
 
-Content published by a Cast. `minimumTierId` is nullable for public followers-only content.
+Content published by a Cast. `minimumStoreTierRank` is the target access field for store-tier content. The legacy `minimumTierId` remains temporarily while the Member and Cast UI migration is completed.
 
 Rules:
 
@@ -126,6 +157,7 @@ Rules:
 - Published content requires `publishedAt`.
 - `audience` is `PUBLIC`, `FOLLOWERS`, or `MEMBERS`; member content requires `minimumTierId`.
 - Members with a tier rank equal to or higher than the required tier can read the full content.
+- `minimumStoreTierRank`, when present, is between `1` and `3`.
 - Archived content is retained for audit history and is excluded from public profile queries.
 
 Recommended index: `(castProfileId, status, publishedAt)`.
@@ -196,10 +228,12 @@ Rules:
 | UserAccount | one to zero-or-one | CastProfile |
 | UserAccount | one to zero-or-one | AccountAvatar |
 | UserAccount | one to many | Store |
+| UserAccount | one to many | MemberPointTransaction as actor |
 | Store | one to many | StoreCast |
 | CastProfile | one to many | StoreCast |
 | StoreCast | one to many | ShiftSchedule |
 | MemberProfile | one to many | CastFollow |
+| MemberProfile | one to many | MemberPointTransaction |
 | CastProfile | one to many | CastFollow |
 | CastProfile | one to many | MemberTier |
 | MemberProfile | one to many | TierMembership |
@@ -228,7 +262,8 @@ Rules:
 2. `MemberProfile`, `CastProfile`, and `Store`.
 3. `StoreCast` and `ShiftSchedule` with approval rules.
 4. `CastFollow` and Member discovery queries.
-5. `MemberTier`, `TierMembership`, and access checks.
-6. `CastContent`, `StoreEvent`, and `StorePromotion`.
+5. `MemberPointTransaction`, store-tier derivation, and access checks.
+6. Legacy `MemberTier` and `TierMembership` migration compatibility.
+7. `CastContent`, `StoreEvent`, and `StorePromotion`.
 7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 5.
 8. Run the migration and Hibernate validation against a disposable MySQL database. Completed through schema version 4 against MySQL 8.4.11 on 15 October 2026; rerun version 5 before the next Cloud SQL deployment.

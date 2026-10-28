@@ -24,13 +24,23 @@ English is the primary language for the interface, system messages, documentatio
 
 The original business stakeholder is Thanaphat Thanakitiworakul (P'Sun), a Software Engineering alumnus, student ID cohort 62. The stakeholder supplied the business concept and is expected to review whether the requirements and workflows match the intended cafe operation.
 
+The stakeholder confirmed the following decisions on 27 October 2026:
+
+- The first release is for one cafe only.
+- A newly registered Member starts without a tier.
+- The cafe checks the customer's bill outside CastFan and then records points on the Member account; CastFan is not the point-of-sale system.
+- Only the Owner records points, using the conversion `1 THB = 1 point`, and points do not expire.
+- Membership uses store-wide tiers: Tier 1 at `1-4,999` points, Tier 2 at `5,000-19,999` points, and Tier 3 at `20,000+` points.
+- Store-wide tiers replace the legacy Cast-specific tier and Member self-subscription model.
+- A separate membership number is not required.
+
 ## Product Vision
 
 CastFan should provide one accessible mobile site where:
 
-- Members can discover Cast, check approved schedules, follow favorites, view events and promotions, and read content allowed by their membership tier.
-- Cast can manage their public profile, submit shifts, organize membership tiers, and publish audience-controlled content.
-- Owners can oversee the store, approve shifts, manage the permanent Cast roster, and publish events and promotions.
+- Members can discover Cast, check approved schedules, follow favorites, view events and promotions, view their store points and tier, and read content allowed by that tier.
+- Cast can manage their public profile, submit shifts, and publish content for public, follower, or store-tier audiences.
+- Owners can oversee the store, record Member points, approve shifts, manage the permanent Cast roster, and publish events and promotions.
 
 The experience should reduce schedule coordination errors while strengthening the relationship between the cafe, Cast, and Members.
 
@@ -65,6 +75,7 @@ Together, these courses require the project to demonstrate:
 - View approved Cast schedules by day and week.
 - View published store events and active promotions.
 - View followed-Cast updates and receive relevant in-app notifications.
+- View their store-wide point balance, current tier, progress, and point history.
 - Read public, follower-only, or membership content when their access level permits it.
 - Download published events as iCalendar files.
 
@@ -75,14 +86,14 @@ Together, these courses require the project to demonstrate:
 - Preview their own public Cast profile exactly as Members see it.
 - Manage only their own public Cast profile.
 - Submit and cancel their own shift requests.
-- Create and manage their own membership tiers.
 - Publish content for public, follower, or membership audiences.
-- Select a minimum tier for membership-only content.
+- Select a minimum store-wide tier for membership-only content.
 
 ### Owner
 
 - Sign in through an internally provisioned `OWNER` account.
 - View store metrics and daily schedules.
+- Search Member accounts and record purchase points after checking bills outside CastFan.
 - Approve or reject Cast shift requests for their store.
 - Manage store information and permanent Cast assignments.
 - Upload event images and create, edit, publish, archive, and review store events.
@@ -108,9 +119,11 @@ Together, these courses require the project to demonstrate:
 ### Following And Membership
 
 1. A Member or Cast follows a Cast.
-2. The Cast may define ordered membership tiers.
-3. Tier membership is Cast-specific; access from one Cast never grants access to another Cast's content.
-4. Content visibility is enforced in backend queries and services, not only hidden in the UI.
+2. A newly registered Member has zero points and no tier.
+3. After checking a bill outside CastFan, the Owner records the paid amount and CastFan awards one point per THB.
+4. The system derives the Member's store-wide tier from the accumulated point balance; Members cannot select or subscribe to a tier.
+5. Points do not expire.
+6. Cast may restrict content by the Member's store-wide tier, and access is enforced in backend queries and services.
 
 ### Events And Promotions
 
@@ -120,12 +133,14 @@ Together, these courses require the project to demonstrate:
 
 ## Current Scope And Constraints
 
-- The current stakeholder scope is one cafe, represented by the current Hoshi Cafe experience.
-- The data model can support multiple stores, but multi-store behavior must not be exposed without confirmed requirements and authorization review.
+- The confirmed stakeholder scope is one cafe, represented by the current Hoshi Cafe experience. The first release must not expose creation or selection of additional stores.
 - Booking, payments, paid content, food ordering, queueing, and point-of-sale operations are out of scope.
+- New Members begin with zero points and no tier. The Owner records points after checking a customer's bill outside CastFan at `1 THB = 1 point`.
+- Tier thresholds are Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+`; points never expire.
+- A separate membership number is not required; the Member account and profile identify the customer in CastFan.
+- The existing self-subscription and Cast-specific tier implementation does not match the confirmed store-wide points model and is scheduled for replacement.
 - Profile photos, event images, Cast content images, and promotion images use validated JPG/PNG/WebP uploads up to 2 MB, stored in dedicated one-to-one image tables. Legacy URL columns remain only for seeded and pre-migration data.
 - Notifications are in-app. Email, SMS, push notifications, and background delivery are not confirmed requirements.
-- Member tier assignment and upgrade rules still require final stakeholder confirmation.
 
 ## Technology And Architecture
 
@@ -176,6 +191,7 @@ The implemented model includes:
 - `UserAccount`
 - `AccountAvatar`
 - `MemberProfile`
+- `MemberPointTransaction`
 - `CastProfile`
 - `Store`
 - `StoreCast`
@@ -245,7 +261,6 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 
 ## Open Decisions
 
-- Confirm the final Member tier assignment and upgrade process with the stakeholder.
 - Confirm whether Cast content needs Owner moderation before publication.
 - Define account recovery and password-reset requirements.
 - Define retention, privacy, and audit-log requirements for personal data.
@@ -257,6 +272,7 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - [`README.md`](README.md): setup, current status, and development roadmap.
 - [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md): recovered historical requirements synthesis.
 - [`docs/web-application-development-grading.md`](docs/web-application-development-grading.md): Web Application Development grading and submission criteria supplied by the course.
+- [`docs/membership-points.md`](docs/membership-points.md): confirmed store-wide points and tier requirements, recommended workflow, and target data model.
 - [`docs/database-design.md`](docs/database-design.md): authoritative data model and business constraints.
 - [`docs/database-migrations.md`](docs/database-migrations.md): Flyway and MySQL verification workflow.
 - [`docs/ui-design-system.md`](docs/ui-design-system.md): authoritative visual and interaction rules.

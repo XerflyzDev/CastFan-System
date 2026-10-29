@@ -181,7 +181,7 @@ class AuthFlowTests {
 				org.hamcrest.Matchers.containsString("Member navigation"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("/owner/promotions")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Edit name")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Change photo")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Change profile photo")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Crop photo")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Save photo")));
 

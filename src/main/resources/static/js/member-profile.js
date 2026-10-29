@@ -1,3 +1,4 @@
+(() => {
 const toast = document.querySelector("#app-toast");
 const avatarInput = document.querySelector("[data-avatar-input]");
 const avatarForm = document.querySelector("[data-avatar-form]");
@@ -221,3 +222,4 @@ document
             }
         });
     });
+})();

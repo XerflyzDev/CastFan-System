@@ -306,3 +306,11 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && activePicker) closeActivePicker(true);
 });
+
+document.addEventListener("scroll", (event) => {
+    if (!activePicker) return;
+    if (event.target instanceof Element && activePicker.popover.contains(event.target)) return;
+    closeActivePicker();
+}, true);
+
+window.addEventListener("resize", () => closeActivePicker());

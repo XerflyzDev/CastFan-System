@@ -11,10 +11,33 @@ function closeActivePicker(returnFocus = false) {
 function openPicker(host, trigger, popover) {
     closeActivePicker();
     popover.hidden = false;
-    const hostRect = host.getBoundingClientRect();
-    const spaceAbove = hostRect.top;
-    const spaceBelow = window.innerHeight - hostRect.bottom;
-    popover.classList.toggle("open-down", spaceAbove < popover.offsetHeight + 20 && spaceBelow > spaceAbove);
+    const triggerRect = trigger.getBoundingClientRect();
+    const boundary = host.closest(".phone") || document.documentElement;
+    const boundaryRect = boundary.getBoundingClientRect();
+    const margin = 12;
+    const minLeft = boundaryRect.left + margin;
+    const maxWidth = Math.max(0, boundaryRect.width - margin * 2);
+    popover.style.maxWidth = `${maxWidth}px`;
+    popover.style.maxHeight = `${Math.max(0, boundaryRect.height - margin * 2)}px`;
+    const popoverWidth = popover.getBoundingClientRect().width;
+    const popoverHeight = popover.getBoundingClientRect().height;
+    const left = Math.min(
+        Math.max(minLeft, triggerRect.right - popoverWidth),
+        Math.max(minLeft, boundaryRect.right - popoverWidth - margin)
+    );
+    const minTop = boundaryRect.top + margin;
+    const maxTop = Math.max(minTop, boundaryRect.bottom - popoverHeight - margin);
+    const spaceAbove = triggerRect.top - minTop;
+    const spaceBelow = boundaryRect.bottom - triggerRect.bottom - margin;
+    const openDown = spaceAbove < popoverHeight + 7 && spaceBelow > spaceAbove;
+    const top = openDown
+        ? Math.min(maxTop, triggerRect.bottom + 7)
+        : Math.max(minTop, Math.min(maxTop, triggerRect.top - popoverHeight - 7));
+    popover.classList.toggle("open-down", openDown);
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+    popover.style.right = "auto";
+    popover.style.bottom = "auto";
     trigger.setAttribute("aria-expanded", "true");
     activePicker = { host, trigger, popover };
 }

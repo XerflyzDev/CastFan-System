@@ -8,7 +8,7 @@
 .picker-trigger:focus-visible,
 .picker-trigger[aria-expanded="true"] { border-color: rgba(128, 107, 63, 0.48); outline: 0; background: #fff; box-shadow: 0 0 0 3px rgba(128, 107, 63, 0.09); }
 .picker-trigger[aria-invalid="true"] { border-color: rgba(155, 71, 81, 0.5); }
-.picker-popover { position: absolute; z-index: 20; bottom: calc(100% + 7px); left: 0; max-width: calc(100vw - 64px); border: 1px solid rgba(17, 19, 24, 0.07); border-radius: 16px; color: var(--ink); background: #fff; box-shadow: 0 18px 44px rgba(30, 32, 38, 0.18); }
+.picker-popover { position: fixed; z-index: 1000; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border: 1px solid rgba(17, 19, 24, 0.07); border-radius: 16px; color: var(--ink); background: #fff; box-shadow: 0 18px 44px rgba(30, 32, 38, 0.18); }
 .picker-popover.open-down { top: calc(100% + 7px); bottom: auto; }
 .picker-popover[hidden] { display: none; }
 .picker-popover-header { display: flex; min-height: 32px; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }

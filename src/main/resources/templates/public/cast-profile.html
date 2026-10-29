@@ -15,7 +15,6 @@
     <section class="phone cast-phone" th:attr="aria-label=${cast.stageName + ' Cast profile'}">
         <div class="detail-actions">
             <a class="page-back-button" th:href="@{/}" aria-label="Back to Home" title="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
-            <button type="button" data-share-profile th:attr="data-share-title=${cast.stageName + ' on CastFan'}" aria-label="Share profile" title="Share"><i class="bi bi-share" aria-hidden="true"></i></button>
         </div>
         <div class="screen-content cast-content">
             <section class="cast-hero" th:classappend="${cast.avatarUrl == null} ? 'no-photo'" th:attr="aria-label=${cast.stageName + ' profile image'}">
@@ -26,7 +25,7 @@
 
             <div class="cast-details">
                 <header class="cast-identity">
-                    <div><p th:text="${cast.storeName + ' Cast'}">CastFan Cast</p><h1 th:text="${cast.stageName}">Mina</h1><span th:text="${cast.handle}">@mina</span></div>
+                    <div><h1 th:text="${cast.stageName}">Mina</h1><span th:text="${cast.handle}">@mina</span></div>
                     <form sec:authorize="hasAnyRole('MEMBER','CAST')" th:if="${!ownProfile and !cast.followed}" th:action="@{/member/casts/{id}/follow-profile(id=${cast.id})}" method="post">
                         <button class="primary-follow" type="submit"><i class="bi bi-heart" aria-hidden="true"></i><span>Follow</span></button>
                     </form>

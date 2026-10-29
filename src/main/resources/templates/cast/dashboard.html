@@ -17,7 +17,6 @@
         <div class="screen-content cast-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/cast}">CastFan</a>
-                <a class="round-button" th:href="@{/casts/{id}(id=${workspace.profile.id})}" aria-label="Preview public profile" title="Preview public profile"><i class="bi bi-eye" aria-hidden="true"></i></a>
             </div>
 
             <header class="cast-heading">
@@ -26,9 +25,9 @@
             </header>
 
             <div class="cast-stats" aria-label="Cast summary">
-                <a th:href="@{/cast/schedule}"><span><i class="bi bi-clock" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Pending shifts</small></a>
-                <a th:href="@{/cast/tiers}"><span class="warm"><i class="bi bi-stars" aria-hidden="true"></i></span><strong th:text="${workspace.profile.activeTierCount}">0</strong><small>Active tiers</small></a>
-                <a th:href="@{/casts/{id}(id=${workspace.profile.id})}"><span class="lavender"><i class="bi bi-people" aria-hidden="true"></i></span><strong th:text="${workspace.profile.followerCount}">0</strong><small>Followers</small></a>
+                <div><span><i class="bi bi-clock" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Pending shifts</small></div>
+                <div><span class="warm"><i class="bi bi-stars" aria-hidden="true"></i></span><strong th:text="${workspace.profile.activeTierCount}">0</strong><small>Active tiers</small></div>
+                <div><span class="lavender"><i class="bi bi-people" aria-hidden="true"></i></span><strong th:text="${workspace.profile.followerCount}">0</strong><small>Followers</small></div>
             </div>
 
             <section class="cast-section" aria-labelledby="next-shifts-heading">

@@ -12,6 +12,15 @@ import org.springframework.core.io.ClassPathResource;
 class UiConsistencyTests {
 
 	@Test
+	void dateTimePickerClosesWhenItsViewportPositionBecomesStale() throws IOException {
+		assertThat(resource("static/js/date-time-picker.js"))
+			.contains("document.addEventListener(\"scroll\"")
+			.contains("activePicker.popover.contains(event.target)")
+			.contains("window.addEventListener(\"resize\"")
+			.contains("closeActivePicker()");
+	}
+
+	@Test
 	void castNavigationKeepsTheApprovedLabelsAndOrder() throws IOException {
 		var navigation = resource("templates/fragments/navigation.html");
 		var castNavigation = navigation.substring(

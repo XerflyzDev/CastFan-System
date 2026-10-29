@@ -87,6 +87,8 @@ class PublicContentWorkflowTests {
 			.andExpect(view().name("public/cast-profile"))
 			.andExpect(model().attributeExists("cast"))
 			.andExpect(content().string(containsString("Mina Public")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Share profile"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Hoshi Cafe Cast"))))
 			.andExpect(content().string(containsString("Silver")));
 		mockMvc.perform(get("/casts/{id}", hidden.getId()))
 			.andExpect(status().isNotFound());

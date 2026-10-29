@@ -12,11 +12,9 @@
 .working-badge i { width: 6px; height: 6px; border-radius: 50%; background: #ef8dad; box-shadow: 0 0 0 3px rgba(239, 141, 173, 0.24); }
 .cast-details { padding: 18px 15px 0; }
 .cast-identity { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.cast-identity p,
 .cast-identity h1 { margin: 0; }
-.cast-identity p { color: var(--muted); font-size: 0.59rem; }
 .cast-identity h1 { font-size: 1.65rem; line-height: 1.05; }
-.cast-identity div > span { color: var(--muted); font-size: 0.58rem; }
+.cast-identity div > span { color: var(--muted); font-size: 0.9rem; }
 .primary-follow { display: flex; min-width: 98px; min-height: 38px; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 12px; color: var(--ink); background: #e6e6e9; font-size: 0.61rem; font-weight: 700; cursor: pointer; }
 .primary-follow.active { color: var(--rose-dark); background: var(--rose-soft); }
 .primary-follow { text-decoration: none; }

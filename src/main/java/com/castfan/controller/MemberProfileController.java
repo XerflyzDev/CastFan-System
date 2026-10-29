@@ -36,6 +36,13 @@ public class MemberProfileController {
 		return "member/profile";
 	}
 
+	@GetMapping("/member/notification-settings")
+	@PreAuthorize("hasRole('MEMBER')")
+	public String notificationSettings(Principal principal, Model model) {
+		model.addAttribute("form", profileService.memberProfileForm(principal.getName()));
+		return "member/notification-settings";
+	}
+
 	@PostMapping("/member/profile")
 	public String updateProfile(Principal principal, @Valid @ModelAttribute("form") MemberProfileForm form,
 		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image, Model model) {

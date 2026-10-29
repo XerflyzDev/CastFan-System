@@ -56,8 +56,9 @@ class MemberProfileWorkflowTests {
 		mockMvc.perform(get("/member/profile").with(memberUser()))
 			.andExpect(status().isOk()).andExpect(view().name("member/profile"))
 			.andExpect(content().string(containsString("Original Member")))
-			.andExpect(content().string(containsString("href=\"/member/notifications\"")))
-			.andExpect(content().string(containsString("Notification center")));
+			.andExpect(content().string(containsString("Profile details")))
+			.andExpect(content().string(containsString("Save profile")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Notification preferences"))));
 
 		var image = new MockMultipartFile("image", "avatar.png", "image/png",
 			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1});
@@ -82,10 +83,23 @@ class MemberProfileWorkflowTests {
 			.andExpect(content().string(containsString("/account/avatar")))
 			.andExpect(content().string(containsString("Membership points")))
 			.andExpect(content().string(containsString("No tier yet")))
-			.andExpect(content().string(containsString("0 points")))
+			.andExpect(content().string(containsString("class=\"membership-card\"")))
+			.andExpect(content().string(containsString("<strong>0</strong>")))
+			.andExpect(content().string(containsString("<small>POINTS</small>")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("No active memberships"))));
 		mockMvc.perform(get("/avatars/{id}", member.getId()))
 			.andExpect(status().isOk()).andExpect(content().contentType("image/png"));
+	}
+
+	@Test
+	void memberCanOpenDedicatedNotificationSettings() throws Exception {
+		mockMvc.perform(get("/member/notification-settings").with(memberUser()))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/notification-settings"))
+			.andExpect(content().string(containsString("Choose your updates")))
+			.andExpect(content().string(containsString("Changes are saved automatically")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Display name"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Profile photo"))));
 	}
 
 	@Test

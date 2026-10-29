@@ -19,7 +19,7 @@
             <header class="notification-heading"><p>Your activity</p><div><h1>Notifications</h1><span th:text="${notifications.totalCount}">0</span></div></header>
 
             <section class="notification-section" aria-labelledby="cast-update-heading">
-                <div class="section-title"><h2 id="cast-update-heading">Cast updates</h2><a th:href="@{/member/following}">Following</a></div>
+                <div class="section-title"><h2 id="cast-update-heading">Cast updates</h2><a class="notification-section-link" th:href="@{/member/following}"><span>Following</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
                 <div class="notification-list" th:if="${!notifications.contentUpdates.empty}">
                     <a class="notification-card" th:each="notice : ${notifications.contentUpdates}" th:classappend="${!notice.accessible} ? 'locked'" th:href="@{/casts/{castId}/content/{contentId}(castId=${notice.castProfileId},contentId=${notice.contentId})}">
                         <img class="notification-avatar" th:if="${notice.castAvatarUrl != null}" th:src="${notice.castAvatarUrl}" th:alt="${notice.castName}">

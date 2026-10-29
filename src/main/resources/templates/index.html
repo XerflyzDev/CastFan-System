@@ -82,7 +82,8 @@
                     <a sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/casts}" aria-label="See all Cast" title="See all Cast"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to see Cast" title="Sign in"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 </div>
-                <div class="cast-carousel" id="working-cast-list" th:if="${!home.workingToday.empty}">
+                <div class="cast-carousel" id="working-cast-list" data-drag-scroll th:if="${!home.workingToday.empty}"
+                        aria-label="Working Cast carousel. Swipe or drag horizontally to see more.">
                     <a class="cast-card" th:each="cast : ${home.workingToday}" th:href="@{/casts/{id}(id=${cast.id})}"
                             th:attr="data-search-item=${cast.name}">
                         <img class="avatar avatar-photo" th:if="${cast.avatarUrl != null}" th:src="${cast.avatarUrl}" th:alt="${cast.name}">

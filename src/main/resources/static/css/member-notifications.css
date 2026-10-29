@@ -7,7 +7,25 @@
 .notification-heading h1 { font-size: 1.75rem; line-height: 1; }
 .notification-heading > div > span { display: grid; min-width: 28px; height: 28px; place-items: center; border-radius: 10px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.58rem; font-weight: 700; }
 .notification-section { margin-top: 20px; }
-.notification-section .section-title > a { padding: 5px 9px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.52rem; font-weight: 700; text-decoration: none; }
+.notification-section .section-title > .notification-section-link {
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    min-height: 28px;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 1px 4px 7px;
+    border: 0;
+    border-radius: 0;
+    color: #686a70;
+    background: transparent;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+}
+.notification-section-link i { font-size: 0.62rem; }
+.notification-section-link:hover { color: var(--ink); }
 .notification-list { display: grid; gap: 8px; }
 .notification-card { display: grid; grid-template-columns: 42px minmax(0, 1fr) 12px; align-items: center; gap: 10px; padding: 12px; border-radius: 16px; color: var(--ink); background: #fff; box-shadow: var(--shadow); text-decoration: none; }
 .notification-card.locked { background: rgba(255, 255, 255, 0.76); }

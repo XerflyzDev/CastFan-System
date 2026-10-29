@@ -37,6 +37,9 @@
                             <input id="avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-input>
                             <label for="avatar-upload" aria-label="Change profile photo" title="Change profile photo"><i class="bi bi-camera" aria-hidden="true"></i></label>
                         </form>
+                        <form class="profile-avatar-remove" th:if="${account.hasAvatar}" th:action="@{/account/avatar/remove}" method="post">
+                            <button type="submit" aria-label="Remove profile photo" title="Remove profile photo"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+                        </form>
                     </div>
                     <div class="profile-identity-copy">
                         <div class="profile-name-heading">

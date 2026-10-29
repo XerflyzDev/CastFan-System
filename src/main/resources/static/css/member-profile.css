@@ -76,6 +76,10 @@
 .profile-avatar-upload label i { font-size: 0.65rem; }
 .profile-avatar-upload label:focus-within,
 .profile-avatar-upload input:focus-visible + label { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
+.profile-avatar-remove { position: absolute; left: 2px; bottom: 2px; margin: 0; }
+.profile-avatar-remove button { display: grid; width: 22px; height: 22px; padding: 0; place-items: center; border: 2px solid #fff; border-radius: 50%; color: #fff; background: var(--rose-dark); box-shadow: 0 2px 7px rgba(17, 19, 24, 0.2); cursor: pointer; }
+.profile-avatar-remove button i { font-size: 0.61rem; }
+.profile-avatar-remove button:focus-visible { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
 .profile-identity-copy { display: grid; min-width: 0; gap: 2px; }
 .profile-identity-copy h2,
 .profile-identity-copy small,

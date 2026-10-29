@@ -1,6 +1,6 @@
 # Membership Points And Tier Workflow
 
-This document defines CastFan's confirmed store-wide membership program. The points balance, immutable ledger, tier derivation, and Owner-only service contract are implemented; Owner and Member UI replacement remains separate work. The legacy Cast-specific tier tables and screens remain temporarily for migration compatibility and are not the store-wide points source of truth.
+This document defines CastFan's confirmed store-wide membership program. The points balance, immutable ledger, tier derivation, Owner workflow, Member summary/history, and store-tier content access are implemented. Legacy Cast-specific tier tables remain temporarily for migration compatibility, but their management and self-subscription screens are no longer part of the active workflow.
 
 ## Confirmed Requirements
 
@@ -91,7 +91,7 @@ The core uses the fixed `StoreMembershipTier` definition `NONE`, `TIER_1`, `TIER
 - `memberPointsForOwner(ownerEmail, memberProfileId)` provides the active Owner with the selected Member's summary and history.
 - `hasStoreTierAccess(memberEmail, minimumRank)` is the backend access check for store-tier content.
 
-The preview result includes the current balance/tier, point delta, and resulting balance/tier. A confirmed result includes the immutable transaction view, resulting balance, and resulting tier. Future controllers must pass the authenticated principal email; they must never accept an Owner ID as proof of authority.
+The preview result includes the current balance/tier, point delta, and resulting balance/tier. A confirmed result includes the immutable transaction view, resulting balance, and resulting tier. Controllers pass the authenticated principal email; they never accept an Owner ID as proof of authority.
 
 An original earned entry may receive one correction or reversal. A second adjustment is rejected so concurrent requests cannot apply the same purchase twice.
 

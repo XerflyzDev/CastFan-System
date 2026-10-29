@@ -20,10 +20,10 @@
 }
 
 .cast-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 9px 0 20px; }
-.cast-stats a { display: grid; min-height: 100px; align-content: start; padding: 11px; border-radius: 15px; color: var(--ink); background: #fff; box-shadow: var(--shadow); text-decoration: none; }
-.cast-stats a > span { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 9px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.68rem; }
-.cast-stats a > span.warm { color: #806b3f; background: var(--amber); }
-.cast-stats a > span.lavender { color: #655b86; background: var(--lavender); }
+.cast-stats > div { display: grid; min-height: 100px; align-content: start; padding: 11px; border-radius: 15px; color: var(--ink); background: #fff; box-shadow: var(--shadow); }
+.cast-stats > div > span { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 9px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.68rem; }
+.cast-stats > div > span.warm { color: #806b3f; background: var(--amber); }
+.cast-stats > div > span.lavender { color: #655b86; background: var(--lavender); }
 .cast-stats strong { margin-top: 8px; font-size: 0.96rem; line-height: 1; }
 .cast-stats small { margin-top: 3px; color: var(--muted); font-size: 0.52rem; line-height: 1.25; }
 
@@ -285,7 +285,7 @@
 
 @media (max-width: 370px) {
     .cast-stats { gap: 5px; }
-    .cast-stats a { padding: 9px; }
+    .cast-stats > div { padding: 9px; }
     .cast-shift-row { grid-template-columns: 55px minmax(0, 1fr) auto; gap: 7px; }
     .schedule-row { grid-template-columns: 55px minmax(0, 1fr) 30px; }
 }

@@ -7,7 +7,7 @@ This checklist records the final local verification for the one-cafe, store-wide
 ## Automated Verification
 
 - `UiConsistencyTests` passes the shared navigation, one-store UI, store-wide points language, and Cast shift-approval copy checks.
-- The full Maven test suite passed: 119 tests, 0 failures, 0 errors, and 1 skipped opt-in MySQL migration test.
+- The integrated Maven test suite passed: 120 tests, 0 failures, 0 errors, and 1 skipped opt-in MySQL migration test.
 - The opt-in MySQL migration test still requires a disposable MySQL 8.4 instance and the `CASTFAN_MYSQL_TEST_*` environment variables.
 - GitHub Actions runs Trivy source and immutable container-image scans and blocks deployment on unfixed high or critical findings.
 

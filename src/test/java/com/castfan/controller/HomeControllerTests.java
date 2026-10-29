@@ -100,7 +100,10 @@ class HomeControllerTests {
 
 		mockMvc.perform(get("/js/member-profile.js"))
 			.andExpect(status().isOk())
-			.andExpect(content().contentTypeCompatibleWith("text/javascript"));
+			.andExpect(content().contentTypeCompatibleWith("text/javascript"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("reader.readAsDataURL(file)")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("URL.createObjectURL(file)"))));
 
 		mockMvc.perform(get("/js/public-detail.js"))
 			.andExpect(status().isOk())

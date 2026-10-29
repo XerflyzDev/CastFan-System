@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Choose which CastFan notifications you want to receive.">
+    <title>Notification Settings | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/member-profile.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone member-edit-page notification-settings-page" aria-label="Member notification settings">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <div class="screen-content profile-content">
+            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/account}" aria-label="Back to Account" title="Back to Account"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
+            <header class="profile-heading"><p>Preferences</p><h1>Notifications</h1></header>
+
+            <section class="profile-form-card notification-settings-card" aria-labelledby="notification-settings-heading">
+                <form class="member-profile-form" th:action="@{/member/profile/notification-preferences}" th:object="${form}" method="post">
+                    <div class="notification-settings-intro">
+                        <span><i class="bi bi-bell" aria-hidden="true"></i></span>
+                        <div><h2 id="notification-settings-heading">Choose your updates</h2><p>Changes are saved automatically.</p></div>
+                    </div>
+                    <fieldset class="notification-preferences">
+                        <legend class="visually-hidden">Notification preferences</legend>
+                        <label class="preference-toggle">
+                            <span><strong>Cast updates</strong><small>New posts from Cast you follow.</small></span>
+                            <input type="checkbox" th:field="*{castUpdateNotifications}" data-notification-preference aria-label="Enable Cast update notifications">
+                            <i aria-hidden="true"></i>
+                        </label>
+                        <label class="preference-toggle">
+                            <span><strong>Event reminders</strong><small>Upcoming published store events.</small></span>
+                            <input type="checkbox" th:field="*{eventNotifications}" data-notification-preference aria-label="Enable event reminders">
+                            <i aria-hidden="true"></i>
+                        </label>
+                    </fieldset>
+                    <a class="notification-center-link" th:href="@{/member/notifications}"><span><i class="bi bi-inbox" aria-hidden="true"></i><span><strong>Notification center</strong><small>View your latest updates and events</small></span></span><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                </form>
+            </section>
+        </div>
+        <nav th:replace="~{fragments/navigation :: member('profile')}"></nav>
+    </section>
+</main>
+<script th:src="@{/js/member-profile.js}" defer></script>
+</body>
+</html>

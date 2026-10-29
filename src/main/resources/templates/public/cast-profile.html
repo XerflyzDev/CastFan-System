@@ -44,7 +44,7 @@
 
                 <section class="next-shift" th:if="${cast.nextShift != null}" aria-labelledby="next-shift-heading">
                     <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
-                    <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">Hoshi Cafe</p></div>
+                    <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">CastFan</p></div>
                     <a sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/schedule}" aria-label="Open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 </section>

@@ -40,6 +40,7 @@ public class CastWorkspaceService {
 	private final MemberTierRepository memberTierRepository;
 	private final ShiftScheduleService shiftScheduleService;
 	private final ProfileService profileService;
+	private final SystemStoreService systemStoreService;
 
 	public CastWorkspaceService(
 		UserAccountRepository userAccountRepository,
@@ -49,7 +50,8 @@ public class CastWorkspaceService {
 		CastFollowRepository castFollowRepository,
 		MemberTierRepository memberTierRepository,
 		ShiftScheduleService shiftScheduleService,
-		ProfileService profileService
+		ProfileService profileService,
+		SystemStoreService systemStoreService
 	) {
 		this.userAccountRepository = userAccountRepository;
 		this.castProfileRepository = castProfileRepository;
@@ -59,28 +61,30 @@ public class CastWorkspaceService {
 		this.memberTierRepository = memberTierRepository;
 		this.shiftScheduleService = shiftScheduleService;
 		this.profileService = profileService;
+		this.systemStoreService = systemStoreService;
 	}
 
 	@Transactional(readOnly = true)
 	public CastWorkspaceView load(String email, int shiftLimit) {
 		var profile = requireProfile(email);
+		var systemStore = systemStoreService.findActive();
 		var assignments = storeCastRepository.findAllByCastProfileIdAndActiveTrue(profile.getId()).stream()
-			.filter(assignment -> assignment.getStore().isActive())
+			.filter(assignment -> systemStore.map(store -> assignment.getStore().getId().equals(store.getId())).orElse(false))
 			.map(assignment -> new CastWorkspaceView.Assignment(
-				assignment.getId(), assignment.getStore().getName(), assignment.getStore().getTimezone()
+				assignment.getId(), SystemStoreService.DISPLAY_NAME, assignment.getStore().getTimezone()
 			))
 			.toList();
 		var now = Instant.now();
 		var schedules = shiftScheduleRepository.findUpcomingForCast(
 			email, now.minusSeconds(12 * 60 * 60), PageRequest.of(0, Math.max(1, shiftLimit))
-		);
+		).stream().filter(schedule -> systemStore.map(store -> schedule.getStoreCast().getStore().getId().equals(store.getId())).orElse(false)).toList();
 		var shifts = schedules.stream().map(schedule -> {
 			var zone = safeZone(schedule.getStoreCast().getStore().getTimezone());
 			var startsAt = schedule.getStartsAt().atZone(zone);
 			var endsAt = schedule.getEndsAt().atZone(zone);
 			return new CastWorkspaceView.ShiftItem(
 				schedule.getId(),
-				schedule.getStoreCast().getStore().getName(),
+				SystemStoreService.DISPLAY_NAME,
 				DATE.format(startsAt),
 				DAY.format(startsAt),
 				TIME.format(startsAt) + " - " + TIME.format(endsAt),
@@ -128,10 +132,11 @@ public class CastWorkspaceService {
 		var account = userAccountRepository.findByEmailIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast account not found."));
 		var profile = requireProfile(email);
+		var systemStore = systemStoreService.requireActive();
 		var assignment = storeCastRepository.findAllByCastProfileIdAndActiveTrue(profile.getId()).stream()
-			.filter(value -> value.getId().equals(form.getStoreCastId()))
+			.filter(value -> value.getStore().getId().equals(systemStore.getId()))
 			.findFirst()
-			.orElseThrow(() -> new DomainRuleViolationException("Store assignment not found."));
+			.orElseThrow(() -> new DomainRuleViolationException("Active CastFan roster assignment not found."));
 		var zone = safeZone(assignment.getStore().getTimezone());
 		var today = LocalDate.now(zone);
 		if (form.getDate().isBefore(today) || form.getDate().isAfter(today.plusYears(1))) {

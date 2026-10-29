@@ -99,7 +99,7 @@
 .timeline::before { position: absolute; top: 25px; bottom: 25px; left: 51px; width: 1px; content: ""; background: #dedee2; }
 .shift-row { position: relative; display: grid; grid-template-columns: 40px 13px minmax(0, 1fr); align-items: center; gap: 5px; }
 .shift-row time { color: var(--muted); font-size: 0.59rem; }
-.timeline-marker { z-index: 1; width: 9px; height: 9px; border: 2px solid var(--screen); border-radius: 50%; background: #bfc0c5; }
+.timeline-marker { z-index: 1; width: 9px; height: 9px; justify-self: center; border: 2px solid var(--screen); border-radius: 50%; background: #bfc0c5; }
 .shift-row.is-live .timeline-marker { background: var(--rose); box-shadow: 0 0 0 4px var(--rose-soft); }
 .shift-row > button,
 .shift-row > a { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto 12px; align-items: center; gap: 9px; min-height: 72px; padding: 12px; border: 0; border-radius: 16px; color: var(--ink); background: #fff; box-shadow: var(--shadow); text-align: left; text-decoration: none; cursor: pointer; }

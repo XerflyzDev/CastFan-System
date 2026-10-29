@@ -9,9 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class OwnerPromotionForm {
-	@NotNull(message = "Store is required")
-	private Long storeId;
-
 	@NotBlank(message = "Title is required")
 	@Size(max = 160, message = "Title must not exceed 160 characters")
 	private String title;
@@ -38,8 +35,6 @@ public class OwnerPromotionForm {
 	@NotNull(message = "End time is required")
 	private LocalTime endsAt;
 
-	public Long getStoreId() { return storeId; }
-	public void setStoreId(Long storeId) { this.storeId = storeId; }
 	public String getTitle() { return title; }
 	public void setTitle(String title) { this.title = title; }
 	public String getDescription() { return description; }

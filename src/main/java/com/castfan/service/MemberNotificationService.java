@@ -74,7 +74,7 @@ public class MemberNotificationService {
 			: java.util.List.<com.castfan.entity.StoreEvent>of()).stream().map(event -> {
 				var zone = safeZone(event.getStore().getTimezone());
 				return new MemberNotificationView.EventNotice(
-					event.getId(), event.getTitle(), event.getStore().getName(),
+					event.getId(), event.getTitle(), SystemStoreService.DISPLAY_NAME,
 					DATE.format(event.getStartsAt().atZone(zone)), TIME.format(event.getStartsAt().atZone(zone)),
 					storeEventImageService.publicImageUrl(event)
 				);

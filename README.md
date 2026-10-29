@@ -22,9 +22,9 @@ English is the primary language for the user interface, system messages, documen
 
 > **Cloud Run health checks and production readiness**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members can edit their display name, bio, profile photo, and notification preferences through an ownership-protected profile route. The Member Home includes a feed from followed Cast with server-side audience and tier access checks. Cast accounts share Home and the approved Schedule, have direct navigation to their own Member-facing Cast Profile, use Profile for editing that identity, and have a fifth Cast destination for their private workspace. Cast can upload content images, submit or cancel shifts, manage membership tiers, and publish audience-controlled content through a streamlined social composer with direct publishing, optional headlines, audience selection, and draft support. Owners can review store metrics, inspect schedules by date, approve or reject shift requests, manage stores and permanent Cast rosters, upload event and promotion images, publish events, and schedule promotion banners through ownership-protected routes. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB instead of image links. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
+The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members edit their display name, bio, and profile photo through an ownership-protected profile route, while a dedicated notification-settings route controls Cast updates and event reminders. The Member Home includes a feed from followed Cast with server-side audience and store-tier access checks. Cast accounts share Home and the approved Schedule, have direct navigation to their own Member-facing Cast Profile, use Profile for editing that identity, and have a fifth Cast destination for their private workspace. Cast can upload content images, submit or cancel shifts, and publish audience-controlled content through a streamlined social composer with direct publishing, optional headlines, store-tier audience selection, and draft support. Owners can review CastFan metrics, inspect schedules by date, approve or reject shift requests, manage the permanent Cast roster, upload event and promotion images, publish events, schedule promotion banners, and record or correct Member points through ownership-protected routes. Store creation and selection are intentionally hidden because the first release represents one cafe only as CastFan; the internal Store entity remains for relational integrity. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB instead of image links. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
 
-> **Requirement alignment notice:** The stakeholder confirmed on 27 October 2026 that the first release supports one cafe. The store-wide points core now provides zero-state registration, Owner-only earning/correction/reversal, an immutable receipt-protected ledger, and derived tiers at `1 THB = 1 point`. Owner and Member screens still need to replace the legacy self-subscription and Cast-specific tier UI.
+> **Requirement alignment notice:** The stakeholder confirmed on 27 October 2026 that the first release supports one cafe. The implemented store-wide points workflow provides zero-state registration, Owner-only earning/correction/reversal, an immutable receipt-protected ledger, derived tiers at `1 THB = 1 point`, read-only Member history, and store-tier content access. Legacy tier entities remain only for migration compatibility and are not exposed as the active membership workflow.
 
 ## Objectives
 
@@ -124,8 +124,8 @@ Implemented and planned entities:
 - `Store`
 - `StoreCast`
 - `ShiftSchedule`
-- `MemberTier`
-- `TierMembership`
+- `MemberTier` (legacy compatibility only)
+- `TierMembership` (legacy compatibility only)
 - `CastFollow`
 - `CastContent`
 - `StoreEvent`
@@ -133,7 +133,7 @@ Implemented and planned entities:
 
 Entity details, relationships, constraints, and implementation order are documented in [docs/database-design.md](docs/database-design.md).
 
-The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its core model is implemented in Flyway V6; dependent Owner and Member/Cast UI migration remains.
+The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its Flyway V6 core, Owner workflow, Member views, and Cast content-access integration are implemented.
 
 The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
 
@@ -191,10 +191,10 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Connect Cloud SQL for MySQL through the Cloud SQL Java Connector.
 - [x] Deploy the Spring Boot service to Google Cloud Run.
 - [x] Store production credentials in Google Cloud Secret Manager.
-- [ ] Restrict the first release to one cafe and remove exposed multi-store creation behavior.
-- [ ] Replace Cast-specific tiers and Member self-subscription with the confirmed Owner-recorded, store-wide points model.
+- [x] Restrict the first release to one cafe and remove exposed multi-store creation behavior.
+- [x] Replace Cast-specific tiers and Member self-subscription with the confirmed Owner-recorded, store-wide points model.
 - [ ] Add validation, error handling, and broader automated tests.
-- [ ] Complete security and responsive UI reviews.
+- [x] Complete security and responsive UI reviews.
 - [ ] Complete production-readiness gates and prepare the project demonstration.
 
 ## Security Requirements

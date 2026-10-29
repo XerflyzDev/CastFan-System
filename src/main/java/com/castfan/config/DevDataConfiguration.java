@@ -1,5 +1,6 @@
 package com.castfan.config;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -7,6 +8,8 @@ import java.time.ZoneId;
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.MemberProfile;
+import com.castfan.entity.MemberPointTransaction;
+import com.castfan.entity.MemberPointTransactionType;
 import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.Store;
 import com.castfan.entity.StoreCast;
@@ -17,6 +20,7 @@ import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
+import com.castfan.repository.MemberPointTransactionRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
@@ -40,6 +44,7 @@ public class DevDataConfiguration {
 		UserAccountRepository userAccountRepository,
 		CastProfileRepository castProfileRepository,
 		MemberProfileRepository memberProfileRepository,
+		MemberPointTransactionRepository memberPointTransactionRepository,
 		StoreRepository storeRepository,
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
@@ -54,12 +59,12 @@ public class DevDataConfiguration {
 
 			var password = passwordEncoder.encode("dev-only-password");
 			var owner = userAccountRepository.save(new UserAccount(
-				"owner@castfan.local", password, "Hoshi Owner", UserRole.OWNER, UserStatus.ACTIVE
+				"owner@castfan.local", password, "CastFan Owner", UserRole.OWNER, UserStatus.ACTIVE
 			));
 			var store = storeRepository.save(new Store(
 				owner,
-				"Hoshi Cafe",
-				"hoshi-cafe",
+				"CastFan",
+				"castfan",
 				"A single-store Cast cafe in Bangkok.",
 				"Bangkok, Thailand",
 				STORE_ZONE.getId(),
@@ -68,7 +73,8 @@ public class DevDataConfiguration {
 			var member = userAccountRepository.save(new UserAccount(
 				"member@castfan.local", password, "Mina Fan", UserRole.MEMBER, UserStatus.ACTIVE
 			));
-			memberProfileRepository.save(new MemberProfile(member, null, null));
+			var memberProfile = memberProfileRepository.save(new MemberProfile(member, null, null));
+			seedMemberPoints(memberProfile, owner, memberProfileRepository, memberPointTransactionRepository);
 
 			var today = LocalDate.now(STORE_ZONE);
 			seedCast(
@@ -95,7 +101,7 @@ public class DevDataConfiguration {
 				store,
 				owner,
 				"Autumn Sweet Night",
-				"Seasonal strawberry desserts and a special evening with the Hoshi Cafe Cast.",
+				"Seasonal strawberry desserts and a special evening with the CastFan Cast.",
 				"/images/autumn-cafe-event.png",
 				eventStartsAt,
 				eventStartsAt.plusSeconds(5 * 60 * 60),
@@ -108,6 +114,35 @@ public class DevDataConfiguration {
 				today.plusDays(30).atTime(23, 59).atZone(STORE_ZONE).toInstant(), true
 			));
 		};
+	}
+
+	private void seedMemberPoints(
+		MemberProfile memberProfile,
+		UserAccount owner,
+		MemberProfileRepository memberProfileRepository,
+		MemberPointTransactionRepository memberPointTransactionRepository
+	) {
+		for (var purchase : new Object[][] {
+			{ new BigDecimal("850.00"), 850L, "DEV-RECEIPT-001" },
+			{ new BigDecimal("400.00"), 400L, "DEV-RECEIPT-002" }
+		}) {
+			var amount = (BigDecimal) purchase[0];
+			var points = (long) purchase[1];
+			var receipt = (String) purchase[2];
+			memberProfile.applyPointsDelta(points);
+			memberPointTransactionRepository.save(new MemberPointTransaction(
+				memberProfile,
+				owner,
+				MemberPointTransactionType.EARN,
+				amount,
+				points,
+				receipt,
+				receipt.toLowerCase(),
+				null,
+				null
+			));
+		}
+		memberProfileRepository.save(memberProfile);
 	}
 
 	private void seedCast(

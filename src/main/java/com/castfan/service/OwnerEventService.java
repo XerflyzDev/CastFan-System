@@ -16,7 +16,6 @@ import com.castfan.entity.StoreEvent;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.StoreEventRepository;
-import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,18 +29,18 @@ public class OwnerEventService {
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 
 	private final UserAccountRepository userAccountRepository;
-	private final StoreRepository storeRepository;
+	private final SystemStoreService systemStoreService;
 	private final StoreEventRepository storeEventRepository;
 	private final StoreEventImageService storeEventImageService;
 
 	public OwnerEventService(
 		UserAccountRepository userAccountRepository,
-		StoreRepository storeRepository,
+		SystemStoreService systemStoreService,
 		StoreEventRepository storeEventRepository,
 		StoreEventImageService storeEventImageService
 	) {
 		this.userAccountRepository = userAccountRepository;
-		this.storeRepository = storeRepository;
+		this.systemStoreService = systemStoreService;
 		this.storeEventRepository = storeEventRepository;
 		this.storeEventImageService = storeEventImageService;
 	}
@@ -49,12 +48,8 @@ public class OwnerEventService {
 	@Transactional(readOnly = true)
 	public OwnerEventView load(String email, Long editingEventId) {
 		var account = requireOwner(email);
-		var stores = storeRepository.findAllByOwnerIdOrderByNameAsc(account.getId());
 		var events = storeEventRepository.findAllForOwner(email).stream().map(this::toEventItem).toList();
 		return new OwnerEventView(
-			stores.stream().filter(Store::isActive)
-				.map(store -> new OwnerEventView.StoreOption(store.getId(), store.getName(), store.getTimezone()))
-				.toList(),
 			events,
 			editingEventId,
 			events.stream().filter(event -> event.id().equals(editingEventId)).map(OwnerEventView.EventItem::imageUrl).findFirst().orElse(null)
@@ -71,7 +66,6 @@ public class OwnerEventService {
 		var startsAt = event.getStartsAt().atZone(zone);
 		var endsAt = event.getEndsAt().atZone(zone);
 		var form = new OwnerEventForm();
-		form.setStoreId(event.getStore().getId());
 		form.setTitle(event.getTitle());
 		form.setDescription(event.getDescription());
 		form.setDate(startsAt.toLocalDate());
@@ -83,7 +77,7 @@ public class OwnerEventService {
 	@Transactional
 	public StoreEvent create(String email, OwnerEventForm form, MultipartFile image) {
 		var owner = requireOwner(email);
-		var store = requireOwnedStore(owner.getId(), form.getStoreId());
+		var store = systemStoreService.requireForOwner(owner);
 		var range = eventRange(form, store);
 		var event = storeEventRepository.saveAndFlush(new StoreEvent(
 			store,
@@ -102,9 +96,6 @@ public class OwnerEventService {
 	@Transactional
 	public void update(String email, Long eventId, OwnerEventForm form, MultipartFile image) {
 		var event = requireOwnedEventForUpdate(email, eventId);
-		if (!event.getStore().getId().equals(form.getStoreId())) {
-			throw new DomainRuleViolationException("An event cannot be moved to another store.");
-		}
 		var range = eventRange(form, event.getStore());
 		try {
 			event.updateDetails(
@@ -152,7 +143,7 @@ public class OwnerEventService {
 		var startsAt = event.getStartsAt().atZone(zone);
 		var endsAt = event.getEndsAt().atZone(zone);
 		return new OwnerEventView.EventItem(
-			event.getId(), event.getTitle(), event.getDescription(), storeEventImageService.ownerImageUrl(event), event.getStore().getName(),
+			event.getId(), event.getTitle(), event.getDescription(), storeEventImageService.ownerImageUrl(event),
 			DATE.format(startsAt), TIME.format(startsAt) + " - " + TIME.format(endsAt),
 			statusLabel(event.getStatus()), event.getStatus().name().toLowerCase(Locale.ENGLISH),
 			event.getStatus() != EventStatus.ARCHIVED, event.getStatus() == EventStatus.DRAFT,
@@ -175,12 +166,6 @@ public class OwnerEventService {
 		return userAccountRepository.findByEmailIgnoreCase(email)
 			.filter(account -> account.getRole() == UserRole.OWNER && account.getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
-	}
-
-	private Store requireOwnedStore(Long ownerId, Long storeId) {
-		return storeRepository.findById(storeId)
-			.filter(store -> store.getOwner().getId().equals(ownerId) && store.isActive())
-			.orElseThrow(() -> new DomainRuleViolationException("Active store not found."));
 	}
 
 	private StoreEvent requireOwnedEvent(String email, Long eventId) {

@@ -117,11 +117,6 @@ public class CastWorkspaceController {
 	}
 
 	private void populateSchedule(Principal principal, Model model) {
-		var workspace = castWorkspaceService.load(principal.getName(), 50);
-		model.addAttribute("workspace", workspace);
-		if (model.getAttribute("form") instanceof CastShiftForm form
-			&& form.getStoreCastId() == null && !workspace.assignments().isEmpty()) {
-			form.setStoreCastId(workspace.assignments().getFirst().id());
-		}
+		model.addAttribute("workspace", castWorkspaceService.load(principal.getName(), 50));
 	}
 }

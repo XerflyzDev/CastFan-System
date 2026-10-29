@@ -104,16 +104,28 @@
                     <div><small>Member access</small><h2 id="membership-heading">Membership points</h2></div>
                     <a th:href="@{/member/memberships}">View</a>
                 </div>
-                <div class="membership-list">
-                    <div class="membership-row">
-                        <span class="membership-icon amber"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
-                        <div>
-                            <strong th:text="${memberPoints.tier.name() == 'NONE' ? 'No tier yet' : #strings.replace(memberPoints.tier.name(), 'TIER_', 'Tier ')}">No tier yet</strong>
-                            <small>Store-wide access tier</small>
-                        </div>
-                        <span class="membership-price" th:text="${#numbers.formatInteger(memberPoints.pointsBalance, 1, 'COMMA') + ' points'}">0 points</span>
-                    </div>
-                </div>
+                <a class="membership-card" th:href="@{/member/memberships}" aria-label="View membership points and tier">
+                    <span class="membership-card-glow membership-card-glow-rose" aria-hidden="true"></span>
+                    <span class="membership-card-glow membership-card-glow-amber" aria-hidden="true"></span>
+                    <span class="membership-card-grid" aria-hidden="true"></span>
+                    <span class="membership-card-topline">
+                        <span>CASTFAN MEMBERSHIP</span>
+                    </span>
+                    <span class="membership-card-tier">
+                        <small th:text="${memberPoints.tier.name() == 'NONE' ? 'No tier yet' : 'Store-wide access'}">No tier yet</small>
+                        <strong th:text="${memberPoints.tier.name() == 'NONE' ? 'MEMBER' : #strings.replace(memberPoints.tier.name(), 'TIER_', 'TIER ')}">MEMBER</strong>
+                    </span>
+                    <span class="membership-card-footer">
+                        <span class="membership-card-member">
+                            <small>Member</small>
+                            <strong th:text="${account.displayName}">Member name</strong>
+                        </span>
+                        <span class="membership-card-points">
+                            <strong th:text="${#numbers.formatInteger(memberPoints.pointsBalance, 1, 'COMMA')}">0</strong>
+                            <small>POINTS</small>
+                        </span>
+                    </span>
+                </a>
             </section>
 
             <section class="profile-section workspace-section" th:if="${account.role == 'OWNER' or account.role == 'CAST'}" aria-labelledby="workspace-heading">
@@ -122,7 +134,7 @@
                 </div>
                 <a class="workspace-link" th:if="${account.role == 'OWNER'}" th:href="@{/owner}">
                     <span class="workspace-icon owner"><i class="bi bi-shop" aria-hidden="true"></i></span>
-                    <span><strong>Owner dashboard</strong><small>Manage Hoshi Cafe operations</small></span>
+                    <span><strong>Owner dashboard</strong><small>Manage CastFan operations</small></span>
                     <span class="workspace-arrow"><i class="bi bi-arrow-up-right" aria-hidden="true"></i></span>
                 </a>
                 <a class="workspace-link" th:if="${account.role == 'CAST'}" th:href="@{/cast}">
@@ -148,7 +160,7 @@
                         <span><strong>Following</strong><small>Manage followed Cast profiles</small></span>
                         <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </a>
-                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/profile}">
+                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/notification-settings}">
                         <span><i class="bi bi-bell" aria-hidden="true"></i></span>
                         <span><strong>Notifications</strong><small th:text="${memberProfile.castUpdateNotifications or memberProfile.eventNotifications ? 'Choose Cast updates and event reminders' : 'All notifications are paused'}">Choose notification preferences</small></span>
                         <i class="bi bi-chevron-right" aria-hidden="true"></i>

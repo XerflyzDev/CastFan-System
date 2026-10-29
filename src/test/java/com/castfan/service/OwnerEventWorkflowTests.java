@@ -70,7 +70,7 @@ class OwnerEventWorkflowTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/events"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event management")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event Test Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Choose image")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-date-picker")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-calendar-days")))

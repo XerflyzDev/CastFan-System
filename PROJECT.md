@@ -40,7 +40,7 @@ CastFan should provide one accessible mobile site where:
 
 - Members can discover Cast, check approved schedules, follow favorites, view events and promotions, view their store points and tier, and read content allowed by that tier.
 - Cast can manage their public profile, submit shifts, and publish content for public, follower, or store-tier audiences.
-- Owners can oversee the store, record Member points, approve shifts, manage the permanent Cast roster, and publish events and promotions.
+- Owners can oversee CastFan, record Member points, approve shifts, manage the permanent Cast roster, and publish events and promotions. The system store is configured internally and is not created or selected in the user interface.
 
 The experience should reduce schedule coordination errors while strengthening the relationship between the cafe, Cast, and Members.
 
@@ -95,7 +95,7 @@ Together, these courses require the project to demonstrate:
 - View store metrics and daily schedules.
 - Search Member accounts and record purchase points after checking bills outside CastFan.
 - Approve or reject Cast shift requests for their store.
-- Manage store information and permanent Cast assignments.
+- Manage permanent Cast assignments for the single CastFan system.
 - Upload event images and create, edit, publish, archive, and review store events.
 - Create and schedule public promotions and banners.
 
@@ -133,7 +133,7 @@ Together, these courses require the project to demonstrate:
 
 ## Current Scope And Constraints
 
-- The confirmed stakeholder scope is one cafe, represented by the current Hoshi Cafe experience. The first release must not expose creation or selection of additional stores.
+- The confirmed stakeholder scope is one cafe represented only as CastFan. The first release does not expose store creation, editing, activation, or selection; the internal `Store` relationship remains for data integrity.
 - Booking, payments, paid content, food ordering, queueing, and point-of-sale operations are out of scope.
 - New Members begin with zero points and no tier. The Owner records points after checking a customer's bill outside CastFan at `1 THB = 1 point`.
 - Tier thresholds are Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+`; points never expire.

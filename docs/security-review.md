@@ -1,6 +1,6 @@
 # Security and Production Readiness Review
 
-Review date: 15 October 2026
+Review date: 29 October 2026
 
 ## Implemented Controls
 
@@ -19,15 +19,15 @@ Review date: 15 October 2026
 - Flyway version 1 production schema with migration naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
 - Opt-in integration coverage that applies Flyway and runs Hibernate schema validation against real MySQL; version 1 passed on MySQL 8.4.11 on 15 October 2026.
 - Public aggregate health and liveness endpoints for Cloud Run probes, with component details hidden and every non-health Actuator route denied.
+- GitHub Actions post-deployment verification that waits for the deployed Cloud Run health endpoint to report `UP`.
+- Trivy source-dependency scanning before tests/deployment and immutable container-image scanning before a revision is deployed.
+- Responsive and accessibility smoke coverage across Member, Cast, and Owner routes at 320 px, 390 px, and desktop widths, with no root-level horizontal overflow in the reviewed pages.
 
 ## Remaining Production Gates
 
 - Add login rate limiting at the edge with Google Cloud Armor or an equivalent shared store. Per-instance memory counters are not sufficient when Cloud Run scales horizontally.
 - Add an account recovery process before accepting real users.
-- Add a post-deployment smoke test once the Cloud Run service URL is available.
 - Review personal data retention and audit logging requirements with the stakeholder.
-- Run dependency and container image vulnerability scanning in CI.
-- Verify responsive layouts and accessibility with production-like data.
 - Configure Cloud SQL backups, Secret Manager rotation, budget alerts, and least-privilege IAM.
 
 ## Deployment Rules

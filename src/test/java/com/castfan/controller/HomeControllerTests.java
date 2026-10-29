@@ -63,7 +63,7 @@ class HomeControllerTests {
 			.andExpect(content().string(containsString("aria-label=\"Profile\"")))
 			.andExpect(content().string(containsString("aria-label=\"Cast\"")))
 			.andExpect(content().string(matchesPattern(
-				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
+				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
 					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
 					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
 			)));

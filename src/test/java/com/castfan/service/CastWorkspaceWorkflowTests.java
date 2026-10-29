@@ -76,7 +76,7 @@ class CastWorkspaceWorkflowTests {
 		mockMvc.perform(get("/cast").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/dashboard"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Test Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Request shift")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Preview public profile"))))
@@ -86,7 +86,7 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Manage content"))))
 			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
-				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
+				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
 					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
 					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
 			)));
@@ -137,7 +137,6 @@ class CastWorkspaceWorkflowTests {
 		mockMvc.perform(post("/cast/schedule")
 				.with(user(cast.getEmail()).roles("CAST"))
 				.with(csrf())
-				.param("storeCastId", assignment.getId().toString())
 				.param("date", date.toString())
 				.param("startsAt", "14:00")
 				.param("endsAt", "20:00"))
@@ -184,13 +183,12 @@ class CastWorkspaceWorkflowTests {
 		mockMvc.perform(post("/cast/schedule")
 				.with(user(otherCast.getEmail()).roles("CAST"))
 				.with(csrf())
-				.param("storeCastId", assignment.getId().toString())
 				.param("date", date.toString())
 				.param("startsAt", LocalTime.of(14, 0).toString())
 				.param("endsAt", LocalTime.of(20, 0).toString()))
 			.andExpect(status().isOk())
 			.andExpect(view().name("cast/schedule"))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Store assignment not found")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Active CastFan roster assignment not found")));
 
 		assertThat(shiftScheduleRepository.findAllByStoreCastIdOrderByStartsAtAsc(assignment.getId())).isEmpty();
 	}

@@ -14,5 +14,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	Optional<Store> findFirstByActiveTrueOrderByIdAsc();
 
+	Optional<Store> findFirstByOwnerIdAndActiveTrueOrderByIdAsc(Long ownerId);
+
 	boolean existsBySlug(String slug);
 }

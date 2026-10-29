@@ -5,6 +5,65 @@
 .profile-heading p { margin-bottom: 3px; color: var(--muted); font-size: 0.7rem; }
 .profile-heading h1 { font-size: 1.75rem; line-height: 1; }
 
+.member-edit-page { background: #fff; }
+.member-edit-page .ambient-top {
+    height: 250px;
+    background: linear-gradient(180deg, #f5f5f5 0%, rgba(245, 245, 245, 0) 100%);
+}
+.member-edit-page .profile-content { padding: calc(17px + env(safe-area-inset-top)) 15px calc(126px + env(safe-area-inset-bottom)); }
+.member-edit-page .profile-heading { margin-bottom: 18px; }
+.member-edit-page .profile-form-card {
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: none;
+}
+.member-edit-page .member-profile-form { gap: 14px; padding: 16px; }
+.edit-profile-summary {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--line);
+}
+.edit-profile-summary > span:last-child { display: grid; gap: 3px; min-width: 0; }
+.edit-profile-summary strong,
+.edit-profile-summary small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.edit-profile-summary strong { color: var(--ink); font-size: 0.78rem; }
+.edit-profile-summary small { color: var(--muted); font-size: 0.54rem; }
+.member-edit-page .edit-form-title { margin: 0; }
+.member-edit-page .member-profile-form input,
+.member-edit-page .member-profile-form textarea { background: #f7f7f8; }
+.member-edit-page .notification-preferences {
+    margin-top: 2px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+.notification-settings-card { margin-top: 6px; }
+.notification-settings-intro { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 12px; }
+.notification-settings-intro > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; color: var(--rose-dark); background: var(--rose-soft); font-size: 1rem; }
+.notification-settings-intro h2 { margin: 0; font-size: 0.78rem; }
+.notification-settings-intro p { margin: 3px 0 0; color: var(--muted); font-size: 0.52rem; }
+.notification-settings-page .notification-preferences { gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; }
+.notification-settings-page .member-profile-form .preference-toggle { border-radius: 0; background: #fff; }
+.notification-settings-page .member-profile-form .preference-toggle + .preference-toggle { border-top: 1px solid var(--line); }
+.notification-center-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); text-decoration: none; }
+.notification-center-link > span { display: flex; align-items: center; gap: 10px; }
+.notification-center-link > span > i { color: var(--muted); font-size: 0.9rem; }
+.notification-center-link > span > span { display: grid; gap: 2px; }
+.notification-center-link strong { font-size: 0.6rem; }
+.notification-center-link small { color: var(--muted); font-size: 0.5rem; }
+.notification-center-link > i { color: var(--muted); }
+.member-edit-page .save-profile-button { min-height: 44px; border-radius: 999px; }
+@media (max-width: 350px) {
+    .member-edit-page .member-profile-form { padding: 14px; }
+    .edit-profile-summary { grid-template-columns: 52px minmax(0, 1fr); }
+    .edit-profile-summary .member-avatar { width: 52px; height: 52px; }
+}
+
 .profile-identity-card { overflow: hidden; border-radius: 18px; background: rgba(255, 255, 255, 0.92); box-shadow: var(--shadow); }
 .profile-identity-main { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px; }
 .profile-avatar-wrap { width: 58px; height: 58px; }
@@ -273,6 +332,68 @@
     padding: 7px 12px;
     color: var(--profile-ink);
     background: rgba(84, 84, 84, 0.08);
+}
+
+.account-prototype .membership-card {
+    position: relative;
+    display: flex;
+    min-height: 176px;
+    overflow: hidden;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 17px;
+    border: 1px solid #e2dce4;
+    border-radius: 19px;
+    color: var(--profile-ink);
+    background: linear-gradient(145deg, #fffdfd 0%, #f7f3f8 58%, #f6f0e6 100%);
+    box-shadow: 0 16px 32px rgba(61, 53, 65, 0.11);
+    text-decoration: none;
+    isolation: isolate;
+}
+.account-prototype .membership-card:focus-visible {
+    outline: 3px solid rgba(180, 120, 141, 0.28);
+    outline-offset: 3px;
+}
+.membership-card-glow {
+    position: absolute;
+    z-index: -2;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    filter: blur(34px);
+    opacity: 0.26;
+    pointer-events: none;
+}
+.membership-card-glow-rose { top: -78px; left: -82px; background: #d99aae; }
+.membership-card-glow-amber { right: -88px; bottom: -88px; background: #e2bd73; }
+.membership-card-grid {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-image: linear-gradient(rgba(101, 91, 134, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(101, 91, 134, 0.04) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(145deg, #000, transparent 72%);
+    pointer-events: none;
+}
+.membership-card-topline,
+.membership-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.membership-card-topline { color: #7d6f7c; font-size: 0.5rem; font-weight: 700; letter-spacing: 0.11em; }
+.membership-card-tier { display: grid; align-content: center; gap: 1px; margin: 8px 0 15px; }
+.membership-card-tier small { color: var(--profile-copy); font-size: 0.52rem; }
+.membership-card-tier strong { font-size: 1.55rem; line-height: 1; letter-spacing: -0.04em; }
+.membership-card-footer { align-items: end; }
+.membership-card-member,
+.membership-card-points { display: grid; gap: 2px; }
+.membership-card-member { min-width: 0; }
+.membership-card-member small,
+.membership-card-points small { color: var(--profile-copy); font-size: 0.43rem; letter-spacing: 0.07em; text-transform: uppercase; }
+.membership-card-member strong { overflow: hidden; max-width: 126px; font-size: 0.6rem; text-overflow: ellipsis; white-space: nowrap; }
+.membership-card-points { text-align: right; }
+.membership-card-points strong { font-size: 0.78rem; line-height: 1; }
+@media (max-width: 350px) {
+    .account-prototype .membership-card { min-height: 164px; padding: 15px; }
+    .membership-card-tier strong { font-size: 1.4rem; }
+    .membership-card-member strong { max-width: 102px; }
 }
 
 .account-prototype .membership-list,

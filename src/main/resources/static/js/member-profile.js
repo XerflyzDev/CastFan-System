@@ -1,3 +1,4 @@
+(() => {
 const toast = document.querySelector("#app-toast");
 const avatarInput = document.querySelector("[data-avatar-input]");
 const avatarForm = document.querySelector("[data-avatar-form]");
@@ -141,6 +142,20 @@ function showMessage(message) {
     toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
 }
 
+const pageMessages = new Map([
+    ["saved", "Profile saved."],
+    ["nameSaved", "Account name updated."],
+    ["photoSaved", "Profile photo updated."],
+    ["photoRemoved", "Profile photo removed."]
+]);
+const pageParameters = new URLSearchParams(window.location.search);
+for (const [parameter, message] of pageMessages) {
+    if (pageParameters.has(parameter)) {
+        showMessage(message);
+        break;
+    }
+}
+
 document.querySelectorAll("[data-message]").forEach((control) => {
     control.addEventListener("click", () => showMessage(control.dataset.message));
 });
@@ -221,3 +236,4 @@ document
             }
         });
     });
+})();

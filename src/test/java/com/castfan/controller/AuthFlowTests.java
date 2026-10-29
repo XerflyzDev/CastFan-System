@@ -181,7 +181,7 @@ class AuthFlowTests {
 				org.hamcrest.Matchers.containsString("Member navigation"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("/owner/promotions")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Edit name")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Change photo")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Change profile photo")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Crop photo")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Save photo")));
 
@@ -224,6 +224,19 @@ class AuthFlowTests {
 			.andExpect(status().isOk())
 			.andExpect(content().contentType("image/png"))
 			.andExpect(content().bytes(png.getBytes()));
+
+		mockMvc.perform(get("/account").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("/account/avatar/remove")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Remove profile photo")));
+
+		mockMvc.perform(post("/account/avatar/remove").with(csrf())
+				.session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/account?photoRemoved"));
+
+		mockMvc.perform(get("/account/avatar").session((org.springframework.mock.web.MockHttpSession) session))
+			.andExpect(status().isNotFound());
 	}
 
 	@Test

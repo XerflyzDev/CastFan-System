@@ -25,10 +25,6 @@
                 <h1>Account</h1>
             </header>
 
-            <div class="profile-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Profile saved.</div>
-            <div class="profile-alert success" th:if="${param.nameSaved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Account name updated.</div>
-            <div class="profile-alert success" th:if="${param.photoSaved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Profile photo updated.</div>
-            <div class="profile-alert success" th:if="${param.photoRemoved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Profile photo removed.</div>
             <div class="profile-alert error" th:if="${photoError}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${photoError}">Unable to update profile photo.</span></div>
 
             <section class="profile-identity-card" aria-labelledby="member-name">
@@ -37,35 +33,32 @@
                         <img class="member-avatar member-avatar-photo" th:if="${account.hasAvatar}" th:src="@{/account/avatar}" th:alt="${account.displayName}">
                         <img class="member-avatar member-avatar-photo" th:if="${!account.hasAvatar and memberProfile != null and memberProfile.avatarUrl != null}" th:src="${memberProfile.avatarUrl}" th:alt="${account.displayName}">
                         <span class="member-avatar" th:if="${!account.hasAvatar and (memberProfile == null or memberProfile.avatarUrl == null)}" th:text="${account.initials}">AR</span>
+                        <form class="profile-avatar-upload" th:action="@{/account/avatar}" method="post" enctype="multipart/form-data" data-avatar-form>
+                            <input id="avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-input>
+                            <label for="avatar-upload" aria-label="Change profile photo" title="Change profile photo"><i class="bi bi-camera" aria-hidden="true"></i></label>
+                        </form>
+                        <form class="profile-avatar-remove" th:if="${account.hasAvatar}" th:action="@{/account/avatar/remove}" method="post">
+                            <button type="submit" aria-label="Remove profile photo" title="Remove profile photo"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+                        </form>
                     </div>
                     <div class="profile-identity-copy">
-                        <h2 id="member-name" th:text="${account.displayName}">Member</h2>
+                        <div class="profile-name-heading">
+                            <h2 id="member-name" th:text="${account.displayName}">Member</h2>
+                            <details class="profile-name-editor" th:open="${nameError != null}">
+                                <summary aria-label="Edit name" title="Edit name"><i class="bi bi-pencil-fill" aria-hidden="true"></i></summary>
+                                <form th:action="@{/account/name}" method="post">
+                                    <label class="visually-hidden" for="display-name">Account name</label>
+                                    <input id="display-name" name="displayName" type="text" minlength="2" maxlength="80" required th:value="${attemptedName != null ? attemptedName : account.displayName}" autocomplete="name">
+                                    <button type="submit" aria-label="Save account name" title="Save">Save</button>
+                                    <small class="profile-name-error" th:if="${nameError}" th:text="${nameError}" role="alert">Unable to update account name.</small>
+                                </form>
+                            </details>
+                        </div>
                         <small th:text="${account.email}">member@example.com</small>
                         <span class="profile-role-pill"><i class="bi bi-shield-check" aria-hidden="true"></i><span th:text="${account.role}">MEMBER</span></span>
                         <p th:if="${memberProfile != null and memberProfile.bio != null}" th:text="${memberProfile.bio}">Profile bio</p>
                     </div>
                 </div>
-                <div class="profile-photo-controls" aria-label="Profile photo">
-                    <form th:action="@{/account/avatar}" method="post" enctype="multipart/form-data" data-avatar-form>
-                        <input id="avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-input>
-                        <label for="avatar-upload"><i class="bi bi-camera" aria-hidden="true"></i><span>Change photo</span></label>
-                    </form>
-                    <span class="profile-photo-hint">JPG, PNG, or WebP · Max 2 MB</span>
-                    <form th:if="${account.hasAvatar}" th:action="@{/account/avatar/remove}" method="post">
-                        <button class="remove-photo-button" type="submit" aria-label="Remove profile photo" title="Remove photo"><i class="bi bi-trash3" aria-hidden="true"></i></button>
-                    </form>
-                </div>
-                <details class="profile-name-editor" th:open="${nameError != null}">
-                    <summary><span><i class="bi bi-pencil" aria-hidden="true"></i>Edit name</span><i class="bi bi-chevron-down" aria-hidden="true"></i></summary>
-                    <form th:action="@{/account/name}" method="post">
-                        <label for="display-name">Account name</label>
-                        <div class="profile-name-field">
-                            <input id="display-name" name="displayName" type="text" minlength="2" maxlength="80" required th:value="${attemptedName != null ? attemptedName : account.displayName}" autocomplete="name">
-                            <button type="submit">Save</button>
-                        </div>
-                        <small class="profile-name-error" th:if="${nameError}" th:text="${nameError}" role="alert">Unable to update account name.</small>
-                    </form>
-                </details>
             </section>
 
             <dialog class="avatar-crop-dialog" data-avatar-crop-dialog aria-labelledby="crop-photo-title">

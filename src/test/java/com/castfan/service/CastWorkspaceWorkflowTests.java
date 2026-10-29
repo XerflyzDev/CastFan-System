@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,9 @@ class CastWorkspaceWorkflowTests {
 
 	@Autowired
 	private ShiftScheduleRepository shiftScheduleRepository;
+
+	@Autowired
+	private AccountAvatarService accountAvatarService;
 
 	private UserAccount cast;
 	private StoreCast assignment;
@@ -171,6 +175,29 @@ class CastWorkspaceWorkflowTests {
 		assertThat(profile.getStageName()).startsWith("Updated Mina");
 		assertThat(profile.getBio()).isEqualTo("Updated public bio");
 		assertThat(profile.isDiscoverable()).isTrue();
+
+		var png = new MockMultipartFile(
+			"image", "cast.png", "image/png",
+			new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}
+		);
+		accountAvatarService.upload(cast.getEmail(), png);
+
+		mockMvc.perform(get("/cast/profile").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"removeImage\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Remove profile photo")));
+
+		mockMvc.perform(post("/cast/profile")
+				.with(user(cast.getEmail()).roles("CAST"))
+				.with(csrf())
+				.param("stageName", profile.getStageName())
+				.param("bio", profile.getBio())
+				.param("discoverable", "true")
+				.param("removeImage", "true"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/cast/profile?saved"));
+
+		assertThat(accountAvatarService.load(cast.getEmail())).isEmpty();
 	}
 
 	@Test

@@ -66,9 +66,20 @@
 
 .profile-identity-card { overflow: hidden; border-radius: 18px; background: rgba(255, 255, 255, 0.92); box-shadow: var(--shadow); }
 .profile-identity-main { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px; }
-.profile-avatar-wrap { width: 58px; height: 58px; }
+.profile-avatar-wrap { position: relative; width: 58px; height: 58px; }
+.profile-avatar-wrap .member-avatar { border-radius: 50%; }
 .member-avatar { display: grid; width: 58px; height: 58px; place-items: center; border-radius: 15px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.82rem; font-weight: 700; }
 .member-avatar-photo { object-fit: cover; }
+.profile-avatar-upload { position: absolute; right: 2px; bottom: 2px; margin: 0; }
+.profile-avatar-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.profile-avatar-upload label { display: grid; width: 22px; height: 22px; place-items: center; border: 2px solid #fff; border-radius: 50%; color: #fff; background: var(--ink); box-shadow: 0 2px 7px rgba(17, 19, 24, 0.2); cursor: pointer; }
+.profile-avatar-upload label i { font-size: 0.65rem; }
+.profile-avatar-upload label:focus-within,
+.profile-avatar-upload input:focus-visible + label { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
+.profile-avatar-remove { position: absolute; left: 2px; bottom: 2px; margin: 0; }
+.profile-avatar-remove button { display: grid; width: 22px; height: 22px; padding: 0; place-items: center; border: 2px solid #fff; border-radius: 50%; color: #fff; background: var(--rose-dark); box-shadow: 0 2px 7px rgba(17, 19, 24, 0.2); cursor: pointer; }
+.profile-avatar-remove button i { font-size: 0.61rem; }
+.profile-avatar-remove button:focus-visible { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
 .profile-identity-copy { display: grid; min-width: 0; gap: 2px; }
 .profile-identity-copy h2,
 .profile-identity-copy small,
@@ -84,17 +95,6 @@
 .profile-photo-controls .remove-photo-button { width: 32px; padding: 0; color: var(--rose-dark); }
 .profile-photo-controls label:focus-within { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
 .profile-photo-hint { min-width: 0; flex: 1; color: var(--muted); font-size: 0.47rem; text-align: right; }
-.profile-name-editor { border-top: 1px solid var(--line); background: rgba(250, 250, 251, 0.72); }
-.profile-name-editor summary { display: flex; min-height: 42px; align-items: center; justify-content: space-between; padding: 8px 16px; color: #62646a; font-size: 0.56rem; font-weight: 700; cursor: pointer; list-style: none; }
-.profile-name-editor summary::-webkit-details-marker { display: none; }
-.profile-name-editor summary > span { display: inline-flex; align-items: center; gap: 7px; }
-.profile-name-editor summary > i { font-size: 0.58rem; transition: transform 160ms ease; }
-.profile-name-editor[open] summary > i { transform: rotate(180deg); }
-.profile-name-editor form { display: grid; gap: 6px; padding: 1px 16px 14px; }
-.profile-name-editor label { color: var(--muted); font-size: 0.5rem; font-weight: 700; }
-.profile-name-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
-.profile-name-field input { min-width: 0; min-height: 38px; padding: 8px 10px; border: 1px solid #dcdce1; border-radius: 10px; color: var(--ink); background: #fff; font-size: 0.62rem; }
-.profile-name-field button { min-width: 58px; border: 0; border-radius: 10px; color: #fff; background: var(--ink); font-size: 0.57rem; font-weight: 700; cursor: pointer; }
 .profile-name-error { color: var(--rose-dark); font-size: 0.51rem; }
 .avatar-crop-dialog { width: min(354px, calc(100vw - 32px)); max-width: none; padding: 0; border: 0; border-radius: 18px; color: var(--ink); background: #fff; box-shadow: 0 24px 70px rgba(30, 32, 38, 0.22); }
 .avatar-crop-dialog::backdrop { background: rgba(17, 19, 24, 0.48); backdrop-filter: blur(5px); }
@@ -276,6 +276,7 @@
 .account-prototype .profile-identity-copy h2 {
     color: var(--profile-ink);
     font-size: 1rem;
+    line-height: 1.7;
     letter-spacing: -0.02em;
 }
 .account-prototype .profile-identity-copy small { color: var(--profile-copy); font-size: 0.6rem; }
@@ -312,12 +313,22 @@
 .account-prototype .profile-photo-controls .remove-photo-button { color: #8a3f55; }
 .account-prototype .profile-photo-hint { color: var(--profile-copy); font-size: 0.48rem; }
 .account-prototype .profile-name-editor { border-color: var(--profile-line); background: #fff; }
-.account-prototype .profile-name-editor summary {
-    min-height: 48px;
-    padding-inline: 16px;
-    color: var(--profile-copy);
-    font-size: 0.58rem;
-}
+.account-prototype .profile-name-heading { display: inline-flex; width: fit-content; max-width: 100%; min-width: 0; justify-self: start; align-items: center; gap: 7px; }
+.account-prototype .profile-name-heading h2 { flex: 0 1 auto; min-width: 0; line-height: 1.2; }
+.account-prototype .profile-name-editor { display: flex; flex: 0 0 auto; min-width: 0; align-items: center; border: 0; background: transparent; }
+.account-prototype .profile-name-editor[open] { flex: 1 1 0; }
+.account-prototype .profile-name-heading:has(.profile-name-editor[open]) { display: flex; width: 100%; }
+.account-prototype .profile-name-editor summary { display: inline-grid; box-sizing: border-box; width: 20px; min-width: 20px; height: 20px; min-height: 20px; flex: 0 0 20px; align-self: center; padding: 0; place-items: center; border: 1px solid #dedee3; border-radius: 50%; color: #51535a; background: #f1f1f3; font-size: 0.52rem; line-height: 1; }
+.account-prototype .profile-name-editor summary::marker { content: ""; }
+.account-prototype .profile-name-editor summary::-webkit-details-marker { display: none; }
+.account-prototype .profile-name-editor summary i { display: block; font-size: 0.52rem; line-height: 1; }
+.account-prototype .profile-name-editor[open] > summary,
+.account-prototype .profile-name-heading:has(.profile-name-editor[open]) > h2 { display: none; }
+.account-prototype .profile-name-editor summary:focus-visible { outline: 3px solid var(--rose-soft); outline-offset: 2px; }
+.account-prototype .profile-name-editor form { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 5px; padding: 0; }
+.account-prototype .profile-name-editor form input:not([type="hidden"]) { flex: 1 1 90px; width: 100%; min-width: 0; min-height: 29px; padding: 5px 8px; border: 1px solid #dcdce1; border-radius: 9px; color: var(--profile-ink); background: #fff; font: inherit; font-size: 0.68rem; }
+.account-prototype .profile-name-editor form button { min-width: 42px; min-height: 29px; padding: 5px 9px; border: 0; border-radius: 9px; color: #fff; background: var(--profile-ink); font: inherit; font-size: 0.58rem; font-weight: 700; cursor: pointer; }
+.account-prototype .profile-name-editor .profile-name-error { flex-basis: 100%; }
 
 .account-prototype .profile-section { margin-top: 28px; }
 .account-prototype .profile-section-title { margin-bottom: 10px; }

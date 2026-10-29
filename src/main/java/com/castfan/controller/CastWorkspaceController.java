@@ -91,6 +91,7 @@ public class CastWorkspaceController {
 			model.addAttribute("form", castWorkspaceService.profileForm(principal.getName()));
 		}
 		model.addAttribute("profileEditorOpen", false);
+		model.addAttribute("nameEditorOpen", false);
 		model.addAttribute("workspace", castWorkspaceService.load(principal.getName(), 3));
 		return "cast/profile";
 	}
@@ -112,6 +113,7 @@ public class CastWorkspaceController {
 			}
 		}
 		model.addAttribute("profileEditorOpen", true);
+		model.addAttribute("nameEditorOpen", bindingResult.hasFieldErrors("stageName"));
 		model.addAttribute("workspace", castWorkspaceService.load(principal.getName(), 3));
 		return "cast/profile";
 	}

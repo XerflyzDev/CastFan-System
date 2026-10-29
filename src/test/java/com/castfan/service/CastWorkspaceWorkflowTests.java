@@ -79,6 +79,11 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Test Cafe")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Request shift")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Preview public profile"))))
+			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
+				"(?s).*<div class=\"cast-stats\" aria-label=\"Cast summary\">\\s*<div>.*?Pending shifts.*?</div>\\s*<div>.*?Active tiers.*?</div>\\s*<div>.*?Followers.*?</div>\\s*</div>.*"
+			)))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Manage content"))))
 			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
 				"(?s).*<nav class=\"floating-nav\" aria-label=\"Cast navigation\">"
@@ -100,7 +105,12 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(view().name("cast/profile"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Your account")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Manage profile")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Preferences")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Preferences"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Interface language"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Appearance"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Support")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Discoverable profile")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(

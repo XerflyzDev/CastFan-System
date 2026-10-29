@@ -184,8 +184,10 @@ class CastWorkspaceWorkflowTests {
 
 		mockMvc.perform(get("/cast/profile").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"removeImage\"")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Remove profile photo")));
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("name=\"removeImage\""))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Remove profile photo"))));
 
 		mockMvc.perform(post("/cast/profile")
 				.with(user(cast.getEmail()).roles("CAST"))

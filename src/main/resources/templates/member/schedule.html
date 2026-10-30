@@ -68,13 +68,14 @@
                     <article class="shift-row" th:each="shift : ${schedule.shifts}" th:classappend="${shift.workingNow} ? 'is-live'">
                         <time th:datetime="${shift.startsAt}" th:text="${shift.startsAt}">14:00</time>
                         <span class="timeline-marker" aria-hidden="true"></span>
-                        <a th:href="@{/casts/{id}(id=${shift.castProfileId})}">
+                        <a th:href="${shift.publicProfileVisible} ? |/casts/${shift.castProfileId}| : null"
+                           th:attr="aria-disabled=${!shift.publicProfileVisible ? 'true' : null}">
                             <img class="avatar avatar-photo" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.name}">
                             <span class="avatar" th:unless="${shift.avatarUrl != null}" th:classappend="${shift.avatarTone}" th:text="${shift.initials}">MN</span>
                             <span class="shift-copy"><strong th:text="${shift.name}">Mina</strong><small th:text="${shift.shiftTime}">14:00 - 20:00</small></span>
                             <span class="shift-status" th:if="${shift.workingNow}">Now</span>
                             <span class="shift-status upcoming" th:if="${!shift.workingNow and shift.startingSoon}">Soon</span>
-                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right" th:if="${shift.publicProfileVisible}" aria-hidden="true"></i>
                         </a>
                     </article>
                 </div>
@@ -90,11 +91,13 @@
                 <article class="week-day-card" th:each="group : ${schedule.weekSchedule}" th:classappend="${group.today} ? 'today'">
                     <header><div><small th:if="${group.today}">Today</small><strong th:text="${group.dateLabel}">Wednesday, 14 October</strong></div><span th:text="${group.shifts.size()}">0</span></header>
                     <div class="week-shift-list" th:if="${!group.shifts.empty}">
-                        <a th:each="shift : ${group.shifts}" th:href="@{/casts/{id}(id=${shift.castProfileId})}">
+                        <a th:each="shift : ${group.shifts}"
+                           th:href="${shift.publicProfileVisible} ? |/casts/${shift.castProfileId}| : null"
+                           th:attr="aria-disabled=${!shift.publicProfileVisible ? 'true' : null}">
                             <img class="avatar avatar-photo" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.name}">
                             <span class="avatar" th:unless="${shift.avatarUrl != null}" th:classappend="${shift.avatarTone}" th:text="${shift.initials}">MN</span>
                             <span><strong th:text="${shift.name}">Mina</strong><small th:text="${shift.shiftTime}">14:00 - 20:00</small></span>
-                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            <i class="bi bi-chevron-right" th:if="${shift.publicProfileVisible}" aria-hidden="true"></i>
                         </a>
                     </div>
                     <p th:if="${group.shifts.empty}">No approved shifts</p>

@@ -37,6 +37,7 @@ public record MemberScheduleView(
 		String initials,
 		String avatarTone,
 		String avatarUrl,
+		boolean publicProfileVisible,
 		String startsAt,
 		String shiftTime,
 		boolean workingNow,

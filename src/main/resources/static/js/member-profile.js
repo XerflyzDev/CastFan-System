@@ -10,7 +10,6 @@ const cropSave = document.querySelector("[data-crop-save]");
 const cropContext = cropCanvas?.getContext("2d");
 let toastTimer;
 let cropImage;
-let cropObjectUrl;
 let cropBaseScale = 1;
 let cropScale = 1;
 let cropOffsetX = 0;
@@ -41,8 +40,6 @@ function renderCrop() {
 }
 
 function resetCrop() {
-    if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl);
-    cropObjectUrl = undefined;
     cropImage = undefined;
     pointerStart = undefined;
     if (avatarInput) avatarInput.value = "";
@@ -64,23 +61,30 @@ avatarInput?.addEventListener("change", (event) => {
         return;
     }
 
-    cropObjectUrl = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-        cropImage = image;
-        cropBaseScale = Math.max(cropCanvas.width / image.naturalWidth, cropCanvas.height / image.naturalHeight);
-        cropScale = 1;
-        cropOffsetX = 0;
-        cropOffsetY = 0;
-        cropZoom.value = "1";
-        renderCrop();
-        cropDialog.showModal();
-    };
-    image.onerror = () => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+        const image = new Image();
+        image.addEventListener("load", () => {
+            cropImage = image;
+            cropBaseScale = Math.max(cropCanvas.width / image.naturalWidth, cropCanvas.height / image.naturalHeight);
+            cropScale = 1;
+            cropOffsetX = 0;
+            cropOffsetY = 0;
+            cropZoom.value = "1";
+            renderCrop();
+            cropDialog.showModal();
+        }, { once: true });
+        image.addEventListener("error", () => {
+            showMessage("This image could not be opened.");
+            resetCrop();
+        }, { once: true });
+        image.src = reader.result;
+    }, { once: true });
+    reader.addEventListener("error", () => {
         showMessage("This image could not be opened.");
         resetCrop();
-    };
-    image.src = cropObjectUrl;
+    }, { once: true });
+    reader.readAsDataURL(file);
 });
 
 cropZoom?.addEventListener("input", (event) => {

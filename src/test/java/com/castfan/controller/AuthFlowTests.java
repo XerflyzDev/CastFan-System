@@ -227,8 +227,10 @@ class AuthFlowTests {
 
 		mockMvc.perform(get("/account").session((org.springframework.mock.web.MockHttpSession) session))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("/account/avatar/remove")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Remove profile photo")));
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("/account/avatar/remove"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Remove profile photo"))));
 
 		mockMvc.perform(post("/account/avatar/remove").with(csrf())
 				.session((org.springframework.mock.web.MockHttpSession) session))

@@ -66,13 +66,13 @@ class CoreDomainModelTests {
 		var firstCast = saveAccount("first-cast@castfan.test", UserRole.CAST, UserStatus.ACTIVE);
 		var secondCast = saveAccount("second-cast@castfan.test", UserRole.CAST, UserStatus.ACTIVE);
 
-		var profile = profileService.createCastProfile(firstCast, "Mira", "Main floor Cast", null, true);
+		var profile = profileService.createCastProfile(firstCast, "Mira", "Main floor Cast", null);
 
 		assertThat(profile.getStageName()).isEqualTo("Mira");
 		assertThat(profile.getStageNameKey()).isEqualTo("mira");
 		assertThat(castProfileRepository.findByStageNameKey("mira")).contains(profile);
 		assertThatThrownBy(() ->
-			profileService.createCastProfile(secondCast, "MIRA", null, null, true)
+			profileService.createCastProfile(secondCast, "MIRA", null, null)
 		).isInstanceOf(DomainConflictException.class);
 	}
 
@@ -82,10 +82,10 @@ class CoreDomainModelTests {
 		var suspendedCast = saveAccount("suspended-cast@castfan.test", UserRole.CAST, UserStatus.SUSPENDED);
 
 		assertThatThrownBy(() ->
-			profileService.createCastProfile(member, "Role Error", null, null, false)
+			profileService.createCastProfile(member, "Role Error", null, null)
 		).isInstanceOf(DomainRuleViolationException.class);
 		assertThatThrownBy(() ->
-			profileService.createCastProfile(suspendedCast, "Status Error", null, null, false)
+			profileService.createCastProfile(suspendedCast, "Status Error", null, null)
 		).isInstanceOf(DomainRuleViolationException.class);
 	}
 

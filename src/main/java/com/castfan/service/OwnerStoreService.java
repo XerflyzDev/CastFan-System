@@ -5,12 +5,14 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.castfan.dto.OwnerCastAssignmentForm;
+import com.castfan.dto.OwnerCastPromotionForm;
 import com.castfan.dto.OwnerStoreView;
 import com.castfan.entity.StoreCast;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastProfileRepository;
+import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,19 @@ public class OwnerStoreService {
 	private final UserAccountRepository userAccountRepository;
 	private final StoreCastRepository storeCastRepository;
 	private final CastProfileRepository castProfileRepository;
+	private final MemberProfileRepository memberProfileRepository;
 	private final SystemStoreService systemStoreService;
+	private final ProfileService profileService;
 
 	public OwnerStoreService(UserAccountRepository userAccountRepository, StoreCastRepository storeCastRepository,
-		CastProfileRepository castProfileRepository, SystemStoreService systemStoreService) {
+		CastProfileRepository castProfileRepository, MemberProfileRepository memberProfileRepository,
+		SystemStoreService systemStoreService, ProfileService profileService) {
 		this.userAccountRepository = userAccountRepository;
 		this.storeCastRepository = storeCastRepository;
 		this.castProfileRepository = castProfileRepository;
+		this.memberProfileRepository = memberProfileRepository;
 		this.systemStoreService = systemStoreService;
+		this.profileService = profileService;
 	}
 
 	@Transactional(readOnly = true)
@@ -41,7 +48,32 @@ public class OwnerStoreService {
 			castProfileRepository.findAllByUserAccountStatusOrderByStageNameAsc(UserStatus.ACTIVE).stream()
 				.map(profile -> new OwnerStoreView.CastOption(profile.getId(), profile.getStageName(),
 					profile.getUserAccount().getEmail())).toList(),
+			memberProfileRepository.findCastPromotionCandidates(UserRole.MEMBER, UserStatus.ACTIVE).stream()
+				.map(profile -> new OwnerStoreView.MemberOption(
+					profile.getId(), profile.getUserAccount().getDisplayName(), profile.getUserAccount().getEmail()
+				)).toList(),
 			assignments.stream().map(this::toAssignmentItem).toList());
+	}
+
+	@Transactional
+	public void promoteMember(String email, OwnerCastPromotionForm form) {
+		var store = systemStoreService.requireForOwner(requireOwner(email));
+		var memberProfile = memberProfileRepository.findByIdForUpdate(form.getMemberProfileId())
+			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
+		var account = memberProfile.getUserAccount();
+		if (account.getRole() != UserRole.MEMBER || account.getStatus() != UserStatus.ACTIVE) {
+			throw new DomainRuleViolationException("Only an active Member account can be promoted to Cast.");
+		}
+		if (castProfileRepository.existsByUserAccountId(account.getId())) {
+			throw new DomainConflictException("This account already has a Cast profile.");
+		}
+
+		account.promoteMemberToCast();
+		userAccountRepository.save(account);
+		var castProfile = profileService.createCastProfile(
+			account, form.getStageName(), memberProfile.getBio(), memberProfile.getAvatarUrl()
+		);
+		storeCastRepository.saveAndFlush(new StoreCast(store, castProfile, true));
 	}
 
 	@Transactional

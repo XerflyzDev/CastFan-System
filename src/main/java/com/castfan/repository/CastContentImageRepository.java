@@ -13,7 +13,7 @@ public interface CastContentImageRepository extends JpaRepository<CastContentIma
 	@Query("select image from CastContentImage image where image.castContent.id = :id and lower(image.castContent.castProfile.userAccount.email) = lower(:email)")
 	Optional<CastContentImage> findOwned(@Param("id") Long id, @Param("email") String email);
 
-	@Query("select image from CastContentImage image where image.castContent.id = :id and image.castContent.castProfile.id = :profileId and image.castContent.status = :status and image.castContent.castProfile.discoverable = true and image.castContent.castProfile.userAccount.status = :userStatus")
+	@Query("select image from CastContentImage image where image.castContent.id = :id and image.castContent.castProfile.id = :profileId and image.castContent.status = :status and image.castContent.castProfile.userAccount.status = :userStatus")
 	Optional<CastContentImage> findPublic(@Param("id") Long id, @Param("profileId") Long profileId,
 		@Param("status") ContentStatus status, @Param("userStatus") UserStatus userStatus);
 }

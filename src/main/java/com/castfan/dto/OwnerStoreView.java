@@ -4,9 +4,11 @@ import java.util.List;
 
 public record OwnerStoreView(
 	List<CastOption> availableCast,
+	List<MemberOption> promotableMembers,
 	List<AssignmentItem> assignments
 ) {
 	public record CastOption(Long id, String stageName, String email) { }
+	public record MemberOption(Long id, String displayName, String email) { }
 
 	public record AssignmentItem(
 		Long id, Long castProfileId, String castName,

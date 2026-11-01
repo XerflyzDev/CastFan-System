@@ -84,7 +84,7 @@ public class PublicContentService {
 	@Transactional(readOnly = true)
 	public PublicCastProfileView castProfile(Long castProfileId, String authenticatedEmail) {
 		var profile = castProfileRepository.findById(castProfileId)
-			.filter(value -> value.isDiscoverable() && value.getUserAccount().getStatus() == UserStatus.ACTIVE)
+			.filter(value -> value.getUserAccount().getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> notFound("Cast profile not found"));
 		return castProfileView(profile, authenticatedEmail);
 	}

@@ -18,6 +18,7 @@
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button page-back-button" th:href="@{/owner}" aria-label="Back to Owner dashboard" title="Back to Owner dashboard"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="owner-heading"><p>CastFan team</p><h1>Cast roster</h1></header>
             <div class="owner-alert success" th:if="${param.assigned}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Cast added to the roster.</div>
+            <div class="owner-alert success" th:if="${param.promoted}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Member promoted to Cast. They can use Cast access after signing in again.</div>
             <div class="owner-alert neutral" th:if="${param.removed}" role="status"><i class="bi bi-person-dash" aria-hidden="true"></i>Cast removed from the active roster.</div>
             <div class="owner-alert success" th:if="${param.restored}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Cast restored to the roster.</div>
             <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update the roster.</span></div>
@@ -29,6 +30,17 @@
                     <label><span>Cast account</span><select th:field="*{castProfileId}" required><option value="">Choose Cast</option><option th:each="cast : ${storeView.availableCast}" th:value="${cast.id}" th:text="${cast.stageName + ' · ' + cast.email}">Mina</option></select><small class="field-error" th:if="${#fields.hasErrors('castProfileId')}" th:errors="*{castProfileId}">Cast is required</small></label>
                     <button class="owner-form-submit" type="submit" th:disabled="${storeView.availableCast.empty}"><i class="bi bi-person-plus" aria-hidden="true"></i>Add to roster</button>
                 </form>
+            </section>
+
+            <section class="owner-section owner-form-card" aria-labelledby="promote-heading">
+                <div class="section-title"><div><small>Use an existing registered account</small><h2 id="promote-heading">Promote member</h2></div><i class="bi bi-person-up" aria-hidden="true"></i></div>
+                <form class="owner-event-form" th:action="@{/owner/cast/promote}" th:object="${promotionForm}" method="post">
+                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to promote Member.</span></div>
+                    <label><span>Member account</span><select th:field="*{memberProfileId}" required><option value="">Choose Member</option><option th:each="member : ${storeView.promotableMembers}" th:value="${member.id}" th:text="${member.displayName + ' · ' + member.email}">Member</option></select><small class="field-error" th:if="${#fields.hasErrors('memberProfileId')}" th:errors="*{memberProfileId}">Member is required</small></label>
+                    <label><span>Stage name</span><input type="text" th:field="*{stageName}" maxlength="80" placeholder="Name shown to Members" required><small class="field-error" th:if="${#fields.hasErrors('stageName')}" th:errors="*{stageName}">Stage name is required</small></label>
+                    <button class="owner-form-submit" type="submit" th:disabled="${storeView.promotableMembers.empty}"><i class="bi bi-person-up" aria-hidden="true"></i>Promote and add to roster</button>
+                </form>
+                <div class="owner-empty" th:if="${storeView.promotableMembers.empty}"><i class="bi bi-person-check" aria-hidden="true"></i><div><strong>No eligible Members</strong><small>Active Member accounts without a Cast profile will appear here.</small></div></div>
             </section>
 
             <section class="owner-section" aria-labelledby="roster-heading">

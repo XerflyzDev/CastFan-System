@@ -287,7 +287,6 @@ public class MembershipService {
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
 		var tier = requireTier(tierId);
 		if (!tier.isActive()
-			|| !tier.getCastProfile().isDiscoverable()
 			|| tier.getCastProfile().getUserAccount().getStatus() != UserStatus.ACTIVE) {
 			throw new DomainRuleViolationException("Membership tier is not available.");
 		}

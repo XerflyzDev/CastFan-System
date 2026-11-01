@@ -96,8 +96,7 @@ public class ProfileService {
 		UserAccount account,
 		String stageName,
 		String bio,
-		String avatarUrl,
-		boolean discoverable
+		String avatarUrl
 	) {
 		requireEligibleAccount(account, UserRole.CAST);
 		if (castProfileRepository.existsByUserAccountId(account.getId())) {
@@ -115,8 +114,7 @@ public class ProfileService {
 			cleanStageName,
 			stageNameKey,
 			cleanOptionalText(bio, "Bio", 1000),
-			cleanOptionalText(avatarUrl, "Avatar URL", 2048),
-			discoverable
+			cleanOptionalText(avatarUrl, "Avatar URL", 2048)
 		);
 
 		try {
@@ -131,7 +129,6 @@ public class ProfileService {
 		String email,
 		String stageName,
 		String bio,
-		boolean discoverable,
 		MultipartFile image,
 		boolean removeImage
 	) {
@@ -149,8 +146,7 @@ public class ProfileService {
 			cleanStageName,
 			stageNameKey,
 			cleanOptionalText(bio, "Bio", 1000),
-			profile.getAvatarUrl(),
-			discoverable
+			profile.getAvatarUrl()
 		);
 		try {
 			var saved = castProfileRepository.saveAndFlush(profile);

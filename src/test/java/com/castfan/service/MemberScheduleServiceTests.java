@@ -108,21 +108,20 @@ class MemberScheduleServiceTests {
 	}
 
 	@Test
-	void approvedShiftRemainsVisibleWhenCastProfileIsNotDiscoverable() {
+	void approvedShiftAppearsForEveryActiveCastProfile() {
 		var owner = account("hidden-cast-owner@test.local", "Owner", UserRole.OWNER);
 		var store = storeRepository.save(new Store(
 			owner, "Hidden Cast Cafe", "hidden-cast-cafe", null, null, STORE_ZONE.getId(), true
 		));
 		var selectedDate = LocalDate.of(2026, 10, 30);
-		var assignment = assignment(store, "hidden-cast@test.local", "Hidden Cast", false);
+		var assignment = assignment(store, "public-cast@test.local", "Public Cast");
 		approvedShift(assignment, owner, selectedDate, 17, 23);
 
 		var schedule = memberScheduleService.load(selectedDate);
 
 		assertThat(schedule.shifts()).singleElement().satisfies(shift -> {
-			assertThat(shift.name()).isEqualTo("Hidden Cast");
+			assertThat(shift.name()).isEqualTo("Public Cast");
 			assertThat(shift.shiftTime()).isEqualTo("17:00 - 23:00");
-			assertThat(shift.publicProfileVisible()).isFalse();
 		});
 	}
 
@@ -131,13 +130,9 @@ class MemberScheduleServiceTests {
 	}
 
 	private StoreCast assignment(Store store, String email, String stageName) {
-		return assignment(store, email, stageName, true);
-	}
-
-	private StoreCast assignment(Store store, String email, String stageName, boolean discoverable) {
 		var castAccount = account(email, stageName, UserRole.CAST);
 		var profile = castProfileRepository.save(new CastProfile(
-			castAccount, stageName, stageName.toLowerCase().replace(' ', '-'), null, null, discoverable
+			castAccount, stageName, stageName.toLowerCase().replace(' ', '-'), null, null
 		));
 		return storeCastRepository.save(new StoreCast(store, profile, true));
 	}

@@ -113,35 +113,10 @@ public interface ShiftScheduleRepository extends JpaRepository<ShiftSchedule, Lo
 		  and schedule.endsAt > :startsAt
 		  and assignment.active = true
 		  and store.active = true
-		  and profile.discoverable = true
 		  and account.status = :userStatus
 		order by schedule.startsAt asc, profile.stageName asc
 		""")
 	List<ShiftSchedule> findPublicShiftsInRange(
-		@Param("storeId") Long storeId,
-		@Param("status") ShiftStatus status,
-		@Param("userStatus") UserStatus userStatus,
-		@Param("startsAt") Instant startsAt,
-		@Param("endsAt") Instant endsAt
-	);
-
-	@Query("""
-		select schedule
-		from ShiftSchedule schedule
-		join fetch schedule.storeCast assignment
-		join fetch assignment.store store
-		join fetch assignment.castProfile profile
-		join fetch profile.userAccount account
-		where schedule.status = :status
-		  and store.id = :storeId
-		  and schedule.startsAt < :endsAt
-		  and schedule.endsAt > :startsAt
-		  and assignment.active = true
-		  and store.active = true
-		  and account.status = :userStatus
-		order by schedule.startsAt asc, profile.stageName asc
-		""")
-	List<ShiftSchedule> findMemberScheduleShiftsInRange(
 		@Param("storeId") Long storeId,
 		@Param("status") ShiftStatus status,
 		@Param("userStatus") UserStatus userStatus,
@@ -162,7 +137,6 @@ public interface ShiftScheduleRepository extends JpaRepository<ShiftSchedule, Lo
 		  and schedule.startsAt < :horizon
 		  and assignment.active = true
 		  and store.active = true
-		  and profile.discoverable = true
 		  and account.status = :userStatus
 		order by schedule.startsAt asc
 		""")

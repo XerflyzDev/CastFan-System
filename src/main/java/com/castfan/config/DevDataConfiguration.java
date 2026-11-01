@@ -167,7 +167,7 @@ public class DevDataConfiguration {
 		));
 		memberProfileRepository.save(new MemberProfile(account, null, null));
 		var profile = castProfileRepository.save(new CastProfile(
-			account, stageName, stageName.toLowerCase(), bio, avatarUrl, true
+			account, stageName, stageName.toLowerCase(), bio, avatarUrl
 		));
 		var assignment = storeCastRepository.save(new StoreCast(store, profile, true));
 		var shift = new ShiftSchedule(

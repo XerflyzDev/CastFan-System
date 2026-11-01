@@ -24,6 +24,7 @@ Constraints:
 
 - `email` is required, normalized to lowercase, and unique.
 - `role` is one of `MEMBER`, `CAST`, or `OWNER`.
+- An Owner-authorized Member-to-Cast promotion updates the account role, retains the existing Member profile, creates one Cast profile, and creates the system-store roster assignment in one transaction.
 - Passwords are stored only as secure hashes.
 
 ### AccountAvatar
@@ -75,7 +76,7 @@ Rules:
 
 ### CastProfile
 
-Cast-specific public profile and discoverability settings. Each user can have at most one Cast profile.
+Cast-specific public profile settings. Each active Cast profile is public, and each user can have at most one Cast profile. The legacy `discoverable` column is retained for migration compatibility and is normalized to `TRUE`.
 
 Constraints:
 

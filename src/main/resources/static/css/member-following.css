@@ -19,7 +19,7 @@
 .profile-avatar.avatar-photo { object-fit: cover; }
 .profile-avatar.rose { color: var(--rose-dark); background: var(--rose-soft); }
 .profile-avatar.lavender { color: #655b86; background: var(--lavender); }
-.profile-avatar.amber { color: #806b3f; background: var(--amber); }
+.profile-avatar.amber { color: #4b4c50; background: var(--amber); }
 .following-copy { display: grid; min-width: 0; gap: 4px; }
 .name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .name-row strong { overflow: hidden; font-size: 0.78rem; text-overflow: ellipsis; white-space: nowrap; }

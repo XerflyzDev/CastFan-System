@@ -335,7 +335,7 @@ class MembershipWorkflowTests {
 
 	private CastProfile createCast(String email, String stageName) {
 		return profileService.createCastProfile(
-			saveAccount(email, UserRole.CAST), stageName, null, null, true
+			saveAccount(email, UserRole.CAST), stageName, null, null
 		);
 	}
 

@@ -133,7 +133,7 @@ class MemberNotificationWorkflowTests {
 	private CastProfile cast(String email, String stageName) {
 		return castProfileRepository.save(new CastProfile(
 			account(email, stageName, UserRole.CAST), stageName, stageName.toLowerCase().replace(' ', '-'),
-			null, null, true
+			null, null
 		));
 	}
 

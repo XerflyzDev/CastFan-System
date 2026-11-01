@@ -29,7 +29,8 @@
                 <div class="review-list" th:if="${!workspace.pendingShifts.empty}">
                     <article class="review-card" th:each="shift : ${workspace.pendingShifts}">
                         <header>
-                            <span class="owner-avatar" th:text="${shift.initials}">MN</span>
+                            <img class="owner-avatar" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.castName}">
+                            <span class="owner-avatar" th:unless="${shift.avatarUrl != null}" th:text="${shift.initials}">MN</span>
                             <div><strong th:text="${shift.castName}">Mina</strong><small><span th:text="${shift.storeName}">CastFan</span> · <span th:text="${shift.dateLabel}">15 Oct</span></small></div>
                             <span class="status-pill pending">Pending</span>
                         </header>

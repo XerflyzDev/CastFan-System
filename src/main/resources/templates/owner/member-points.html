@@ -18,16 +18,20 @@
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content owner-content points-content">
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="${selectedMember != null ? '/owner/member-points' : '/owner'}" th:attr="aria-label=${selectedMember != null ? 'Back to Member selection' : 'Back to Owner dashboard'},title=${selectedMember != null ? 'Back to Member selection' : 'Back to Owner dashboard'}"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
-            <header class="owner-heading"><p>Membership management</p><h1>Member points</h1><span>Check the bill outside CastFan, then record the paid amount and receipt reference.</span></header>
+            <header class="owner-heading points-heading">
+                <p th:text="${selectedMember == null ? 'Members' : 'Member account'}">Members</p>
+                <h1 th:text="${selectedMember == null ? 'Member points' : 'Add points'}">Member points</h1>
+                <span th:if="${selectedMember == null}">Select a Member to record purchase points.</span>
+            </header>
 
             <div class="notice error-notice" th:if="${error != null and selectedMember == null}" role="alert" aria-live="assertive"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${error}">Please check the selected Member.</span></div>
 
-            <section class="points-card" th:if="${selectedMember == null}" aria-labelledby="search-title">
-                <div class="points-card-heading"><div><h2 id="search-title">Find a Member</h2><p>Search by name or email.</p></div></div>
+            <section class="points-directory" th:if="${selectedMember == null}" aria-labelledby="search-title">
                 <form class="points-search" method="get" th:action="@{/owner/member-points}">
-                    <label for="member-query">Member name or email</label>
-                    <div class="search-control"><i class="bi bi-search" aria-hidden="true"></i><input id="member-query" name="q" type="search" maxlength="120" placeholder="Search Members" th:value="${query}"><button type="submit">Search</button></div>
+                    <label class="sr-only" for="member-query">Member name or email</label>
+                    <div class="search-control"><i class="bi bi-search" aria-hidden="true"></i><input id="member-query" name="q" type="search" maxlength="120" placeholder="Search by name or email" th:value="${query}"><button type="submit">Search</button></div>
                 </form>
+                <div class="directory-heading"><h2 id="search-title">Members</h2><span th:text="|${members.size()} found|">0 found</span></div>
                 <div class="member-results" th:if="${!members.empty}" aria-label="Member search results">
                     <a class="member-result" th:each="member : ${members}" th:href="@{/owner/member-points(memberId=${member.id},q=${query})}">
                         <span class="member-monogram" aria-hidden="true" th:text="${#strings.substring(member.displayName, 0, 1).toUpperCase()}">M</span>
@@ -39,9 +43,8 @@
                 <div class="points-empty" th:if="${members.empty}"><span><i class="bi bi-person-search" aria-hidden="true"></i></span><strong th:text="${query != null and !query.isBlank() ? 'No Members found' : 'No active Members yet'}">No active Members yet</strong><small th:text="${query != null and !query.isBlank() ? 'Try another name or email address.' : 'Active Member accounts will appear here.'}">Active Member accounts will appear here.</small></div>
             </section>
 
-            <section class="points-card selected-member-card" th:if="${selectedMember != null}" aria-labelledby="purchase-title">
-                <div class="points-card-heading"><div><h2 id="purchase-title">Record a purchase</h2><p>Confirm the selected Member and enter the checked receipt details.</p></div></div>
-                <div class="selected-member-summary"><span class="member-monogram large" aria-hidden="true" th:text="${#strings.substring(selectedMember.memberDisplayName, 0, 1).toUpperCase()}">M</span><div><strong th:text="${selectedMember.memberDisplayName}">Member Name</strong><small>Current membership</small></div><div class="tier-summary"><strong th:text="${selectedMember.tier}">NONE</strong><small><span th:text="${#numbers.formatInteger(selectedMember.pointsBalance, 1, 'COMMA')}">0</span> points</small></div></div>
+            <section class="selected-member-page" th:if="${selectedMember != null}" aria-labelledby="purchase-title">
+                <div class="selected-member-summary"><span class="member-monogram large" aria-hidden="true" th:text="${#strings.substring(selectedMember.memberDisplayName, 0, 1).toUpperCase()}">M</span><div><strong th:text="${selectedMember.memberDisplayName}">Member Name</strong><small>Selected Member</small></div><div class="tier-summary"><strong th:text="${selectedMember.tier.name() == 'NONE' ? 'No tier' : #strings.replace(selectedMember.tier.name(), 'TIER_', 'Tier ')}">No tier</strong><small><span th:text="${#numbers.formatInteger(selectedMember.pointsBalance, 1, 'COMMA')}">0</span> points</small></div></div>
 
                 <div class="notice success-notice" th:if="${success != null}" role="status" aria-live="polite">
                     <strong><i class="bi bi-check-circle" aria-hidden="true"></i> Points recorded</strong>
@@ -51,10 +54,11 @@
                 <div class="notice error-notice" th:if="${error != null}" role="alert" aria-live="assertive"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${error}">Please check the purchase details.</span></div>
 
                 <form class="purchase-form" method="post" th:action="@{/owner/member-points/preview}" th:object="${form}" id="points-form">
+                    <div class="form-section-heading"><h2 id="purchase-title">Purchase details</h2><p>Use the amount shown on the checked receipt.</p></div>
                     <input type="hidden" th:field="*{memberProfileId}" th:value="${selectedMember.memberProfileId}">
                     <div class="field-group"><label for="paid-amount">Paid amount <span>(THB)</span></label><div class="amount-input"><span aria-hidden="true">฿</span><input id="paid-amount" type="number" min="0.01" max="9999999999.99" step="0.01" inputmode="decimal" placeholder="0.00" th:field="*{paidAmount}" th:attr="aria-invalid=${#fields.hasErrors('paidAmount')}"></div><small class="field-error" th:if="${#fields.hasErrors('paidAmount')}" th:errors="*{paidAmount}" id="amount-error">Enter a valid positive amount.</small><small>Whole-number points are rounded down.</small></div>
                     <div class="field-group"><label for="receipt-reference">Receipt reference</label><input id="receipt-reference" type="text" autocomplete="off" maxlength="120" placeholder="e.g. RCPT-2026-00125" th:field="*{receiptReference}" th:attr="aria-invalid=${#fields.hasErrors('receiptReference')}" aria-describedby="receipt-help receipt-error"><small id="receipt-help">Required · Must be unique · Do not enter payment-card details.</small><small class="field-error" th:if="${#fields.hasErrors('receiptReference')}" th:errors="*{receiptReference}" id="receipt-error">Receipt reference is required.</small></div>
-                    <button class="owner-primary points-preview-button" type="submit"><i class="bi bi-calculator" aria-hidden="true"></i><span>Preview points</span></button>
+                    <button class="owner-primary points-preview-button" type="submit"><span>Review points</span><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                 </form>
 
                 <section class="points-preview" th:if="${preview != null}" aria-labelledby="preview-title" aria-live="polite">
@@ -77,8 +81,8 @@
                 </div>
 
                 <section class="points-history" aria-labelledby="history-title">
-                    <div class="history-heading"><div><small>Audit trail</small><h3 id="history-title">Point history</h3></div><span th:text="${selectedMember.transactions.size()}">0</span></div>
-                    <div class="history-empty" th:if="${selectedMember.transactions.empty}">No point transactions yet.</div>
+                    <div class="history-heading"><h3 id="history-title">Point history</h3><span th:text="|${selectedMember.transactions.size()} entries|">0 entries</span></div>
+                    <div class="history-empty" th:if="${selectedMember.transactions.empty}"><i class="bi bi-receipt" aria-hidden="true"></i><span>No transactions for this Member yet.</span></div>
                     <article class="history-entry" th:each="transaction : ${selectedMember.transactions}">
                         <div class="history-entry-top"><span class="transaction-type" th:text="${transaction.type}">EARN</span><strong th:classappend="${transaction.pointsDelta < 0} ? ' negative' : ''"><span th:text="${transaction.pointsDelta > 0 ? '+' : ''}">+</span><span th:text="${#numbers.formatInteger(transaction.pointsDelta, 1, 'COMMA')}">0</span> pts</strong></div>
                         <p th:if="${transaction.receiptReference != null}">Receipt <b th:text="${transaction.receiptReference}">RCPT</b></p>

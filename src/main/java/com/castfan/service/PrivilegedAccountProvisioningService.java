@@ -36,7 +36,7 @@ public class PrivilegedAccountProvisioningService {
 	public UserAccount provisionCast(String email, String password, String displayName, String stageName) {
 		var account = createAccount(email, password, displayName, UserRole.CAST);
 		profileService.createMemberProfile(account);
-		profileService.createCastProfile(account, stageName, null, null, false);
+		profileService.createCastProfile(account, stageName, null, null);
 		return account;
 	}
 

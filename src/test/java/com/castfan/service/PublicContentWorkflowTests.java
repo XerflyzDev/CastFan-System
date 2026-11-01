@@ -54,15 +54,15 @@ class PublicContentWorkflowTests {
 	@Autowired private MemberTierRepository memberTierRepository;
 
 	@Test
-	void publicDetailsExposeOnlyPublishedAndDiscoverableContent() throws Exception {
+	void publicDetailsExposeAllActiveCastAndOnlyPublishedStoreContent() throws Exception {
 		var owner = account("public-owner@test.local", "Owner", UserRole.OWNER);
 		var store = storeRepository.save(new Store(
 			owner, "Hoshi Cafe", "public-hoshi", null, "Bangkok, Thailand", STORE_ZONE.getId(), true
 		));
-		var mina = cast("public-mina@test.local", "Mina Public", true);
-		var hidden = cast("public-hidden@test.local", "Hidden Public", false);
+		var mina = cast("public-mina@test.local", "Mina Public");
+		var secondCast = cast("public-second@test.local", "Second Public");
 		var assignment = storeCastRepository.save(new StoreCast(store, mina, true));
-		storeCastRepository.save(new StoreCast(store, hidden, true));
+		storeCastRepository.save(new StoreCast(store, secondCast, true));
 		memberTierRepository.save(new MemberTier(
 			mina, "Silver", "silver", "Member updates", 1, new BigDecimal("199.00"), "THB"
 		));
@@ -90,8 +90,9 @@ class PublicContentWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Share profile"))))
 			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("Hoshi Cafe Cast"))))
 			.andExpect(content().string(containsString("Silver")));
-		mockMvc.perform(get("/casts/{id}", hidden.getId()))
-			.andExpect(status().isNotFound());
+		mockMvc.perform(get("/casts/{id}", secondCast.getId()))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Second Public")));
 
 		mockMvc.perform(get("/events/{id}", published.getId()))
 			.andExpect(status().isOk())
@@ -112,14 +113,13 @@ class PublicContentWorkflowTests {
 		return userAccountRepository.save(new UserAccount(email, "encoded", name, role, UserStatus.ACTIVE));
 	}
 
-	private CastProfile cast(String email, String stageName, boolean discoverable) {
+	private CastProfile cast(String email, String stageName) {
 		return castProfileRepository.save(new CastProfile(
 			account(email, stageName, UserRole.CAST),
 			stageName,
 			stageName.toLowerCase().replace(' ', '-'),
 			stageName + " profile",
-			null,
-			discoverable
+			null
 		));
 	}
 }

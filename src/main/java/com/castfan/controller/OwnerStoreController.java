@@ -3,6 +3,7 @@ package com.castfan.controller;
 import java.security.Principal;
 
 import com.castfan.dto.OwnerCastAssignmentForm;
+import com.castfan.dto.OwnerCastPromotionForm;
 import com.castfan.service.DomainConflictException;
 import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.OwnerStoreService;
@@ -26,7 +27,6 @@ public class OwnerStoreController {
 
 	@GetMapping({"/owner/cast", "/owner/stores"})
 	public String roster(Principal principal, Model model) {
-		if (!model.containsAttribute("assignmentForm")) model.addAttribute("assignmentForm", new OwnerCastAssignmentForm());
 		populate(principal, model);
 		return "owner/stores";
 	}
@@ -46,6 +46,22 @@ public class OwnerStoreController {
 		return "owner/stores";
 	}
 
+	@PostMapping("/owner/cast/promote")
+	public String promoteMember(Principal principal,
+		@Valid @ModelAttribute("promotionForm") OwnerCastPromotionForm form,
+		BindingResult bindingResult, Model model) {
+		if (!bindingResult.hasErrors()) {
+			try {
+				ownerStoreService.promoteMember(principal.getName(), form);
+				return "redirect:/owner/cast?promoted";
+			} catch (DomainConflictException | DomainRuleViolationException exception) {
+				bindingResult.reject("promotion.invalid", exception.getMessage());
+			}
+		}
+		populate(principal, model);
+		return "owner/stores";
+	}
+
 	@PostMapping("/owner/cast/{assignmentId}/{action:activate|deactivate}")
 	public String assignmentStatus(Principal principal, @PathVariable Long assignmentId, @PathVariable String action,
 		RedirectAttributes redirectAttributes) {
@@ -59,6 +75,12 @@ public class OwnerStoreController {
 	}
 
 	private void populate(Principal principal, Model model) {
+		if (!model.containsAttribute("assignmentForm")) {
+			model.addAttribute("assignmentForm", new OwnerCastAssignmentForm());
+		}
+		if (!model.containsAttribute("promotionForm")) {
+			model.addAttribute("promotionForm", new OwnerCastPromotionForm());
+		}
 		model.addAttribute("storeView", ownerStoreService.load(principal.getName()));
 	}
 }

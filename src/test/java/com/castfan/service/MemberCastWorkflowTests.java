@@ -51,25 +51,27 @@ class MemberCastWorkflowTests {
 	private MockMvc mockMvc;
 
 	@Test
-	void discoveryReturnsOnlyVisibleCastAndMarksFollowedProfiles() {
+	void discoveryReturnsAllActiveCastAndMarksFollowedProfiles() {
 		var member = createMember("discover-member@castfan.test");
-		var visible = createCast("visible-cast@castfan.test", "Visible Cast", true);
-		createCast("hidden-cast@castfan.test", "Hidden Cast", false);
+		var visible = createCast("visible-cast@castfan.test", "Visible Cast");
+		createCast("another-cast@castfan.test", "Another Cast");
 
 		var initialPage = memberCastService.discover(member.getUserAccount().getEmail(), PageRequest.of(0, 12));
-		assertThat(initialPage.getContent()).extracting(view -> view.stageName()).containsExactly("Visible Cast");
-		assertThat(initialPage.getContent().getFirst().following()).isFalse();
+		assertThat(initialPage.getContent()).extracting(view -> view.stageName())
+			.containsExactly("Another Cast", "Visible Cast");
+		assertThat(initialPage.getContent()).allSatisfy(view -> assertThat(view.following()).isFalse());
 
 		memberCastService.follow(member.getUserAccount().getEmail(), visible.getId());
 		var followedPage = memberCastService.discover(member.getUserAccount().getEmail(), PageRequest.of(0, 12));
-		assertThat(followedPage.getContent().getFirst().following()).isTrue();
+		assertThat(followedPage.getContent()).filteredOn(view -> view.stageName().equals("Visible Cast"))
+			.singleElement().satisfies(view -> assertThat(view.following()).isTrue());
 	}
 
 	@Test
 	void followIsIdempotentAndUnfollowAffectsOnlyTheCurrentMember() {
 		var firstMember = createMember("first-follow-member@castfan.test");
 		var secondMember = createMember("second-follow-member@castfan.test");
-		var cast = createCast("followed-cast@castfan.test", "Followed Cast", true);
+		var cast = createCast("followed-cast@castfan.test", "Followed Cast");
 
 		memberCastService.follow(firstMember.getUserAccount().getEmail(), cast.getId());
 		memberCastService.follow(firstMember.getUserAccount().getEmail(), cast.getId());
@@ -87,9 +89,8 @@ class MemberCastWorkflowTests {
 	void nonAudienceAccountAndUnavailableCastAreRejected() {
 		var member = createMember("restricted-member@castfan.test");
 		var ownerAccount = saveAccount("actor-owner@castfan.test", UserRole.OWNER);
-		var hiddenCast = createCast("private-cast@castfan.test", "Private Cast", false);
 
-		assertThatThrownBy(() -> memberCastService.follow(member.getUserAccount().getEmail(), hiddenCast.getId()))
+		assertThatThrownBy(() -> memberCastService.follow(member.getUserAccount().getEmail(), Long.MAX_VALUE))
 			.isInstanceOf(DomainRuleViolationException.class);
 		assertThatThrownBy(() -> memberCastService.discover(ownerAccount.getEmail(), PageRequest.of(0, 12)))
 			.isInstanceOf(DomainRuleViolationException.class);
@@ -98,7 +99,7 @@ class MemberCastWorkflowTests {
 	@Test
 	void memberEndpointsEnforceRoleAndCsrf() throws Exception {
 		var member = createMember("web-member@castfan.test");
-		var cast = createCast("web-cast@castfan.test", "Web Cast", true);
+		var cast = createCast("web-cast@castfan.test", "Web Cast");
 		profileService.createMemberProfile(cast.getUserAccount());
 		var memberRequest = user(member.getUserAccount().getEmail()).roles("MEMBER");
 		var castRequest = user(cast.getUserAccount().getEmail()).roles("CAST");
@@ -157,13 +158,12 @@ class MemberCastWorkflowTests {
 		return profileService.createMemberProfile(saveAccount(email, UserRole.MEMBER));
 	}
 
-	private CastProfile createCast(String email, String stageName, boolean discoverable) {
+	private CastProfile createCast(String email, String stageName) {
 		return profileService.createCastProfile(
 			saveAccount(email, UserRole.CAST),
 			stageName,
 			stageName + " profile",
-			null,
-			discoverable
+			null
 		);
 	}
 

@@ -23,7 +23,6 @@ public interface MemberTierRepository extends JpaRepository<MemberTier, Long> {
 		join fetch tier.castProfile profile
 		join fetch profile.userAccount account
 		where tier.active = true
-		  and profile.discoverable = true
 		  and account.status = :status
 		order by profile.stageName asc, tier.rank asc
 		""")

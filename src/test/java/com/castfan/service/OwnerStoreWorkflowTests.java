@@ -12,9 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.castfan.entity.Store;
 import com.castfan.entity.UserAccount;
+import com.castfan.entity.UserRole;
+import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastProfileRepository;
+import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreRepository;
+import com.castfan.repository.UserAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,10 @@ class OwnerStoreWorkflowTests {
 	@Autowired private StoreRepository storeRepository;
 	@Autowired private StoreCastRepository storeCastRepository;
 	@Autowired private CastProfileRepository castProfileRepository;
+	@Autowired private MemberProfileRepository memberProfileRepository;
+	@Autowired private UserAccountRepository userAccountRepository;
+	@Autowired private ProfileService profileService;
+	@Autowired private OwnerStoreService ownerStoreService;
 
 	private UserAccount owner;
 	private UserAccount cast;
@@ -81,6 +89,58 @@ class OwnerStoreWorkflowTests {
 		mockMvc.perform(post("/owner/cast/{id}/activate", assignment.getId()).with(ownerUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/cast?restored=true"));
 		assertThat(storeCastRepository.findById(assignment.getId()).orElseThrow().isActive()).isTrue();
+	}
+
+	@Test
+	void ownerCanPromoteRegisteredMemberAndAddThemToRoster() throws Exception {
+		var member = userAccountRepository.saveAndFlush(new UserAccount(
+			"promote-member-" + System.nanoTime() + "@castfan.test", "existing-password-hash",
+			"Registered Member", UserRole.MEMBER, UserStatus.ACTIVE
+		));
+		var memberProfile = profileService.createMemberProfile(member);
+		assertThat(ownerStoreService.load(owner.getEmail()).promotableMembers())
+			.anyMatch(candidate -> candidate.id().equals(memberProfile.getId()));
+
+		mockMvc.perform(get("/owner/cast").with(ownerUser()))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promote member")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(member.getEmail())));
+
+		mockMvc.perform(post("/owner/cast/promote").with(ownerUser()).with(csrf())
+				.param("memberProfileId", memberProfile.getId().toString())
+				.param("stageName", "New Cast"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/cast?promoted"));
+
+		var promotedAccount = userAccountRepository.findById(member.getId()).orElseThrow();
+		assertThat(promotedAccount.getRole()).isEqualTo(UserRole.CAST);
+		assertThat(promotedAccount.getPasswordHash()).isEqualTo("existing-password-hash");
+		assertThat(memberProfileRepository.findByUserAccountId(member.getId())).isPresent();
+		var castProfile = castProfileRepository.findByUserAccountId(member.getId()).orElseThrow();
+		assertThat(castProfile.getStageName()).isEqualTo("New Cast");
+		assertThat(storeCastRepository.findByStoreIdAndCastProfileId(store.getId(), castProfile.getId())
+			.orElseThrow().isActive()).isTrue();
+		assertThat(ownerStoreService.load(owner.getEmail()).promotableMembers())
+			.noneMatch(candidate -> candidate.id().equals(memberProfile.getId()));
+	}
+
+	@Test
+	void memberCannotPromoteAnotherMember() throws Exception {
+		var member = userAccountRepository.saveAndFlush(new UserAccount(
+			"blocked-promote-" + System.nanoTime() + "@castfan.test", "encoded", "Member",
+			UserRole.MEMBER, UserStatus.ACTIVE
+		));
+		var memberProfile = profileService.createMemberProfile(member);
+
+		mockMvc.perform(post("/owner/cast/promote")
+				.with(user(member.getEmail()).roles("MEMBER")).with(csrf())
+				.param("memberProfileId", memberProfile.getId().toString())
+				.param("stageName", "Unauthorized Cast"))
+			.andExpect(status().isForbidden());
+
+		assertThat(userAccountRepository.findById(member.getId()).orElseThrow().getRole())
+			.isEqualTo(UserRole.MEMBER);
+		assertThat(castProfileRepository.findByUserAccountId(member.getId())).isEmpty();
 	}
 
 	@Test

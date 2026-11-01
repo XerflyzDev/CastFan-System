@@ -137,7 +137,7 @@ class HomeServiceTests {
 	void homeGreetingUsesCurrentCastStageName() {
 		var castAccount = account("cast-greeting@test.local", "Old Account Name", UserRole.CAST);
 		castProfileRepository.saveAndFlush(new CastProfile(
-			castAccount, "New Stage Name", "new-stage-name", null, null, true
+			castAccount, "New Stage Name", "new-stage-name", null, null
 		));
 
 		var home = homeService.load(castAccount.getEmail());
@@ -152,7 +152,7 @@ class HomeServiceTests {
 	private CastProfile cast(String email, String stageName) {
 		var account = account(email, stageName, UserRole.CAST);
 		return castProfileRepository.save(new CastProfile(
-			account, stageName, stageName.toLowerCase(), null, null, true
+			account, stageName, stageName.toLowerCase(), null, null
 		));
 	}
 }

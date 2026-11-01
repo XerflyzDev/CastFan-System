@@ -33,7 +33,6 @@ public interface CastFollowRepository extends JpaRepository<CastFollow, Long> {
 		join fetch follow.castProfile profile
 		join fetch profile.userAccount account
 		where follow.memberProfile.id = :memberProfileId
-		  and profile.discoverable = true
 		  and account.status = :status
 		order by profile.stageName asc
 		""")

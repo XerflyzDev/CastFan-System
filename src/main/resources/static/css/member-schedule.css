@@ -92,7 +92,7 @@
 .schedule-summary div { display: grid; gap: 2px; }
 .schedule-summary small { color: var(--muted); font-size: 0.59rem; }
 .schedule-summary strong { font-size: 0.77rem; }
-.schedule-summary > span { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; color: #6f6038; background: var(--amber); font-size: 0.54rem; font-weight: 700; }
+.schedule-summary > span { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; color: #4b4c50; background: var(--amber); font-size: 0.54rem; font-weight: 700; }
 
 .shift-section { margin-top: 20px; }
 .timeline { position: relative; display: grid; gap: 9px; }

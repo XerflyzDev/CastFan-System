@@ -86,6 +86,12 @@ class OwnerWorkspaceWorkflowTests {
 
 	@Test
 	void ownerCanOpenDashboardAndDateSchedule() throws Exception {
+		var profile = requireProfile(cast);
+		profile.updatePublicDetails(
+			profile.getStageName(), profile.getStageNameKey(), profile.getBio(), "/avatars/" + cast.getId()
+		);
+		castProfileRepository.save(profile);
+
 		mockMvc.perform(get("/owner").with(user(owner.getEmail()).roles("OWNER")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/dashboard"))
@@ -99,6 +105,7 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(view().name("owner/shifts"))
 			.andExpect(content().string(containsString("Review queue")))
 			.andExpect(content().string(containsString("14:00 - 20:00")))
+			.andExpect(content().string(containsString("src=\"/avatars/" + cast.getId() + "\"")))
 			.andExpect(content().string(containsString("data-picker-date")))
 			.andExpect(content().string(containsString("date-time-picker.js")))
 			.andExpect(content().string(not(containsString("aria-label=\"Local time\""))));

@@ -102,4 +102,11 @@ public class UserAccount {
 	public void updateDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
+
+	public void promoteMemberToCast() {
+		if (status != UserStatus.ACTIVE || role != UserRole.MEMBER) {
+			throw new IllegalStateException("Only an active Member account can be promoted to Cast.");
+		}
+		role = UserRole.CAST;
+	}
 }

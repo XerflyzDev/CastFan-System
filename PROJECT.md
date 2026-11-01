@@ -97,6 +97,7 @@ Together, these courses require the project to demonstrate:
 - View store metrics and daily schedules.
 - Search Member accounts and record purchase points after checking bills outside CastFan.
 - Approve or reject Cast shift requests for their store.
+- Promote an active registered Member account to Cast and add it to the permanent roster.
 - Manage permanent Cast assignments for the single CastFan system.
 - Upload event images and create, edit, publish, archive, and review store events.
 - Create and schedule public promotions and banners.

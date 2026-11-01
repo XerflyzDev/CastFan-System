@@ -6,7 +6,7 @@
 .picker-trigger > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .picker-trigger > i { color: #777980; text-align: center; }
 .picker-trigger:focus-visible,
-.picker-trigger[aria-expanded="true"] { border-color: rgba(128, 107, 63, 0.48); outline: 0; background: #fff; box-shadow: 0 0 0 3px rgba(128, 107, 63, 0.09); }
+.picker-trigger[aria-expanded="true"] { border-color: rgba(48, 50, 56, 0.48); outline: 0; background: #fff; box-shadow: 0 0 0 3px rgba(48, 50, 56, 0.09); }
 .picker-trigger[aria-invalid="true"] { border-color: rgba(155, 71, 81, 0.5); }
 .picker-popover { position: fixed; z-index: 1000; max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border: 1px solid rgba(17, 19, 24, 0.07); border-radius: 16px; color: var(--ink); background: #fff; box-shadow: 0 18px 44px rgba(30, 32, 38, 0.18); }
 .picker-popover.open-down { top: calc(100% + 7px); bottom: auto; }
@@ -23,12 +23,12 @@
 .shared-calendar-day { position: relative; display: grid; width: 100%; aspect-ratio: 1; place-items: center; padding: 0; border: 0; border-radius: 9px; color: var(--ink); background: transparent; font: inherit; font-size: 0.56rem; cursor: pointer; }
 .shared-calendar-day:hover { background: #f2f2f4; }
 .shared-calendar-day.outside { color: #b7b8bd; }
-.shared-calendar-day.today::after { position: absolute; bottom: 3px; width: 3px; height: 3px; border-radius: 50%; content: ""; background: #806b3f; }
+.shared-calendar-day.today::after { position: absolute; bottom: 3px; width: 3px; height: 3px; border-radius: 50%; content: ""; background: #4b4c50; }
 .shared-calendar-day.selected { color: #fff; background: #25272c; font-weight: 700; }
 .shared-calendar-day.selected::after { background: var(--amber); }
-.shared-calendar-day:focus-visible { outline: 2px solid rgba(128, 107, 63, 0.42); outline-offset: 1px; }
+.shared-calendar-day:focus-visible { outline: 2px solid rgba(48, 50, 56, 0.42); outline-offset: 1px; }
 .picker-popover-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 9px; border-top: 1px solid var(--line); }
-.picker-popover-footer button { min-height: 30px; padding: 5px 7px; border: 0; border-radius: 8px; color: #806b3f; background: transparent; font: inherit; font-size: 0.52rem; font-weight: 700; cursor: pointer; }
+.picker-popover-footer button { min-height: 30px; padding: 5px 7px; border: 0; border-radius: 8px; color: #4b4c50; background: transparent; font: inherit; font-size: 0.52rem; font-weight: 700; cursor: pointer; }
 .picker-popover-footer button:hover { background: var(--amber); }
 .shared-time-popover { right: 0; left: auto; width: 226px; padding: 12px; }
 .shared-time-columns { display: grid; grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr); align-items: center; gap: 5px; }

@@ -4,7 +4,7 @@ This document is the source of truth for the current CastFan visual language. It
 
 ## Design Direction
 
-CastFan uses a modern, minimalist, iOS-inspired interface in light mode. Black, grey, and white form the primary visual structure, with restrained dusty rose, lavender, and warm amber accents. The approved application-wide treatment uses white content canvases, `#F5F5F5` atmospheric backgrounds, `#EBEBEB` separators, very light depth, rounded pill controls, and translucent floating navigation with a neutral active item. The experience should feel calm, premium, friendly, and easy to scan on a mobile device while remaining polished on tablet and desktop screens.
+CastFan uses a modern, minimalist, iOS-inspired interface in light mode. Black, charcoal, grey, and white form the primary visual structure, with dusty rose and lavender reserved for meaningful interactive or role-specific accents. The approved application-wide treatment uses white content canvases, `#F5F5F5` atmospheric backgrounds, `#EBEBEB` separators, very light depth, rounded pill controls, and translucent floating navigation with a neutral active item. The experience should feel calm, premium, friendly, and easy to scan on a mobile device while remaining polished on tablet and desktop screens.
 
 The previous pink-led visual theme and the older full-width desktop application shell are retired. New pages must use the color tokens, spacing, typography, components, and interaction patterns defined here. The approved direction is based on the current CastFan Product UI v2 reference and the implemented phone-shell pages.
 
@@ -55,7 +55,7 @@ The previous pink-led visual theme and the older full-width desktop application 
 | Warm Amber | `#F7EDD9` | Limited avatar variation |
 | Error | `#C83F5B` | Validation and destructive feedback |
 
-Page backgrounds blend white, light grey, and soft charcoal-grey tones. Blue and mint are not part of the approved theme. Dusty rose, lavender, and amber are supporting accents only and must not dominate a page. Avoid saturated full-screen color fields and excessive decorative effects.
+Page backgrounds blend white, light grey, and soft charcoal-grey tones. Blue, mint, brown, and warm amber are not part of the approved application theme. Use neutral charcoal text and soft-grey icon surfaces by default; reserve dusty rose, lavender, red, and green for controls or states where the color carries meaning. Avoid saturated full-screen color fields and excessive decorative effects.
 
 ## Typography
 

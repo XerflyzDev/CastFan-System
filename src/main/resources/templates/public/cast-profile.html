@@ -54,8 +54,26 @@
                     <div class="section-title"><h2 id="content-title">Latest updates</h2><span th:text="${cast.content.size() + ' posts'}">0 posts</span></div>
                     <div class="public-content-list" th:if="${!cast.content.empty}">
                         <article class="public-content-card" th:each="post : ${cast.content}" th:classappend="${!post.accessible} ? ' locked'">
-                            <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" th:alt="${post.title}">
-                            <div class="public-content-copy"><div><span th:text="${post.audience}">Public</span><small th:text="${post.publishedLabel}">14 Oct</small></div><h3 th:text="${post.title}">Update title</h3><p th:if="${post.accessible}" th:text="${post.body}">Update content</p><p th:unless="${post.accessible}" class="locked-copy"><i class="bi bi-lock" aria-hidden="true"></i> Join the required audience to read this update.</p><a class="content-read" th:href="@{/casts/{castId}/content/{contentId}(castId=${cast.id},contentId=${post.id})}"><span th:text="${post.accessible ? 'Read update' : 'View access'}">Read update</span><i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+                            <header class="social-post-header">
+                                <img th:if="${cast.avatarUrl != null}" th:src="${cast.avatarUrl}" th:alt="${cast.stageName}">
+                                <span th:unless="${cast.avatarUrl != null}" th:text="${cast.initials}">MN</span>
+                                <div>
+                                    <strong th:text="${cast.stageName}">Mina</strong>
+                                    <small><span th:text="${cast.handle}">@mina</span><b aria-hidden="true">·</b><time th:text="${post.publishedLabel}">14 Oct</time></small>
+                                </div>
+                                <span class="social-post-audience"><i class="bi" th:classappend="${post.accessible ? 'bi-globe2' : 'bi-lock'}" aria-hidden="true"></i><span th:text="${post.audience}">Public</span></span>
+                            </header>
+                            <div class="public-content-copy">
+                                <h3 th:text="${post.title}">Update title</h3>
+                                <p th:if="${post.accessible}" th:text="${post.body}">Update content</p>
+                                <p th:unless="${post.accessible}" class="locked-copy"><i class="bi bi-lock" aria-hidden="true"></i>Join the required audience to read this update.</p>
+                            </div>
+                            <a class="social-post-media" th:if="${post.imageUrl != null}" th:href="@{/casts/{castId}/content/{contentId}(castId=${cast.id},contentId=${post.id})}" th:attr="aria-label=${'Open ' + post.title}">
+                                <img th:src="${post.imageUrl}" th:alt="${post.title}">
+                            </a>
+                            <footer class="social-post-footer">
+                                <a class="content-read" th:href="@{/casts/{castId}/content/{contentId}(castId=${cast.id},contentId=${post.id})}"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span th:text="${post.accessible ? 'View post' : 'View access'}">View post</span></a>
+                            </footer>
                         </article>
                     </div>
                     <p class="profile-empty-copy" th:if="${cast.content.empty}">No published updates yet.</p>

@@ -54,7 +54,7 @@
     --rose-dark: #9a4962;
     --rose-soft: #f7e7ed;
     --lavender-soft: #eeeaf7;
-    --amber-soft: #f7edd9;
+    --amber-soft: #f1f1f3;
     --danger: #c83f5b;
     --danger-soft: #fff0f3;
     --shadow-sm: inset 0 0 0 1px #ebebeb, 0 1px 2px rgba(17, 17, 17, 0.025);
@@ -131,7 +131,7 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .avatar-large { width: 62px; height: 62px; flex-basis: 62px; font-size: 0.88rem; }
 .tone-rose { color: #8d4c61; background: linear-gradient(145deg, #fbeef2, var(--rose-soft)); }
 .tone-violet { color: #655b86; background: linear-gradient(145deg, #f5f2fb, var(--lavender-soft)); }
-.tone-amber { color: #806b3f; background: linear-gradient(145deg, #fff8eb, var(--amber-soft)); }
+.tone-amber { color: #4b4c50; background: linear-gradient(145deg, #f8f8f9, var(--amber-soft)); }
 .tone-mint { color: #45474d; background: linear-gradient(145deg, #f2f2f3, #d9dade); }
 .online-dot { position: absolute; right: 0; bottom: 1px; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; background: var(--rose); }
 
@@ -273,8 +273,8 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 .password-strength-meter span { height: 3px; border-radius: 999px; background: #e7e7e9; transition: background-color 160ms ease; }
 .password-strength.weak .password-strength-heading strong { color: var(--danger); }
 .password-strength.weak .password-strength-meter span:first-child { background: var(--rose); }
-.password-strength.fair .password-strength-heading strong { color: #8a6930; }
-.password-strength.fair .password-strength-meter span:nth-child(-n + 2) { background: #d4ad62; }
+.password-strength.fair .password-strength-heading strong { color: #5f6065; }
+.password-strength.fair .password-strength-meter span:nth-child(-n + 2) { background: #8d8f94; }
 .password-strength.strong .password-strength-heading strong { color: #4d6254; }
 .password-strength.strong .password-strength-meter span { background: #738c7a; }
 .primary-button, .secondary-button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; text-decoration: none; cursor: pointer; }

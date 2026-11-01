@@ -3,18 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="The requested CastFan page could not be found.">
     <meta name="robots" content="noindex">
     <title>Page not found | CastFan</title>
-    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/error-pages.css}" rel="stylesheet">
 </head>
-<body class="auth-page">
-<main class="auth-layout">
-    <a class="brand auth-brand" th:href="@{/}"><span>CastFan</span></a>
-    <section class="auth-panel" aria-labelledby="not-found-heading">
-        <div class="auth-heading"><p class="eyebrow">404</p>
-        <h1 id="not-found-heading">Page not found</h1>
-        <p>The page may have moved or is no longer available.</p></div>
-        <a class="primary-button" th:href="@{/}">Return home</a>
+<body>
+<main class="concept-stage">
+    <section class="phone error-phone" aria-label="Page not found">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <div class="screen-content error-content">
+            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a></div>
+            <section class="error-state" aria-labelledby="not-found-heading">
+                <span class="error-code" aria-hidden="true">404</span>
+                <div class="error-copy">
+                    <p>Page not found</p>
+                    <h1 id="not-found-heading">This page is not here</h1>
+                    <span>The link may be outdated, or the page may have moved.</span>
+                </div>
+                <div class="error-actions">
+                    <a class="error-primary" th:href="@{/}">Back to home</a>
+                </div>
+            </section>
+        </div>
     </section>
 </main>
 </body>

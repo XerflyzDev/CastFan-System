@@ -108,6 +108,9 @@ class UiConsistencyTests {
 			.contains("Changes are saved automatically")
 			.contains("data-notification-preference")
 			.contains("th:href=\"@{/member/notifications}\"");
+		assertThat(resource("static/css/member-profile.css"))
+			.contains("input[type=\"checkbox\"]:checked ~ i")
+			.contains("input[type=\"checkbox\"]:focus-visible ~ i");
 	}
 
 	@Test
@@ -186,6 +189,18 @@ class UiConsistencyTests {
 			.contains(".membership-points-page .ambient-top")
 			.contains(".points-summary-card")
 			.contains(".point-transaction");
+		assertThat(resource("templates/owner/member-points.html"))
+			.contains("class=\"points-directory\"")
+			.contains("class=\"selected-member-page\"")
+			.contains("Purchase details")
+			.contains("Review points")
+			.doesNotContain("Membership management")
+			.doesNotContain("class=\"points-card\"")
+			.doesNotContain("Record a purchase");
+		assertThat(resource("static/css/owner-member-points.css"))
+			.contains(".points-directory, .selected-member-page")
+			.contains(".member-results")
+			.contains("@media (max-width: 350px)");
 		assertThat(resource("templates/cast/content.html"))
 			.contains("minimumStoreTierRank")
 			.doesNotContain("minimumTierId");
@@ -244,6 +259,53 @@ class UiConsistencyTests {
 		assertThat(profileStyles)
 			.contains(".account-prototype .wordmark { color: var(--profile-ink); }")
 			.doesNotContain(".account-prototype .wordmark { color: var(--profile-ink); font-size:");
+	}
+
+	@Test
+	void warmBrownAccentsStayOutOfTheMonotoneApplicationTheme() throws IOException {
+		var stylesheets = new String[] {
+			"static/css/app.css",
+			"static/css/member-home.css",
+			"static/css/member-schedule.css",
+			"static/css/member-profile.css",
+			"static/css/member-following.css",
+			"static/css/cast-profile.css",
+			"static/css/cast-workspace.css",
+			"static/css/event-detail.css",
+			"static/css/date-time-picker.css",
+			"static/css/owner-workspace.css",
+			"static/css/owner-member-points-history.css"
+		};
+
+		for (var stylesheet : stylesheets) {
+			assertThat(resource(stylesheet))
+				.as(stylesheet)
+				.doesNotContain("#806b3f", "#715e3a", "#6f6038", "#8a6930", "#e2bd73",
+					"#c99a67", "#d4ad62", "#9c7843", "#fbf3e5", "#f6f0e6",
+					"rgba(128, 107, 63");
+		}
+		assertThat(resource("static/css/member-home.css"))
+			.contains("--amber: #f1f1f3")
+			.contains("color: #4b4c50");
+	}
+
+	@Test
+	void errorPagesUseTheSharedMonotonePhoneShell() throws IOException {
+		for (var status : new String[] { "403", "404", "500" }) {
+			assertThat(resource("templates/error/" + status + ".html"))
+				.as(status)
+				.contains("class=\"phone error-phone\"")
+				.contains("class=\"wordmark\"")
+				.contains("class=\"error-state\"")
+				.contains("class=\"error-code\"")
+				.contains("/css/error-pages.css")
+				.doesNotContain("auth-layout", "auth-panel", "primary-button", "error-symbol");
+		}
+		assertThat(resource("static/css/error-pages.css"))
+			.contains(".error-state")
+			.contains(".error-primary")
+			.contains("@media (max-width: 350px)")
+			.doesNotContain("#806b3f", "rgba(128, 107, 63");
 	}
 
 	private String resource(String path) throws IOException {

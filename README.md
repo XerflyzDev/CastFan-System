@@ -112,7 +112,9 @@ The backend will be organized by responsibility into `Controller`, `Service`, `R
 
 Sensitive data such as database passwords, API secrets, and service-account keys must never be committed to the repository.
 
-Public registration always creates a `MEMBER`. Privileged `CAST` and `OWNER` accounts are created only through the internal provisioning service; there is no public role-selection or privileged-account endpoint.
+Public registration always creates a `MEMBER`. Privileged access is created only through the internal provisioning service or an Owner-authorized Member-to-Cast promotion; there is no public role-selection or privileged-account endpoint.
+
+An authenticated Owner can promote an existing active Member to Cast from the Cast roster. The account keeps its login and Member profile, receives a public Cast profile, and is assigned to the permanent roster in one transaction.
 
 ## Core Data Model
 

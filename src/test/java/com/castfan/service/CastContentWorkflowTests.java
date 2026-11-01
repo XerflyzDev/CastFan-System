@@ -82,7 +82,11 @@ class CastContentWorkflowTests {
 		mockMvc.perform(post("/cast/content/{id}/publish", post.getId()).with(castUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/cast/content?published=true"));
 		mockMvc.perform(get("/casts/{id}", castProfileId))
-			.andExpect(status().isOk()).andExpect(content().string(containsString("Public content body")));
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Public content body")))
+			.andExpect(content().string(containsString("class=\"social-post-header\"")))
+			.andExpect(content().string(containsString("class=\"social-post-media\"")))
+			.andExpect(content().string(containsString("View post")));
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, post.getId()).with(castUser()))
 			.andExpect(status().isOk()).andExpect(view().name("public/content-detail"))
 			.andExpect(content().string(containsString("Public content body")))

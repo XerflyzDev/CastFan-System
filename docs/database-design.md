@@ -24,6 +24,7 @@ Constraints:
 
 - `email` is required, normalized to lowercase, and unique.
 - `role` is one of `MEMBER`, `CAST`, or `OWNER`.
+- An Owner-authorized Member-to-Cast promotion updates the account role, retains the existing Member profile, creates one Cast profile, and creates the system-store roster assignment in one transaction.
 - Passwords are stored only as secure hashes.
 
 ### AccountAvatar

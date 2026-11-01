@@ -34,7 +34,6 @@
                             <input id="cast-avatar-upload" type="file" name="image" accept="image/jpeg,image/png,image/webp" data-avatar-input>
                             <input type="hidden" th:field="*{stageName}">
                             <input type="hidden" th:field="*{bio}">
-                            <input type="hidden" th:field="*{discoverable}">
                             <label for="cast-avatar-upload" aria-label="Change profile photo" title="Change profile photo"><i class="bi bi-camera" aria-hidden="true"></i></label>
                         </form>
                     </div>
@@ -45,7 +44,6 @@
                                 <summary aria-label="Edit name" title="Edit name"><i class="bi bi-pencil-fill" aria-hidden="true"></i></summary>
                                 <form th:action="@{/cast/profile}" th:object="${form}" method="post">
                                     <input type="hidden" th:field="*{bio}">
-                                    <input type="hidden" th:field="*{discoverable}">
                                     <label class="visually-hidden" for="cast-stage-name">Stage name</label>
                                     <input id="cast-stage-name" type="text" th:field="*{stageName}" maxlength="80" required autocomplete="nickname">
                                     <button type="submit" aria-label="Save stage name" title="Save">Save</button>
@@ -59,7 +57,7 @@
                 </div>
                 <details class="cast-profile-editor" th:open="${profileEditorOpen}">
                     <summary>
-                        <span><i class="bi bi-sliders" aria-hidden="true"></i><strong>Manage profile</strong><small>Bio and visibility</small></span>
+                        <span><i class="bi bi-sliders" aria-hidden="true"></i><strong>Manage profile</strong><small>Public bio</small></span>
                         <i class="bi bi-chevron-down" aria-hidden="true"></i>
                     </summary>
                     <div class="cast-profile-form-panel">
@@ -67,7 +65,6 @@
                             <div class="inline-alert error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}">Profile error</div>
                             <input type="hidden" th:field="*{stageName}">
                             <label><span>Bio</span><textarea th:field="*{bio}" maxlength="1000" rows="4" placeholder="Tell Members a little about you"></textarea><small class="field-error" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}">Bio error</small></label>
-                            <label class="toggle-row"><span><strong>Discoverable profile</strong><small>Allow Members to find and follow you.</small></span><input type="checkbox" th:field="*{discoverable}"><i aria-hidden="true"></i></label>
                             <button class="primary-action form-submit" type="submit"><i class="bi bi-check2" aria-hidden="true"></i><span>Save changes</span></button>
                         </form>
                     </div>

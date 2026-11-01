@@ -17,7 +17,7 @@ public interface CastProfileRepository extends JpaRepository<CastProfile, Long> 
 
 	Optional<CastProfile> findByStageNameKey(String stageNameKey);
 
-	Page<CastProfile> findAllByDiscoverableTrueAndUserAccountStatusOrderByStageNameAsc(
+	Page<CastProfile> findAllByUserAccountStatusOrderByStageNameAsc(
 		UserStatus status,
 		Pageable pageable
 	);

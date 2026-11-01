@@ -41,7 +41,7 @@ public class MemberCastService {
 	@Transactional(readOnly = true)
 	public Page<MemberCastView> discover(String authenticatedEmail, Pageable pageable) {
 		var memberProfile = requireActiveMember(authenticatedEmail);
-		var castPage = castProfileRepository.findAllByDiscoverableTrueAndUserAccountStatusOrderByStageNameAsc(
+		var castPage = castProfileRepository.findAllByUserAccountStatusOrderByStageNameAsc(
 			UserStatus.ACTIVE,
 			pageable
 		);
@@ -66,7 +66,6 @@ public class MemberCastService {
 	public void follow(String authenticatedEmail, Long castProfileId) {
 		var memberProfile = requireActiveMember(authenticatedEmail);
 		var castProfile = castProfileRepository.findById(castProfileId)
-			.filter(profile -> profile.isDiscoverable())
 			.filter(profile -> profile.getUserAccount().getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast profile is not available."));
 

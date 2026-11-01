@@ -116,7 +116,8 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Appearance"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Support")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Discoverable profile")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Discoverable profile"))))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("/member/notifications"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/cast/profile\"")))
@@ -166,15 +167,13 @@ class CastWorkspaceWorkflowTests {
 				.with(user(cast.getEmail()).roles("CAST"))
 				.with(csrf())
 				.param("stageName", "Updated Mina " + cast.getId())
-				.param("bio", "Updated public bio")
-				.param("discoverable", "true"))
+				.param("bio", "Updated public bio"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/cast/profile?saved"));
 
 		var profile = requireProfile();
 		assertThat(profile.getStageName()).startsWith("Updated Mina");
 		assertThat(profile.getBio()).isEqualTo("Updated public bio");
-		assertThat(profile.isDiscoverable()).isTrue();
 
 		var png = new MockMultipartFile(
 			"image", "cast.png", "image/png",
@@ -194,7 +193,6 @@ class CastWorkspaceWorkflowTests {
 				.with(csrf())
 				.param("stageName", profile.getStageName())
 				.param("bio", profile.getBio())
-				.param("discoverable", "true")
 				.param("removeImage", "true"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/cast/profile?saved"));

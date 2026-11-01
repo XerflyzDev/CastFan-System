@@ -17,7 +17,6 @@ public record CastWorkspaceView(
 		String initials,
 		String bio,
 		String avatarUrl,
-		boolean discoverable,
 		long followerCount,
 		long activeTierCount,
 		String email

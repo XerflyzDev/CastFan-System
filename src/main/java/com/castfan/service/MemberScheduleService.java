@@ -75,7 +75,7 @@ public class MemberScheduleService {
 		var rangeStartsAt = rangeStartsOn.atStartOfDay(zone).toInstant();
 		var rangeEndsAt = rangeEndsOn.atStartOfDay(zone).toInstant();
 
-		var schedules = store.map(value -> shiftScheduleRepository.findMemberScheduleShiftsInRange(
+		var schedules = store.map(value -> shiftScheduleRepository.findPublicShiftsInRange(
 			value.getId(), ShiftStatus.APPROVED, UserStatus.ACTIVE, rangeStartsAt, rangeEndsAt
 		)).orElseGet(List::of);
 		var selectedSchedules = schedules.stream()
@@ -136,8 +136,7 @@ public class MemberScheduleService {
 			&& now.plusSeconds(2 * 60 * 60).isAfter(schedule.getStartsAt());
 		return new MemberScheduleView.ShiftItem(
 			schedule.getId(), profile.getId(), profile.getStageName(), initials(profile.getStageName()),
-			avatarTone(profile.getId()), profile.getAvatarUrl(), profile.isDiscoverable(),
-			TIME.format(schedule.getStartsAt().atZone(zone)),
+			avatarTone(profile.getId()), profile.getAvatarUrl(), TIME.format(schedule.getStartsAt().atZone(zone)),
 			formatRange(schedule.getStartsAt(), schedule.getEndsAt(), zone),
 			!now.isBefore(schedule.getStartsAt()) && now.isBefore(schedule.getEndsAt()), startsSoon
 		);

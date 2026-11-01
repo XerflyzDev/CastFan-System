@@ -80,8 +80,7 @@ public class AccountAvatarService {
 			memberProfileRepository.save(profile);
 		});
 		castProfileRepository.findByUserAccountId(accountId).ifPresent(profile -> {
-			profile.updatePublicDetails(profile.getStageName(), profile.getStageNameKey(), profile.getBio(), avatarUrl,
-				profile.isDiscoverable());
+			profile.updatePublicDetails(profile.getStageName(), profile.getStageNameKey(), profile.getBio(), avatarUrl);
 			castProfileRepository.save(profile);
 		});
 	}

@@ -75,7 +75,7 @@ Rules:
 
 ### CastProfile
 
-Cast-specific public profile and discoverability settings. Each user can have at most one Cast profile.
+Cast-specific public profile settings. Each active Cast profile is public, and each user can have at most one Cast profile. The legacy `discoverable` column is retained for migration compatibility and is normalized to `TRUE`.
 
 Constraints:
 

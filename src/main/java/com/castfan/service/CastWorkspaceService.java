@@ -106,7 +106,7 @@ public class CastWorkspaceService {
 		return new CastWorkspaceView(
 			new CastWorkspaceView.Profile(
 				profile.getId(), profile.getStageName(), initials(profile.getStageName()), profile.getBio(),
-				profile.getAvatarUrl(), profile.isDiscoverable(), castFollowRepository.countByCastProfileId(profile.getId()),
+				profile.getAvatarUrl(), castFollowRepository.countByCastProfileId(profile.getId()),
 				tiers.stream().filter(tier -> tier.isActive()).count(), profile.getUserAccount().getEmail()
 			),
 			assignments,
@@ -123,7 +123,6 @@ public class CastWorkspaceService {
 		var form = new CastProfileForm();
 		form.setStageName(profile.getStageName());
 		form.setBio(profile.getBio());
-		form.setDiscoverable(profile.isDiscoverable());
 		return form;
 	}
 
@@ -164,7 +163,7 @@ public class CastWorkspaceService {
 	@Transactional
 	public void updateProfile(String email, CastProfileForm form, MultipartFile image) {
 		profileService.updateCastProfile(
-			email, form.getStageName(), form.getBio(), form.isDiscoverable(), image, form.isRemoveImage()
+			email, form.getStageName(), form.getBio(), image, form.isRemoveImage()
 		);
 	}
 

@@ -14,8 +14,6 @@ public class CastProfileForm {
 
 	private boolean removeImage;
 
-	private boolean discoverable;
-
 	public String getStageName() {
 		return stageName;
 	}
@@ -35,11 +33,4 @@ public class CastProfileForm {
 	public boolean isRemoveImage() { return removeImage; }
 	public void setRemoveImage(boolean removeImage) { this.removeImage = removeImage; }
 
-	public boolean isDiscoverable() {
-		return discoverable;
-	}
-
-	public void setDiscoverable(boolean discoverable) {
-		this.discoverable = discoverable;
-	}
 }

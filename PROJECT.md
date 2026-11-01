@@ -27,6 +27,7 @@ The original business stakeholder is Thanaphat Thanakitiworakul (P'Sun), a Softw
 The stakeholder confirmed the following decisions on 27 October 2026:
 
 - The first release is for one cafe only.
+- Every active Cast profile is public and available for Members to discover and follow; Cast cannot opt out of discovery.
 - A newly registered Member starts without a tier.
 - The cafe checks the customer's bill outside CastFan and then records points on the Member account; CastFan is not the point-of-sale system.
 - Only the Owner records points, using the conversion `1 THB = 1 point`, and points do not expire.
@@ -85,6 +86,7 @@ Together, these courses require the project to demonstrate:
 - Use the shared Home and approved Schedule experience, with direct access to their Member-facing Cast profile, profile settings, and private Cast workspace.
 - Preview their own public Cast profile exactly as Members see it.
 - Manage only their own public Cast profile.
+- Every active Cast profile remains public; Cast can edit its content but cannot hide it from Member discovery.
 - Submit and cancel their own shift requests.
 - Publish content for public, follower, or membership audiences.
 - Select a minimum store-wide tier for membership-only content.

@@ -46,7 +46,7 @@ public class CastProfile {
 	private String avatarUrl;
 
 	@Column(nullable = false)
-	private boolean discoverable;
+	private boolean discoverable = true;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
@@ -62,29 +62,27 @@ public class CastProfile {
 		String stageName,
 		String stageNameKey,
 		String bio,
-		String avatarUrl,
-		boolean discoverable
+		String avatarUrl
 	) {
 		this.userAccount = userAccount;
 		this.stageName = stageName;
 		this.stageNameKey = stageNameKey;
 		this.bio = bio;
 		this.avatarUrl = avatarUrl;
-		this.discoverable = discoverable;
+		this.discoverable = true;
 	}
 
 	public void updatePublicDetails(
 		String stageName,
 		String stageNameKey,
 		String bio,
-		String avatarUrl,
-		boolean discoverable
+		String avatarUrl
 	) {
 		this.stageName = stageName;
 		this.stageNameKey = stageNameKey;
 		this.bio = bio;
 		this.avatarUrl = avatarUrl;
-		this.discoverable = discoverable;
+		this.discoverable = true;
 	}
 
 	@PrePersist
@@ -121,10 +119,6 @@ public class CastProfile {
 
 	public String getAvatarUrl() {
 		return avatarUrl;
-	}
-
-	public boolean isDiscoverable() {
-		return discoverable;
 	}
 
 	public Instant getCreatedAt() {

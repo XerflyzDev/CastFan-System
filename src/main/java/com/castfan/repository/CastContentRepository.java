@@ -40,7 +40,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 		join fetch profile.userAccount account
 		left join fetch content.minimumTier tier
 		where content.status = :status
-		  and profile.discoverable = true
 		  and account.status = :userStatus
 		  and exists (
 			select follow.id from CastFollow follow
@@ -63,7 +62,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 		where content.id = :contentId
 		  and profile.id = :castProfileId
 		  and content.status = :status
-		  and profile.discoverable = true
 		  and account.status = :userStatus
 		""")
 	Optional<CastContent> findPublishedByIdForProfile(

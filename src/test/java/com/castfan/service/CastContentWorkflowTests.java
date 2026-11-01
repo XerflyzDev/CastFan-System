@@ -57,7 +57,7 @@ class CastContentWorkflowTests {
 	void setUp() {
 		var suffix = Long.toString(System.nanoTime());
 		castAccount = saveAccount("content-cast-" + suffix + "@castfan.test", UserRole.CAST);
-		castProfileId = profileService.createCastProfile(castAccount, "Content Cast " + suffix, null, null, true).getId();
+		castProfileId = profileService.createCastProfile(castAccount, "Content Cast " + suffix, null, null).getId();
 	}
 
 	@Test
@@ -160,7 +160,7 @@ class CastContentWorkflowTests {
 		var castViewer = saveAccount("content-cast-viewer-" + System.nanoTime() + "@castfan.test", UserRole.CAST);
 		profileService.createMemberProfile(castViewer);
 		profileService.createCastProfile(
-			castViewer, "Content Viewer " + System.nanoTime(), null, null, true
+			castViewer, "Content Viewer " + System.nanoTime(), null, null
 		);
 		memberCastService.follow(castViewer.getEmail(), castProfileId);
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", castProfileId, followerPost.getId())
@@ -199,7 +199,7 @@ class CastContentWorkflowTests {
 		var post = createAndPublish("Private Route", "Route body", ContentAudience.PUBLIC, null);
 		var other = saveAccount("detail-other-cast-" + System.nanoTime() + "@castfan.test", UserRole.CAST);
 		var otherProfileId = profileService.createCastProfile(
-			other, "Detail Other " + System.nanoTime(), null, null, true
+			other, "Detail Other " + System.nanoTime(), null, null
 		).getId();
 
 		mockMvc.perform(get("/casts/{castId}/content/{contentId}", otherProfileId, post.getId()))
@@ -211,7 +211,7 @@ class CastContentWorkflowTests {
 	void anotherCastCannotChangeContentAndCreationRequiresCsrf() throws Exception {
 		var post = createAndPublish("Owned Post", "Owner-only edit", ContentAudience.PUBLIC, null);
 		var other = saveAccount("other-content-cast-" + System.nanoTime() + "@castfan.test", UserRole.CAST);
-		profileService.createCastProfile(other, "Other Content Cast " + System.nanoTime(), null, null, true);
+		profileService.createCastProfile(other, "Other Content Cast " + System.nanoTime(), null, null);
 
 		mockMvc.perform(post("/cast/content").with(castUser())
 				.param("title", "No CSRF").param("body", "Rejected").param("audience", "PUBLIC"))

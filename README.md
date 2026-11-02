@@ -26,14 +26,14 @@ The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MyS
 
 Every active Cast profile is public and available for Member discovery and following. Cast can edit their public identity but cannot hide an active profile.
 
-> **Requirement alignment notice:** The stakeholder confirmed on 27 October 2026 that the first release supports one cafe. The implemented store-wide points workflow provides zero-state registration, Owner-only earning/correction/reversal, an immutable receipt-protected ledger, derived tiers at `1 THB = 1 point`, read-only Member history, and store-tier content access. Legacy tier entities remain only for migration compatibility and are not exposed as the active membership workflow.
+> **Requirement alignment notice:** The stakeholder confirmed on 27 October 2026 that the first release supports one cafe. The implemented store-wide points workflow provides zero-state registration, Owner-only earning/correction/reversal, an immutable receipt-protected ledger, derived tiers at `1 THB = 1 point`, read-only Member history, and store-tier content access.
 
 ## Objectives
 
 - Simplify Cast shift submission and approval.
 - Help Members find schedules and follow their favorite Cast.
 - Support store events, promotions, and public information.
-- Manage membership tiers and access to Cast content.
+- Derive store-wide membership tiers from points and control access to Cast content.
 - Deliver an attractive, accessible, and responsive mobile-first interface.
 
 ## User Roles
@@ -128,8 +128,6 @@ Implemented and planned entities:
 - `Store`
 - `StoreCast`
 - `ShiftSchedule`
-- `MemberTier` (legacy compatibility only)
-- `TierMembership` (legacy compatibility only)
 - `CastFollow`
 - `CastContent`
 - `StoreEvent`
@@ -137,16 +135,11 @@ Implemented and planned entities:
 
 Entity details, relationships, constraints, and implementation order are documented in [docs/database-design.md](docs/database-design.md).
 
-The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its Flyway V6 core, Owner workflow, Member views, and Cast content-access integration are implemented.
+The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its Flyway V6 core, V9 legacy-schema removal, Owner workflow, Member views, and Cast content-access integration are implemented.
 
 The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
 
 Pushes to `main` are prepared to run the full H2/MySQL test suite and deploy an immutable image to Cloud Run through keyless GitHub Actions Workload Identity Federation. The workflow is stored at [`.github/workflows/google-cloud-deploy.yml`](.github/workflows/google-cloud-deploy.yml).
-
-An optional Cloudflare Worker edge gateway is prepared under `cloudflare/`.
-It proxies to the existing Cloud Run service without moving Spring Boot or
-Cloud SQL. Setup, validation, security boundaries, and rollback are documented
-in [docs/cloudflare-deployment.md](docs/cloudflare-deployment.md).
 
 The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
 
@@ -171,7 +164,7 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Implement Store-Cast assignments and the Shift approval domain workflow.
 - [x] Add role-based route and method authorization for Cast and Owner workspaces.
 - [x] Implement Cast discovery and Member follow/unfollow workflow.
-- [x] Implement Cast membership tiers and Member tier access checks.
+- [x] Implement store-wide membership points, derived tiers, and content access checks.
 - [x] Connect the real Member Home to approved shifts, published events, and follow state.
 - [x] Connect the protected Member Schedule to approved shifts with date selection.
 - [x] Connect Member Following and Profile to the existing follow and membership workflows.
@@ -182,7 +175,7 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Add the Member Notification Center for followed-Cast updates and upcoming events.
 - [x] Add persisted Member preferences for Cast-update and event notifications.
 - [x] Complete the remaining Member workflow.
-- [x] Implement the Cast profile, shift submission, cancellation, and membership tier workflow.
+- [x] Implement the Cast profile, shift submission, cancellation, and content workflow.
 - [x] Implement Cast content publishing and tier-based visibility.
 - [x] Implement the Owner Dashboard, daily schedule, and shift approval workflow.
 - [x] Implement Owner Event Management with image uploads and draft, publish, and archive states.
@@ -196,7 +189,7 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Deploy the Spring Boot service to Google Cloud Run.
 - [x] Store production credentials in Google Cloud Secret Manager.
 - [x] Restrict the first release to one cafe and remove exposed multi-store creation behavior.
-- [x] Replace Cast-specific tiers and Member self-subscription with the confirmed Owner-recorded, store-wide points model.
+- [x] Use the confirmed Owner-recorded, store-wide points model as the only membership workflow.
 - [ ] Add validation, error handling, and broader automated tests.
 - [x] Complete security and responsive UI reviews.
 - [ ] Complete production-readiness gates and prepare the project demonstration.

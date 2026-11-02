@@ -348,7 +348,7 @@ Figma reference from SRS:
 ### Minimum Security Acceptance Criteria
 
 - No user can access another user's private profile data through direct object IDs.
-- No Member can view exclusive content without the required Cast-specific category.
+- No Member can view exclusive content without the required store-wide tier.
 - No Cast can modify another Cast's schedule, content, category, or follower records.
 - No Owner can modify another store's data if multi-store support exists.
 - Uploaded files cannot execute script in the browser.

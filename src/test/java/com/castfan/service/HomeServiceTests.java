@@ -78,13 +78,13 @@ class HomeServiceTests {
 			today.atTime(22, 0).atZone(STORE_ZONE).toInstant()
 		));
 		castFollowRepository.save(new CastFollow(memberProfile, mina));
-		var followedPost = new CastContent(
+		var followedPost = CastContent.forStoreTier(
 			mina, "Mina update", "A new update for everyone following Mina", null,
 			ContentAudience.FOLLOWERS, null
 		);
 		followedPost.publish();
 		castContentRepository.save(followedPost);
-		var unrelatedPost = new CastContent(
+		var unrelatedPost = CastContent.forStoreTier(
 			yuki, "Yuki update", "This must not appear in Mina's feed", null,
 			ContentAudience.PUBLIC, null
 		);

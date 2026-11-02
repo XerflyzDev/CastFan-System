@@ -20,7 +20,6 @@ import com.castfan.repository.CastFollowRepository;
 import com.castfan.repository.CastContentRepository;
 import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
-import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
@@ -43,7 +42,6 @@ public class PublicContentService {
 	private final CastProfileRepository castProfileRepository;
 	private final StoreCastRepository storeCastRepository;
 	private final ShiftScheduleRepository shiftScheduleRepository;
-	private final MemberTierRepository memberTierRepository;
 	private final CastFollowRepository castFollowRepository;
 	private final UserAccountRepository userAccountRepository;
 	private final MemberProfileRepository memberProfileRepository;
@@ -57,7 +55,6 @@ public class PublicContentService {
 		CastProfileRepository castProfileRepository,
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
-		MemberTierRepository memberTierRepository,
 		CastFollowRepository castFollowRepository,
 		UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository,
@@ -70,7 +67,6 @@ public class PublicContentService {
 		this.castProfileRepository = castProfileRepository;
 		this.storeCastRepository = storeCastRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
-		this.memberTierRepository = memberTierRepository;
 		this.castFollowRepository = castFollowRepository;
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
@@ -116,11 +112,6 @@ public class PublicContentService {
 			!now.isBefore(shift.getStartsAt()) && now.isBefore(shift.getEndsAt())
 		)).orElse(null);
 
-		var tiers = memberTierRepository.findAllByCastProfileIdOrderByRankAsc(castProfileId).stream()
-			.filter(tier -> tier.isActive())
-			.map(tier -> new PublicCastProfileView.TierSummary(
-				tier.getId(), tier.getName(), tier.getDescription(), tier.getMonthlyPrice(), tier.getCurrency()
-			)).toList();
 		var viewer = memberProfile(authenticatedEmail);
 		var isFollowed = viewer
 			.map(member -> castFollowRepository.existsByMemberProfileIdAndCastProfileId(member.getId(), castProfileId))
@@ -140,7 +131,7 @@ public class PublicContentService {
 			profile.getAvatarUrl(), initials(profile.getStageName()),
 			SystemStoreService.DISPLAY_NAME,
 			castFollowRepository.countByCastProfileId(castProfileId), isFollowed,
-			nextShift, tiers, content
+			nextShift, content
 		);
 	}
 

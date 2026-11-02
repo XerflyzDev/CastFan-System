@@ -1,6 +1,6 @@
 # Membership Points And Tier Workflow
 
-This document defines CastFan's confirmed store-wide membership program. The points balance, immutable ledger, tier derivation, Owner workflow, Member summary/history, and store-tier content access are implemented. Legacy Cast-specific tier tables remain temporarily for migration compatibility, but their management and self-subscription screens are no longer part of the active workflow.
+This document defines CastFan's confirmed store-wide membership program. The points balance, immutable ledger, tier derivation, Owner workflow, Member summary/history, and store-tier content access are implemented as the only membership workflow.
 
 ## Confirmed Requirements
 
@@ -12,7 +12,7 @@ This document defines CastFan's confirmed store-wide membership program. The poi
 - Points do not expire.
 - Tier status belongs to the store membership, not to an individual Cast.
 - Members do not choose or subscribe to a tier themselves.
-- The existing Cast-specific tier and self-subscription workflow must be removed from the target design.
+- Members cannot create, buy, select, or subscribe to membership tiers.
 - A separate membership number is not required.
 
 ## Tier Thresholds

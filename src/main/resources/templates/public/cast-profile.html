@@ -37,9 +37,8 @@
 
                 <p class="cast-bio" th:text="${cast.bio != null ? cast.bio : 'Profile details will be added soon.'}">Cast bio</p>
 
-                <section class="profile-stats" th:classappend="'two-stats'" th:attr="aria-label=${cast.stageName + ' profile summary'}">
+                <section class="profile-stats" th:attr="aria-label=${cast.stageName + ' profile summary'}">
                     <div><strong th:text="${cast.followerCount}">0</strong><small>Followers</small></div>
-                    <div><strong th:text="${cast.tiers.size()}">0</strong><small>Member tiers</small></div>
                 </section>
 
                 <section class="next-shift" th:if="${cast.nextShift != null}" aria-labelledby="next-shift-heading">
@@ -79,27 +78,6 @@
                     <p class="profile-empty-copy" th:if="${cast.content.empty}">No published updates yet.</p>
                 </section>
 
-                <section class="profile-section-block" aria-labelledby="membership-title">
-                    <div class="section-title"><h2 id="membership-title">Membership</h2><a sec:authorize="hasRole('MEMBER')" th:href="@{/member/memberships}">Compare</a></div>
-                    <div class="tier-list" th:if="${!cast.tiers.empty}">
-                        <a class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="hasRole('MEMBER')" th:href="@{/member/memberships}">
-                            <span class="tier-icon"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
-                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
-                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
-                        </a>
-                        <a class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="isAnonymous()" th:href="@{/login}">
-                            <span class="tier-icon"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
-                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
-                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
-                        </a>
-                        <div class="tier-option" th:each="tier : ${cast.tiers}" sec:authorize="isAuthenticated() and !hasRole('MEMBER')">
-                            <span class="tier-icon"><i class="bi bi-star-fill" aria-hidden="true"></i></span>
-                            <span><strong th:text="${tier.name}">Member tier</strong><em th:text="${tier.description != null ? tier.description : 'Member access and updates'}">Benefits</em></span>
-                            <b th:text="${tier.currency == 'THB' ? '฿' + tier.monthlyPrice : tier.monthlyPrice + ' ' + tier.currency}">฿199</b>
-                        </div>
-                    </div>
-                    <p class="profile-empty-copy" th:if="${cast.tiers.empty}">No active membership tiers.</p>
-                </section>
             </div>
         </div>
 

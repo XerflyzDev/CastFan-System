@@ -17,7 +17,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 
 	@Query("""
 		select content from CastContent content
-		left join fetch content.minimumTier tier
 		where lower(content.castProfile.userAccount.email) = lower(:email)
 		order by content.createdAt desc
 		""")
@@ -25,7 +24,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 
 	@Query("""
 		select content from CastContent content
-		left join fetch content.minimumTier tier
 		where content.castProfile.id = :castProfileId and content.status = :status
 		order by content.publishedAt desc
 		""")
@@ -38,7 +36,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 		select content from CastContent content
 		join fetch content.castProfile profile
 		join fetch profile.userAccount account
-		left join fetch content.minimumTier tier
 		where content.status = :status
 		  and account.status = :userStatus
 		  and exists (
@@ -58,7 +55,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 		select content from CastContent content
 		join fetch content.castProfile profile
 		join fetch profile.userAccount account
-		left join fetch content.minimumTier tier
 		where content.id = :contentId
 		  and profile.id = :castProfileId
 		  and content.status = :status
@@ -72,6 +68,6 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 	);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("select content from CastContent content left join fetch content.minimumTier where content.id = :id")
+	@Query("select content from CastContent content where content.id = :id")
 	Optional<CastContent> findByIdForUpdate(@Param("id") Long id);
 }

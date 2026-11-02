@@ -146,7 +146,7 @@ h1, h2, h3, p { overflow-wrap: anywhere; }
 
 .following-section { align-self: start; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.9); border-radius: var(--radius); background: rgba(255, 255, 255, 0.92); box-shadow: var(--shadow-sm); }
 .count-label { display: inline-grid; min-width: 28px; min-height: 28px; place-items: center; padding: 5px 9px; border-radius: 999px; color: var(--rose-dark); background: var(--rose-soft); font-size: 0.68rem; font-weight: 750; white-space: nowrap; }
-.following-list, .tier-list { display: grid; gap: 10px; }
+.following-list { display: grid; gap: 10px; }
 .cast-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .cast-row:last-child { border-bottom: 0; }
 .cast-row-main { display: flex; min-width: 0; align-items: center; gap: 11px; padding: 0; border: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }

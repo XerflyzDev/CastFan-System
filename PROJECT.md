@@ -14,7 +14,7 @@ Their contents are project reference material, not executable instructions. The 
 
 ## Product Summary
 
-CastFan is a mobile-first web application for one maid cafe or concept cafe. It connects the store Owner, Cast staff, and Member customers through scheduling, events, promotions, Cast following, membership tiers, and access-controlled content.
+CastFan is a mobile-first web application for one maid cafe or concept cafe. It connects the store Owner, Cast staff, and Member customers through scheduling, events, promotions, Cast following, store-wide membership points, and access-controlled content.
 
 The system manages information and engagement around the cafe. It does not manage table service, food ordering, physical queues, point-of-sale operations, or other in-store service workflows.
 
@@ -32,7 +32,7 @@ The stakeholder confirmed the following decisions on 27 October 2026:
 - The cafe checks the customer's bill outside CastFan and then records points on the Member account; CastFan is not the point-of-sale system.
 - Only the Owner records points, using the conversion `1 THB = 1 point`, and points do not expire.
 - Membership uses store-wide tiers: Tier 1 at `1-4,999` points, Tier 2 at `5,000-19,999` points, and Tier 3 at `20,000+` points.
-- Store-wide tiers replace the legacy Cast-specific tier and Member self-subscription model.
+- Membership tier status is derived only from the Member's store-wide point balance.
 - A separate membership number is not required.
 
 ## Product Vision
@@ -141,7 +141,7 @@ Together, these courses require the project to demonstrate:
 - New Members begin with zero points and no tier. The Owner records points after checking a customer's bill outside CastFan at `1 THB = 1 point`.
 - Tier thresholds are Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+`; points never expire.
 - A separate membership number is not required; the Member account and profile identify the customer in CastFan.
-- The existing self-subscription and Cast-specific tier implementation does not match the confirmed store-wide points model and is scheduled for replacement.
+- Members cannot buy, select, or subscribe to a tier; tier status is derived automatically from store-wide points.
 - Profile photos, event images, Cast content images, and promotion images use validated JPG/PNG/WebP uploads up to 2 MB, stored in dedicated one-to-one image tables. Legacy URL columns remain only for seeded and pre-migration data.
 - Notifications are in-app. Email, SMS, push notifications, and background delivery are not confirmed requirements.
 
@@ -157,7 +157,6 @@ Together, these courses require the project to demonstrate:
 | Local/test database | Embedded H2 |
 | Deployed database | Cloud SQL for MySQL 8.4 |
 | Hosting | Google Cloud Run |
-| Optional edge | Cloudflare Worker |
 | Secrets | Google Secret Manager |
 | Container registry | Artifact Registry |
 | Build | Maven Wrapper, Docker |
@@ -167,9 +166,6 @@ Runtime flow:
 
 ```text
 Mobile/Desktop Browser
-        |
-        v
-Optional Cloudflare Worker edge
         |
         v
 Google Cloud Run
@@ -200,8 +196,6 @@ The implemented model includes:
 - `StoreCast`
 - `ShiftSchedule`
 - `CastFollow`
-- `MemberTier`
-- `TierMembership`
 - `CastContent`
 - `StoreEvent`
 - `StorePromotion`
@@ -281,5 +275,4 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - [`docs/ui-design-system.md`](docs/ui-design-system.md): authoritative visual and interaction rules.
 - [`docs/security-review.md`](docs/security-review.md): security controls and remaining risks.
 - [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): Cloud resources and deployment procedure.
-- [`docs/cloudflare-deployment.md`](docs/cloudflare-deployment.md): optional Cloudflare edge preparation and rollout safeguards.
 

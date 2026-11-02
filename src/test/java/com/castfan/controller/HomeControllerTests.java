@@ -175,7 +175,7 @@ class HomeControllerTests {
 		mockMvc.perform(get("/concepts/cast-profile.html"))
 			.andExpect(status().isOk())
 			.andExpect(content().contentTypeCompatibleWith("text/html"))
-			.andExpect(content().string(containsString("Silver Member")));
+			.andExpect(content().string(containsString("Latest Update")));
 
 		mockMvc.perform(get("/concepts/event-detail.html"))
 			.andExpect(status().isOk())

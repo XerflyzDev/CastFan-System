@@ -35,11 +35,5 @@ build/
 ### Local configuration and secrets ###
 .env
 .env.*
-.dev.vars
-.dev.vars.*
 application-local.properties
 gha-creds-*.json
-
-### Frontend tooling ###
-node_modules/
-.wrangler/

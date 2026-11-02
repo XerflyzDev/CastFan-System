@@ -1,6 +1,5 @@
 package com.castfan.dto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public record PublicCastProfileView(
@@ -14,19 +13,9 @@ public record PublicCastProfileView(
 	long followerCount,
 	boolean followed,
 	ShiftSummary nextShift,
-	List<TierSummary> tiers,
 	List<ContentSummary> content
 ) {
 	public record ShiftSummary(String dateLabel, String timeLabel, boolean workingNow) {
-	}
-
-	public record TierSummary(
-		Long id,
-		String name,
-		String description,
-		BigDecimal monthlyPrice,
-		String currency
-	) {
 	}
 
 	public record ContentSummary(

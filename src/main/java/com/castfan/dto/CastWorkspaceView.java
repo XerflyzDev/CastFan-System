@@ -18,7 +18,6 @@ public record CastWorkspaceView(
 		String bio,
 		String avatarUrl,
 		long followerCount,
-		long activeTierCount,
 		String email
 	) {
 	}

@@ -55,7 +55,7 @@ The store-wide points core is implemented as follows:
 - Only the authenticated Owner records points after checking the bill outside CastFan; no bill, payment, or point-of-sale record is managed by CastFan.
 - Award points at `1 THB = 1 point`; points do not expire.
 - Derive store-wide tiers as Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+` points.
-- The legacy Cast-specific tier and Member self-subscription tables remain temporarily for UI migration compatibility. They are not the source of truth for store-wide points.
+- Store-wide point balance is the only source of membership tier status.
 - The workflow and service contract are specified in [`membership-points.md`](membership-points.md).
 
 ### MemberPointTransaction
@@ -76,7 +76,7 @@ Rules:
 
 ### CastProfile
 
-Cast-specific public profile settings. Each active Cast profile is public, and each user can have at most one Cast profile. The legacy `discoverable` column is retained for migration compatibility and is normalized to `TRUE`.
+Public profile settings for a Cast. Each active Cast profile is public, and each user can have at most one Cast profile. The legacy `discoverable` column is retained for migration compatibility and is normalized to `TRUE`.
 
 Constraints:
 
@@ -125,35 +125,12 @@ Records a Member following a Cast.
 
 Constraint: unique pair `(memberProfileId, castProfileId)`.
 
-### MemberTier
-
-A Cast-owned membership tier ordered by `rank`.
-
-This describes the current implementation only. It does not match the confirmed target and will be replaced by store-wide point tiers.
-
-Constraints:
-
-- Unique pair `(castProfileId, name)`.
-- Unique pair `(castProfileId, rank)`.
-- `rank` is positive and `monthlyPrice` is not negative.
-
-### TierMembership
-
-Records a Member's subscription to a Cast membership tier.
-
-This describes the current implementation only. Member self-subscription and Cast-specific membership will be removed; the target begins with no tier and derives store-wide tier status from points recorded by the Owner.
-
-Constraint: unique pair `(memberProfileId, memberTierId)` for the initial implementation.
-
-The service must ensure that a Member has no more than one active tier for the same Cast.
-
 ### CastContent
 
-Content published by a Cast. `minimumStoreTierRank` is the required access field for store-tier content. The legacy `minimumTierId` remains temporarily while the Member and Cast UI migration is completed, but it is no longer accepted as the database access boundary by itself.
+Content published by a Cast. `minimumStoreTierRank` is the required access field for store-tier content.
 
 Rules:
 
-- The selected minimum tier must belong to the same Cast as the content.
 - Only the owning Cast can edit, publish, archive, or delete a draft.
 - Published content requires `publishedAt`.
 - `audience` is `PUBLIC`, `FOLLOWERS`, or `MEMBERS`; member content requires `minimumStoreTierRank`.
@@ -236,12 +213,8 @@ Rules:
 | MemberProfile | one to many | CastFollow |
 | MemberProfile | one to many | MemberPointTransaction |
 | CastProfile | one to many | CastFollow |
-| CastProfile | one to many | MemberTier |
-| MemberProfile | one to many | TierMembership |
-| MemberTier | one to many | TierMembership |
 | CastProfile | one to many | CastContent |
 | CastContent | one to zero-or-one | CastContentImage |
-| MemberTier | optional one to many | CastContent |
 | Store | one to many | StoreEvent |
 | StoreEvent | one to zero-or-one | StoreEventImage |
 | Store | one to many | StorePromotion |
@@ -264,7 +237,6 @@ Rules:
 3. `StoreCast` and `ShiftSchedule` with approval rules.
 4. `CastFollow` and Member discovery queries.
 5. `MemberPointTransaction`, store-tier derivation, and access checks.
-6. Legacy `MemberTier` and `TierMembership` migration compatibility.
-7. `CastContent`, `StoreEvent`, and `StorePromotion`.
-7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 5.
-8. Run the migration and Hibernate validation against a disposable MySQL database. Completed through schema version 4 against MySQL 8.4.11 on 15 October 2026; rerun version 5 before the next Cloud SQL deployment.
+6. `CastContent`, `StoreEvent`, and `StorePromotion`.
+7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 9.
+8. Run the migration and Hibernate validation against a disposable MySQL database before the next Cloud SQL deployment.

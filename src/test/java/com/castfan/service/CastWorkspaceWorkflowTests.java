@@ -85,7 +85,7 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Preview public profile"))))
 			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
-				"(?s).*<div class=\"cast-stats\" aria-label=\"Cast summary\">\\s*<div>.*?Pending shifts.*?</div>\\s*<div>.*?Active tiers.*?</div>\\s*<div>.*?Followers.*?</div>\\s*</div>.*"
+				"(?s).*<div class=\"cast-stats\" aria-label=\"Cast summary\">\\s*<div>.*?Pending shifts.*?</div>\\s*<div>.*?Followers.*?</div>\\s*</div>.*"
 			)))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Manage content"))))

@@ -24,8 +24,8 @@ class DatabaseMigrationTests {
 
 	private static final List<String> EXPECTED_TABLES = List.of(
 		"account_avatars", "cast_content", "cast_content_images", "cast_follows", "cast_profiles", "flyway_schema_history",
-		"member_point_transactions", "member_profiles", "member_tiers", "shift_schedules", "store_cast", "store_event_images", "store_events",
-		"store_promotion_images", "store_promotions", "stores", "tier_memberships", "user_accounts"
+		"member_point_transactions", "member_profiles", "shift_schedules", "store_cast", "store_event_images", "store_events",
+		"store_promotion_images", "store_promotions", "stores", "user_accounts"
 	);
 
 	@Autowired
@@ -45,7 +45,16 @@ class DatabaseMigrationTests {
 			""", String.class);
 
 		assertThat(tables).containsAll(EXPECTED_TABLES);
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
+		assertThat(tables).doesNotContain("member_tiers", "tier_memberships");
+		var contentColumns = jdbc.queryForList("""
+			select lower(column_name)
+			from information_schema.columns
+			where table_schema = 'public' and table_name = 'cast_content'
+			""", String.class);
+		assertThat(contentColumns)
+			.contains("minimum_store_tier_rank")
+			.doesNotContain("minimum_tier_id");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

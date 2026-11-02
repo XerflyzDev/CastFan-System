@@ -48,10 +48,6 @@ public class CastContent {
 	@Column(nullable = false, length = 20)
 	private ContentAudience audience;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "minimum_tier_id")
-	private MemberTier minimumTier;
-
 	@Column(name = "minimum_store_tier_rank")
 	private Integer minimumStoreTierRank;
 
@@ -70,13 +66,6 @@ public class CastContent {
 
 	protected CastContent() { }
 
-	public CastContent(CastProfile castProfile, String title, String body, String imageUrl,
-		ContentAudience audience, MemberTier minimumTier) {
-		this.castProfile = castProfile;
-		this.status = ContentStatus.DRAFT;
-		updateDetails(title, body, imageUrl, audience, minimumTier);
-	}
-
 	public static CastContent forStoreTier(CastProfile castProfile, String title, String body, String imageUrl,
 		ContentAudience audience, StoreMembershipTier minimumStoreTier) {
 		var content = new CastContent();
@@ -84,23 +73,6 @@ public class CastContent {
 		content.status = ContentStatus.DRAFT;
 		content.updateStoreTierDetails(title, body, imageUrl, audience, minimumStoreTier);
 		return content;
-	}
-
-	public void updateDetails(String title, String body, String imageUrl,
-		ContentAudience audience, MemberTier minimumTier) {
-		if (status == ContentStatus.ARCHIVED) throw new IllegalStateException("Archived content cannot be edited.");
-		if (audience == ContentAudience.MEMBERS && minimumTier == null) {
-			throw new IllegalArgumentException("A minimum tier is required for member content.");
-		}
-		if (audience != ContentAudience.MEMBERS && minimumTier != null) {
-			throw new IllegalArgumentException("A minimum tier can be used only for member content.");
-		}
-		this.title = title;
-		this.body = body;
-		this.imageUrl = imageUrl;
-		this.audience = audience;
-		this.minimumTier = minimumTier;
-		this.minimumStoreTierRank = minimumTier == null ? null : Math.min(3, minimumTier.getRank());
 	}
 
 	public void updateStoreTierDetails(String title, String body, String imageUrl,
@@ -117,7 +89,6 @@ public class CastContent {
 		this.body = body;
 		this.imageUrl = imageUrl;
 		this.audience = audience;
-		this.minimumTier = null;
 		this.minimumStoreTierRank = minimumStoreTier == null ? null : minimumStoreTier.getRank();
 	}
 
@@ -131,7 +102,6 @@ public class CastContent {
 		if (minimumStoreTier == null || minimumStoreTier == StoreMembershipTier.NONE) {
 			throw new IllegalArgumentException("A paid store tier is required for member content.");
 		}
-		this.minimumTier = null;
 		this.minimumStoreTierRank = minimumStoreTier.getRank();
 	}
 
@@ -158,7 +128,6 @@ public class CastContent {
 	public String getBody() { return body; }
 	public String getImageUrl() { return imageUrl; }
 	public ContentAudience getAudience() { return audience; }
-	public MemberTier getMinimumTier() { return minimumTier; }
 	public Integer getMinimumStoreTierRank() { return minimumStoreTierRank; }
 	public StoreMembershipTier getMinimumStoreTier() {
 		return minimumStoreTierRank == null ? null : StoreMembershipTier.fromRank(minimumStoreTierRank);

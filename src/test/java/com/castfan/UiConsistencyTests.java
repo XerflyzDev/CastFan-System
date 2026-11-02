@@ -222,7 +222,6 @@ class UiConsistencyTests {
 			Map.entry("templates/member/casts.html", "th:href=\"@{/member/following}\" aria-label=\"Back to Following\""),
 			Map.entry("templates/member/memberships.html", "th:href=\"@{/account}\" aria-label=\"Back to Profile\""),
 			Map.entry("templates/cast/schedule.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
-			Map.entry("templates/cast/tiers.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
 			Map.entry("templates/cast/content.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
 			Map.entry("templates/owner/shifts.html", "th:href=\"@{/owner}\" aria-label=\"Back to Owner dashboard\""),
 			Map.entry("templates/owner/stores.html", "th:href=\"@{/owner}\" aria-label=\"Back to Owner dashboard\""),

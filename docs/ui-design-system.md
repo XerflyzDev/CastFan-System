@@ -210,13 +210,13 @@ When adding a new page, reuse the existing tokens and component classes before i
 - [x] Authentication and account pages
 - [x] Cast discovery and following pages
 - [x] Member membership pages
-- [x] JPA-backed Cast Dashboard, Schedule, Profile, and Membership Tiers
+- [x] JPA-backed Cast Dashboard, Schedule, Profile, and store-tier content access
 - [x] JPA-backed Cast Content Studio with audience and tier visibility
 - [x] JPA-backed Owner Dashboard and Shift Review workspace
 - [x] JPA-backed Owner Event Management workspace
 - [x] JPA-backed Owner Store Management and permanent Cast roster
 - [x] JPA-backed Owner Promotion and Banner Management
-- [x] Cast membership tier management
+- [x] Store-wide membership points and derived tier presentation
 - [x] Access-denied page
 - [x] Responsive mobile and desktop behavior
 - [x] Shared application shell and neutral navigation treatment across roles
@@ -253,6 +253,6 @@ The persistent Cast navigation contains five destinations in this order:
 2. `Schedule` - the shared approved Cast schedule by day or week.
 3. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
 4. `Profile` - settings for the Cast's public identity, stage name, bio, photo, account email, and sign out. Active Cast profiles are always public.
-5. `Cast` - the private Cast workspace for shift requests, tiers, and content management.
+5. `Cast` - the private Cast workspace for shift requests and content management.
 
 Cast accounts use `/cast/profile` as their single Profile destination. The generic `/account` route redirects Cast accounts there so account and public-profile editing are not presented as separate destinations.

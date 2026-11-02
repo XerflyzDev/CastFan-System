@@ -130,7 +130,6 @@ class CastContentWorkflowTests {
 
 		var saved = castContentRepository.saveAndFlush(content);
 
-		assertThat(saved.getMinimumTier()).isNull();
 		assertThat(saved.getMinimumStoreTier()).isEqualTo(StoreMembershipTier.TIER_2);
 		assertThat(saved.getMinimumStoreTierRank()).isEqualTo(2);
 	}

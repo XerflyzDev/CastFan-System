@@ -15,7 +15,6 @@ import com.castfan.dto.CastWorkspaceView;
 import com.castfan.entity.ShiftStatus;
 import com.castfan.repository.CastFollowRepository;
 import com.castfan.repository.CastProfileRepository;
-import com.castfan.repository.MemberTierRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.UserAccountRepository;
@@ -37,7 +36,6 @@ public class CastWorkspaceService {
 	private final StoreCastRepository storeCastRepository;
 	private final ShiftScheduleRepository shiftScheduleRepository;
 	private final CastFollowRepository castFollowRepository;
-	private final MemberTierRepository memberTierRepository;
 	private final ShiftScheduleService shiftScheduleService;
 	private final ProfileService profileService;
 	private final SystemStoreService systemStoreService;
@@ -48,7 +46,6 @@ public class CastWorkspaceService {
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
 		CastFollowRepository castFollowRepository,
-		MemberTierRepository memberTierRepository,
 		ShiftScheduleService shiftScheduleService,
 		ProfileService profileService,
 		SystemStoreService systemStoreService
@@ -58,7 +55,6 @@ public class CastWorkspaceService {
 		this.storeCastRepository = storeCastRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
 		this.castFollowRepository = castFollowRepository;
-		this.memberTierRepository = memberTierRepository;
 		this.shiftScheduleService = shiftScheduleService;
 		this.profileService = profileService;
 		this.systemStoreService = systemStoreService;
@@ -94,7 +90,6 @@ public class CastWorkspaceService {
 				!now.isBefore(schedule.getStartsAt()) && now.isBefore(schedule.getEndsAt())
 			);
 		}).toList();
-		var tiers = memberTierRepository.findAllByCastProfileIdOrderByRankAsc(profile.getId());
 		var pendingCount = schedules.stream().filter(shift -> shift.getStatus() == ShiftStatus.SUBMITTED).count();
 		var approvedCount = schedules.stream().filter(shift -> shift.getStatus() == ShiftStatus.APPROVED).count();
 		var nextShiftLabel = schedules.stream()
@@ -107,7 +102,7 @@ public class CastWorkspaceService {
 			new CastWorkspaceView.Profile(
 				profile.getId(), profile.getStageName(), initials(profile.getStageName()), profile.getBio(),
 				profile.getAvatarUrl(), castFollowRepository.countByCastProfileId(profile.getId()),
-				tiers.stream().filter(tier -> tier.isActive()).count(), profile.getUserAccount().getEmail()
+				profile.getUserAccount().getEmail()
 			),
 			assignments,
 			shifts,

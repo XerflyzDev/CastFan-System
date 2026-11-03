@@ -71,14 +71,12 @@ public class OwnerWorkspaceController {
 		try {
 			ownerWorkspaceService.reject(principal.getName(), shiftId, reviewNote);
 			redirectAttributes.addAttribute("rejected", true);
-		} catch (DomainRuleViolationException exception) {
+		} catch (DomainConflictException | DomainRuleViolationException exception) {
 			redirectAttributes.addAttribute("error", exception.getMessage());
 		}
 		addDate(redirectAttributes, date);
 		return "redirect:/owner/shifts";
-	}
-
-	private void addDate(RedirectAttributes redirectAttributes, LocalDate date) {
+	}(RedirectAttributes redirectAttributes, LocalDate date) {
 		if (date != null) {
 			redirectAttributes.addAttribute("date", date.toString());
 		}

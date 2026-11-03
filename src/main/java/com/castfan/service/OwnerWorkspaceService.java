@@ -29,7 +29,7 @@ public class OwnerWorkspaceService {
 
 	private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Bangkok");
 	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM uuuu", Locale.ENGLISH);
-		private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
+	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 
 	private final UserAccountRepository userAccountRepository;
 	private final StoreRepository storeRepository;

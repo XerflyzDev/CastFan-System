@@ -1,0 +1,37 @@
+/* Dedicated Owner Shift Review styles; shared workspace styles remain untouched. */
+.owner-review-card { display: grid; gap: 11px; }
+.owner-review-card > .review-card-heading { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.review-cast-identity { display: grid; min-width: 0; gap: 3px; }
+.review-cast-identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.review-cast-identity small { color: var(--muted); font-size: 0.51rem; }
+.review-shift-details { display: grid; gap: 7px; padding: 10px 11px; border: 1px solid #ededf0; border-radius: 12px; background: #f8f8f9; }
+.review-shift-details p { display: flex; min-width: 0; align-items: center; gap: 8px; margin: 0; color: #4b4c50; font-size: 0.62rem; line-height: 1.4; }
+.review-shift-details i { width: 15px; flex: 0 0 15px; color: #777980; text-align: center; }
+.review-shift-date span { font-weight: 700; }
+.review-shift-time span { font-variant-numeric: tabular-nums; }
+.review-actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; gap: 8px; }
+.review-action-form { display: grid; min-width: 0; gap: 7px; }
+.review-reason-label { display: grid; min-width: 0; gap: 5px; color: #55575d; font-size: 0.52rem; font-weight: 700; }
+.review-reason-label > span > span { color: #898a90; font-weight: 500; }
+.review-reason-label input { width: 100%; min-width: 0; min-height: 38px; padding: 8px 9px; border: 1px solid #e5e5e8; border-radius: 10px; outline: 0; color: var(--ink); background: #f7f7f8; font: inherit; font-size: 0.56rem; }
+.review-reason-label input:focus { border-color: rgba(48, 50, 56, 0.48); background: #fff; box-shadow: 0 0 0 3px rgba(48, 50, 56, 0.09); }
+.review-submit-button { display: flex; width: 100%; min-height: 39px; align-items: center; justify-content: center; gap: 6px; padding: 8px 7px; border: 1px solid transparent; border-radius: 11px; font: inherit; font-size: 0.57rem; font-weight: 700; cursor: pointer; }
+.review-submit-button.reject-button { color: #9b4751; background: #f8e5e7; }
+.review-submit-button.approve-button { color: #fff; background: #25272c; }
+.review-submit-button:focus-visible { outline: 2px solid #55575d; outline-offset: 2px; }
+.review-submit-button:disabled { cursor: not-allowed; opacity: 0.48; }
+.owner-review-card.is-submitting { border: 1px solid #d9d9dd; }
+.review-submit-status { min-height: 0; margin: -2px 0 0; color: #55575d; font-size: 0.53rem; }
+.review-submit-status:empty { display: none; }
+.review-submit-button.is-loading::before { width: 11px; height: 11px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; content: ""; animation: owner-shift-spin 700ms linear infinite; }
+@keyframes owner-shift-spin { to { transform: rotate(360deg); } }
+@media (max-width: 370px) {
+    .owner-review-card { padding: 11px; gap: 9px; }
+    .owner-review-card > .review-card-heading { grid-template-columns: 36px minmax(0, 1fr); gap: 7px; }
+    .owner-review-card > .review-card-heading .status-pill { grid-column: 2; justify-self: start; }
+    .review-actions { grid-template-columns: minmax(0, 1fr); }
+    .review-submit-button { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .review-submit-button.is-loading::before { animation: none; }
+}

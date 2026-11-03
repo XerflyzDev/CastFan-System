@@ -31,7 +31,7 @@
                     <label class="sr-only" for="member-query">Member name or email</label>
                     <div class="search-control"><i class="bi bi-search" aria-hidden="true"></i><input id="member-query" name="q" type="search" maxlength="120" placeholder="Search by name or email" th:value="${query}"><button type="submit">Search</button></div>
                 </form>
-                <div class="directory-heading"><h2 id="search-title">Members</h2><span th:text="|${directory.totalResults()} found|">0 found</span></div>
+                <div class="directory-heading"><h2 id="search-title">Members</h2><span th:text="|${directory.totalResults()} member${directory.totalResults() == 1 ? '' : 's'}|">0 members</span></div>
                 <div class="member-results" th:if="${!members.empty}" aria-label="Member search results">
                     <a class="member-result" th:each="member : ${members}" th:id="|member-${member.id}|" th:href="@{/owner/member-points(memberId=${member.id},q=${query},page=${directoryState.page},anchor=${member.id})}">
                         <span class="member-monogram" aria-hidden="true" th:text="${#strings.substring(member.displayName, 0, 1).toUpperCase()}">M</span>
@@ -47,7 +47,6 @@
                     <a class="page-button" th:if="${directory.hasNext()}" th:href="@{/owner/member-points(q=${query},page=${directory.currentPage() + 1},anchor=${directoryState.anchor})}" rel="next">Next</a>
                     <span class="page-button disabled" th:unless="${directory.hasNext()}" aria-disabled="true">Next</span>
                 </nav>
-                <div class="directory-page-summary" th:if="${directory.totalResults() > 0}" th:text="|Showing ${directory.firstResult()}–${directory.lastResult()} of ${directory.totalResults()} Members|">Showing 1–25 of 1000 Members</div>
                 <div class="points-empty" th:if="${members.empty}"><span><i class="bi bi-person-search" aria-hidden="true"></i></span><strong th:text="${query != null and !query.isBlank() ? 'No Members found' : 'No active Members yet'}">No active Members yet</strong><small th:text="${query != null and !query.isBlank() ? 'Try another name or email address.' : 'Active Member accounts will appear here.'}">Active Member accounts will appear here.</small></div>
             </section>
 

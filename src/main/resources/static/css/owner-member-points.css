@@ -3,7 +3,7 @@
 .points-heading > span { display: block; margin-top: 7px; color: #777980; font-size: .78rem; line-height: 1.45; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .points-directory, .selected-member-page { display: grid; gap: 18px; }
-.directory-controls { position: sticky; z-index: 4; top: 0; margin: -2px -4px 0; padding: 4px; background: rgb(255 255 255 / 96%); backdrop-filter: blur(10px); }
+.directory-controls { position: sticky; z-index: 4; top: 0; margin: 0; padding: 0; background: transparent !important; box-shadow: none; }
 .points-search, .purchase-form { display: grid; gap: 14px; }
 .search-control { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 4px 5px 4px 14px; border: 1px solid #dedee1; border-radius: 14px; background: #fff; }
 .search-control > i { color: #85868c; font-size: .95rem; }
@@ -35,7 +35,6 @@
 .page-button.disabled { color: #a4a5aa; background: #f4f4f5; cursor: not-allowed; }
 .page-button:focus-visible { outline: 3px solid #c66c87; outline-offset: 2px; }
 .page-status { color: #595a60; font-size: .68rem; text-align: center; white-space: nowrap; }
-.directory-page-summary { color: #898a90; font-size: .64rem; text-align: center; }
 .selected-member-summary { display: flex; align-items: center; gap: 11px; padding: 14px 0; border-top: 1px solid #e5e5e7; border-bottom: 1px solid #e5e5e7; }
 .member-monogram.large { width: 46px; height: 46px; }
 .selected-member-summary > div:nth-child(2) { display: grid; min-width: 0; flex: 1; gap: 3px; }

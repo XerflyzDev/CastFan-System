@@ -50,6 +50,7 @@ class OwnerMemberPointsControllerTests {
 		mockMvc.perform(get("/owner/member-points").param("q", "Mina").with(ownerUser))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/member-points"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 member")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Member")));
 
 		mockMvc.perform(post("/owner/member-points/preview").with(ownerUser).with(csrf())
@@ -91,9 +92,8 @@ class OwnerMemberPointsControllerTests {
 
 		mockMvc.perform(get("/owner/member-points").with(ownerUser))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("1000 found")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1000 members")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 1 of 40")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Showing 1–25 of 1000 Members")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("rel=\"next\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0000")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Directory Member 0025"))));
@@ -101,7 +101,6 @@ class OwnerMemberPointsControllerTests {
 		mockMvc.perform(get("/owner/member-points").param("page", "39").with(ownerUser))
 			.andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 40 of 40")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Showing 976–1000 of 1000 Members")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("rel=\"prev\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("rel=\"next\""))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0999")));
@@ -121,11 +120,11 @@ class OwnerMemberPointsControllerTests {
 
 		mockMvc.perform(get("/owner/member-points").param("q", "directory-0999@").with(ownerUser))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 found")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 member")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0999")));
 		mockMvc.perform(get("/owner/member-points").param("q", "no-such-member").with(ownerUser))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("0 found")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("0 members")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("No Members found")));
 	}
 

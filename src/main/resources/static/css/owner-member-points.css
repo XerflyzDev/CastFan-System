@@ -9,7 +9,7 @@
 .search-control > i { color: #85868c; font-size: .95rem; }
 .search-control input { min-width: 0; flex: 1; padding: 10px 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: .8rem; }
 .search-control button { min-height: 38px; padding: 0 14px; border: 0; border-radius: 10px; background: #202126; color: #fff; cursor: pointer; font: inherit; font-size: .73rem; font-weight: 700; }
-.search-control:focus-within, .field-group input:focus, .amount-input:focus-within { outline: 3px solid rgb(17 19 24 / 10%); border-color: #777980; }
+.search-control:focus-within, .field-group > input:focus, .amount-input:focus-within { outline: 3px solid rgb(17 19 24 / 10%); border-color: #777980; }
 .directory-heading { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
 .directory-heading h2, .form-section-heading h2 { margin: 0; font-size: .98rem; }
 .directory-heading span, .form-section-heading p { margin: 0; color: #898a90; font-size: .68rem; }
@@ -51,6 +51,7 @@
 .amount-input { display: flex; align-items: center; padding-left: 12px; border: 1px solid #dedee1; border-radius: 11px; background: #fff; }
 .amount-input > span { color: #777980; font-size: .86rem; }
 .amount-input input { border: 0; background: transparent; }
+.amount-input input:focus { outline: 0; box-shadow: none; }
 .field-group > small { color: #898a90; font-size: .66rem; line-height: 1.45; }
 .field-group .field-error { color: #a52e48; }
 .field-group input[aria-invalid=true] { border-color: #c83f5b; background: #fff8f9; }

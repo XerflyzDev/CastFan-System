@@ -91,7 +91,7 @@
                 </div>
 
                 <section class="points-history" aria-labelledby="history-title">
-                    <div class="history-heading"><h3 id="history-title">Point history</h3><span th:text="|${selectedMember.transactions.size()} entries|">0 entries</span></div>
+                    <div class="history-heading"><h3 id="history-title">Point history</h3></div>
                     <div class="history-empty" th:if="${selectedMember.transactions.empty}"><i class="bi bi-receipt" aria-hidden="true"></i><span>No transactions for this Member yet.</span></div>
                     <article class="history-entry" th:each="transaction : ${selectedMember.transactions}">
                         <div class="history-entry-top"><span class="transaction-type" th:text="${transaction.type}">EARN</span><strong th:classappend="${transaction.pointsDelta < 0} ? ' negative' : ''"><span th:text="${transaction.pointsDelta > 0 ? '+' : ''}">+</span><span th:text="${#numbers.formatInteger(transaction.pointsDelta, 1, 'COMMA')}">0</span> pts</strong></div>

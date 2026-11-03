@@ -110,7 +110,7 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(content().string(containsString("Review queue")))
 			.andExpect(content().string(containsString("14:00 - 20:00")))
 			.andExpect(content().string(containsString(FULL_DATE.format(shiftDate))))
-			.andExpect(content().string(containsString("owner-shifts.js"))
+			.andExpect(content().string(containsString("owner-shifts.js")))
 			.andExpect(content().string(containsString("src=\"/avatars/" + cast.getId() + "\"")))
 			.andExpect(content().string(containsString("data-picker-date")))
 			.andExpect(content().string(containsString("date-time-picker.js")))

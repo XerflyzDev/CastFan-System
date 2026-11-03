@@ -76,7 +76,9 @@ public class OwnerWorkspaceController {
 		}
 		addDate(redirectAttributes, date);
 		return "redirect:/owner/shifts";
-	}(RedirectAttributes redirectAttributes, LocalDate date) {
+	}
+
+	private void addDate(RedirectAttributes redirectAttributes, LocalDate date) {
 		if (date != null) {
 			redirectAttributes.addAttribute("date", date.toString());
 		}

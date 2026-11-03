@@ -16,6 +16,8 @@
 .member-results { display: grid; border-top: 1px solid #e8e8ea; border-bottom: 1px solid #e8e8ea; }
 .member-result { display: flex; min-width: 0; align-items: center; gap: 11px; min-height: 58px; padding: 8px 2px; border-bottom: 1px solid #ededee; color: inherit; text-decoration: none; }
 .member-result:last-child { border-bottom: 0; }
+.member-results.single-result { overflow: hidden; border: 1px solid #e8e8ea; border-radius: 14px; background: #fff; }
+.member-results.single-result .member-result { min-height: 68px; padding: 10px 12px; border: 0; }
 .member-result:hover { background: #f8f8f9; }
 .member-result:target { border-radius: 10px; background: #f2f2f3; scroll-margin-top: 72px; }
 .member-monogram { display: grid; width: 38px; height: 38px; flex: none; place-items: center; border: 1px solid #e2dfe8; border-radius: 50%; background: #f2eff7; color: #57505f; font-weight: 700; }

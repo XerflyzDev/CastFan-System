@@ -32,7 +32,7 @@
                     <div class="search-control"><i class="bi bi-search" aria-hidden="true"></i><input id="member-query" name="q" type="search" maxlength="120" placeholder="Search by name or email" th:value="${query}"><button type="submit">Search</button></div>
                 </form>
                 <div class="directory-heading"><h2 id="search-title">Members</h2><span th:text="|${directory.totalResults()} member${directory.totalResults() == 1 ? '' : 's'}|">0 members</span></div>
-                <div class="member-results" th:if="${!members.empty}" aria-label="Member search results">
+                <div class="member-results" th:classappend="${members.size() == 1 ? ' single-result' : ''}" th:if="${!members.empty}" aria-label="Member search results">
                     <a class="member-result" th:each="member : ${members}" th:id="|member-${member.id}|" th:href="@{/owner/member-points(memberId=${member.id},q=${query},page=${directoryState.page},anchor=${member.id})}">
                         <span class="member-monogram" aria-hidden="true" th:text="${#strings.substring(member.displayName, 0, 1).toUpperCase()}">M</span>
                         <span class="member-result-copy"><strong th:text="${member.displayName}">Member</strong><small th:text="${member.email}">member@example.com</small></span>

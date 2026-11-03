@@ -51,6 +51,7 @@ class OwnerMemberPointsControllerTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/member-points"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 member")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("single-result")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Member")));
 
 		mockMvc.perform(post("/owner/member-points/preview").with(ownerUser).with(csrf())

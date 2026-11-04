@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="View current active CastFan promotions.">
+    <title th:text="${pageTitle + ' | CastFan'}">Promotions | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/promotions.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone shared-page-shell promotions-page" aria-label="Current promotions">
+        <div class="ambient-top" aria-hidden="true"></div>
+
+        <div class="screen-content shared-page-content">
+            <div class="top-actions">
+                <a class="wordmark" th:href="@{/}">CastFan</a>
+                <a class="round-button page-back-button" th:href="@{/}"
+                   aria-label="Back to Home" title="Back to Home">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            <header class="shared-page-heading promotion-page-heading">
+                <p class="eyebrow">CastFan offers</p>
+                <h1>Promotions</h1>
+                <span>Discover current offers available at the cafe.</span>
+            </header>
+
+            <section class="promotion-list" th:if="${!promotions.empty}" aria-label="Active promotions">
+                <article class="public-promotion-card" th:each="promotion : ${promotions}">
+                    <img class="public-promotion-image"
+                         th:if="${promotion.bannerUrl != null}"
+                         th:src="${promotion.bannerUrl}"
+                         th:alt="${promotion.title}"
+                         loading="lazy"
+                         referrerpolicy="no-referrer">
+
+                    <div class="public-promotion-art" th:unless="${promotion.bannerUrl != null}" aria-hidden="true">
+                        <i class="bi bi-gift"></i>
+                    </div>
+
+                    <div class="public-promotion-copy">
+                        <div class="promotion-card-meta">
+                            <span th:text="${promotion.storeName}">CastFan</span>
+                            <span th:text="${promotion.endsLabel}">Ends 31 Oct 2026</span>
+                        </div>
+
+                        <h2 th:text="${promotion.title}">Promotion title</h2>
+                        <p th:text="${promotion.description}">Promotion description</p>
+
+                        <code class="promotion-code"
+                              th:if="${promotion.code != null and !#strings.isEmpty(promotion.code)}"
+                              th:text="${promotion.code}">
+                            WELCOME10
+                        </code>
+                    </div>
+                </article>
+            </section>
+
+            <div class="directory-empty promotion-empty" th:if="${promotions.empty}">
+                <i class="bi bi-megaphone" aria-hidden="true"></i>
+                <h2>No active promotions</h2>
+                <p>There are no promotions available right now. Check back later.</p>
+            </div>
+        </div>
+
+        <th:block sec:authorize="isAnonymous()" th:replace="~{fragments/navigation :: anonymous('home')}"></th:block>
+        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('home')}"></th:block>
+        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('home')}"></th:block>
+        <th:block sec:authorize="hasRole('OWNER')" th:replace="~{fragments/navigation :: owner('promotions')}"></th:block>
+    </section>
+</main>
+</body>
+</html>

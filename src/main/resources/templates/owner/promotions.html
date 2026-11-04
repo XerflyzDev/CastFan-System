@@ -19,63 +19,32 @@
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><div class="action-group"><a class="round-button" th:href="@{/}" aria-label="Preview public home" title="Preview public home"><i class="bi bi-eye" aria-hidden="true"></i></a><a class="round-button page-back-button" th:href="@{/owner}" aria-label="Back to Owner dashboard" title="Back to Owner dashboard"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div></div>
             <header class="owner-heading"><p>CastFan marketing</p><h1>Promotions &amp; banners</h1></header>
 
-            <div class="owner-alert success" th:if="${param.created}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Promotion created in paused state.</div>
+            <div class="owner-alert success" th:if="${param.created}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Promotion created as Draft.</div>
             <div class="owner-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Promotion changes saved.</div>
-            <div class="owner-alert success" th:if="${param.activated}" role="status"><i class="bi bi-broadcast" aria-hidden="true"></i>Promotion activated.</div>
-            <div class="owner-alert neutral" th:if="${param.deactivated}" role="status"><i class="bi bi-pause-circle" aria-hidden="true"></i>Promotion paused.</div>
+            <div class="owner-alert success" th:if="${param.published}" role="status"><i class="bi bi-broadcast" aria-hidden="true"></i>Promotion published.</div>
+            <div class="owner-alert neutral" th:if="${param.archived}" role="status"><i class="bi bi-archive" aria-hidden="true"></i>Promotion archived.</div>
             <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update promotion.</span></div>
 
             <section class="owner-section promotion-list-section" aria-labelledby="promotion-list-heading">
-                <div class="section-title"><div><small>Scheduled and past campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div><span class="owner-count" th:text="${promotionView.promotions.size()}">0</span></div>
+                <div class="section-title"><div><small>Draft, scheduled, active, and archived campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div><a class="owner-form-submit owner-create-button" th:href="@{/owner/promotions/new}" style="width:auto"><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Create promotion</span></a></div>
                 <div class="owner-promotion-list" th:if="${!promotionView.promotions.empty}">
                     <article class="owner-promotion-card" th:each="promotion : ${promotionView.promotions}">
                         <img class="promotion-thumb" th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
                         <span class="promotion-thumb promotion-placeholder" th:unless="${promotion.bannerUrl != null}"><i class="bi bi-card-image" aria-hidden="true"></i></span>
                         <div class="promotion-card-copy">
-                            <div><span class="status-pill" th:classappend="${promotion.statusTone}" th:text="${promotion.status}">Paused</span><small>CastFan</small></div>
+                            <div><span class="status-pill" th:classappend="${promotion.statusTone}" th:text="${promotion.status}">Draft</span><small>CastFan</small></div>
                             <h3 th:text="${promotion.title}">Member welcome offer</h3>
                             <p th:text="${promotion.rangeLabel}">14 Oct 2026, 09:00 - 31 Oct 2026, 23:59</p>
                             <code th:if="${promotion.code != null}" th:text="${promotion.code}">WELCOME10</code>
                         </div>
                         <div class="event-actions" aria-label="Promotion actions">
                             <a class="event-action" th:if="${promotion.editable}" th:href="@{/owner/promotions/{id}/edit(id=${promotion.id})}" aria-label="Edit promotion" title="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></a>
-                            <form th:if="${promotion.activatable}" th:action="@{/owner/promotions/{id}/activate(id=${promotion.id})}" method="post"><button class="event-action publish" type="submit" aria-label="Activate promotion" title="Activate"><i class="bi bi-broadcast" aria-hidden="true"></i></button></form>
-                            <form th:if="${promotion.deactivatable}" th:action="@{/owner/promotions/{id}/deactivate(id=${promotion.id})}" method="post"><button class="event-action archive" type="submit" aria-label="Pause promotion" title="Pause"><i class="bi bi-pause" aria-hidden="true"></i></button></form>
+                            <form th:if="${promotion.publishable}" th:action="@{/owner/promotions/{id}/publish(id=${promotion.id})}" method="post"><button class="event-action publish" type="submit" aria-label="Publish promotion" title="Publish"><i class="bi bi-broadcast" aria-hidden="true"></i></button></form>
+                            <form th:if="${promotion.archivable}" th:action="@{/owner/promotions/{id}/archive(id=${promotion.id})}" method="post" data-confirm="Archive this promotion? It will remain in your history but will no longer be public."><button class="event-action archive" type="submit" aria-label="Archive promotion" title="Archive"><i class="bi bi-archive" aria-hidden="true"></i></button></form>
                         </div>
                     </article>
                 </div>
-                <div class="owner-empty" th:if="${promotionView.promotions.empty}"><i class="bi bi-megaphone" aria-hidden="true"></i><div><strong>No promotions yet</strong><small>Create a campaign and activate it when the banner is ready.</small></div></div>
-            </section>
-
-            <section class="owner-section owner-form-card" aria-labelledby="promotion-form-heading">
-                <div class="section-title"><div><small th:text="${promotionView.editingPromotionId == null ? 'New campaign' : 'Update campaign'}">New campaign</small><h2 id="promotion-form-heading" th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Edit promotion'}">Create promotion</h2></div><a th:if="${promotionView.editingPromotionId != null}" th:href="@{/owner/promotions}" aria-label="Cancel editing"><i class="bi bi-x-lg" aria-hidden="true"></i></a></div>
-                <form class="owner-event-form" th:action="${promotionFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
-                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save promotion.</span></div>
-                    <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" placeholder="Member welcome offer" required><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title is required</small></label>
-                    <label><span>Description</span><textarea th:field="*{description}" maxlength="2000" rows="4" placeholder="Describe the benefit and redemption terms." required></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is required</small></label>
-                    <label><span>Promotion code <em>Optional, globally unique</em></span><input type="text" th:field="*{code}" maxlength="64" placeholder="WELCOME10"><small class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">Use a valid code</small></label>
-                    <label class="owner-image-upload">
-                        <span>Promotion image <em>Optional</em></span>
-                        <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-event-image-input>
-                        <input type="hidden" th:field="*{removeImage}" data-event-image-remove>
-                        <span class="owner-image-picker">
-                            <img th:if="${promotionView.editingImageUrl != null}" th:src="${promotionView.editingImageUrl}" alt="Current promotion image" data-event-image-preview>
-                            <img th:unless="${promotionView.editingImageUrl != null}" alt="Selected promotion image preview" data-event-image-preview hidden>
-                            <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
-                            <span><strong data-event-image-name th:text="${promotionView.editingImageUrl != null ? 'Replace image' : 'Choose image'}">Choose image</strong><small>JPG, PNG, or WebP · Maximum 2 MB</small></span>
-                        </span>
-                    </label>
-                    <button class="owner-image-clear" type="button" data-event-image-clear th:hidden="${promotionView.editingImageUrl == null}"><i class="bi bi-x-circle" aria-hidden="true"></i><span>Clear image</span></button>
-                    <div class="owner-form-pair">
-                        <div class="picker-form-field"><span class="picker-field-label">Starts on</span><div data-picker-host><input type="date" th:field="*{startsOn}" required data-picker-date data-picker-label="Start date"></div><small class="field-error" th:if="${#fields.hasErrors('startsOn')}" th:errors="*{startsOn}">Start date is required</small></div>
-                        <div class="picker-form-field"><span class="picker-field-label">At</span><div data-picker-host><input type="time" th:field="*{startsAt}" required data-picker-time data-picker-label="Start time"></div><small class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}">Start time is required</small></div>
-                    </div>
-                    <div class="owner-form-pair">
-                        <div class="picker-form-field"><span class="picker-field-label">Ends on</span><div data-picker-host><input type="date" th:field="*{endsOn}" required data-picker-date data-picker-label="End date"></div><small class="field-error" th:if="${#fields.hasErrors('endsOn')}" th:errors="*{endsOn}">End date is required</small></div>
-                        <div class="picker-form-field"><span class="picker-field-label">At</span><div data-picker-host><input type="time" th:field="*{endsAt}" required data-picker-time data-picker-label="End time"></div><small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End time is required</small></div>
-                    </div>
-                    <button class="owner-form-submit" type="submit"><i class="bi" th:classappend="${promotionView.editingPromotionId == null ? 'bi-plus-lg' : 'bi-check2'}" aria-hidden="true"></i><span th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Save changes'}">Create promotion</span></button>
-                </form>
+                <div class="owner-empty" th:if="${promotionView.promotions.empty}"><i class="bi bi-megaphone" aria-hidden="true"></i><div><strong>No promotions yet</strong><small>Create a campaign and publish it when the banner is ready.</small></div></div>
             </section>
         </div>
 

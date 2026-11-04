@@ -13,6 +13,7 @@ import com.castfan.dto.HomeViewModel;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.ShiftStatus;
+import com.castfan.entity.PromotionStatus;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
@@ -128,7 +129,8 @@ public class HomeService {
 				storeEventImageService.publicImageUrl(event)
 			))
 			.toList();
-		var promotions = storePromotionRepository.findCurrentPublicPromotions(now, PageRequest.of(0, 3)).stream()
+		var promotions = storePromotionRepository.findCurrentPublicPromotions(
+			now, PromotionStatus.ACTIVE, PageRequest.of(0, 3)).stream()
 			.map(promotion -> {
 				var promotionZone = safeZone(promotion.getStore().getTimezone());
 				return new HomeViewModel.FeaturedPromotion(

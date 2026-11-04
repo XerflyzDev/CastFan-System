@@ -18,7 +18,9 @@
         <div class="screen-content schedule-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
-                <a class="round-button" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                <a class="round-button" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications">
+                    <i class="bi bi-bell" aria-hidden="true"></i>
+                </a>
             </div>
 
             <header class="schedule-heading">
@@ -26,54 +28,124 @@
                     <p th:text="${schedule.storeName}">CastFan</p>
                     <h1>Schedule</h1>
                 </div>
-                <button class="month-button" type="button" th:attr="data-message=${schedule.monthLabel}" aria-label="Selected month" title="Selected month">
+                <button class="month-button" type="button"
+                        th:attr="data-message=${schedule.monthLabel}"
+                        aria-label="Selected month" title="Selected month">
                     <i class="bi bi-calendar3" aria-hidden="true"></i>
                 </button>
             </header>
 
+            <!-- Day / Week selector -->
             <div class="schedule-mode" role="group" aria-label="Schedule view">
-                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='day')}" th:classappend="${!schedule.weekView} ? 'active'" th:attr="aria-pressed=${!schedule.weekView}">Day</a>
-                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='week')}" th:classappend="${schedule.weekView} ? 'active'" th:attr="aria-pressed=${schedule.weekView}">Week</a>
+                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='day')}"
+                   th:classappend="${!schedule.weekView} ? 'active'"
+                   th:attr="aria-pressed=${!schedule.weekView}">
+                    Day
+                </a>
+                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='week')}"
+                   th:classappend="${schedule.weekView} ? 'active'"
+                   th:attr="aria-pressed=${schedule.weekView}">
+                    Week
+                </a>
             </div>
 
+            <!-- Select a date -->
             <nav class="date-strip" aria-label="Choose a date">
-                <a th:each="day : ${schedule.days}" th:href="@{/member/schedule(date=${day.isoDate},view=${schedule.weekView ? 'week' : 'day'})}"
-                   th:classappend="${day.selected} ? 'active'" th:attr="aria-current=${day.selected ? 'date' : null}">
+                <a th:each="day : ${schedule.days}"
+                   th:href="@{/member/schedule(date=${day.isoDate},view=${schedule.weekView ? 'week' : 'day'})}"
+                   th:classappend="${day.selected} ? 'active'"
+                   th:attr="aria-current=${day.selected ? 'date' : null},
+                            aria-label=${day.dayLabel + ' ' + day.dayNumber + (day.selected ? ', selected' : '')}">
                     <span th:text="${day.dayLabel}">Tue</span>
                     <strong th:text="${day.dayNumber}">14</strong>
-                    <i th:if="${day.shiftCount > 0}" th:classappend="${day.selected} ? 'selected-dot'" aria-hidden="true"></i>
+
+                    <small th:if="${day.selected}" class="date-selected-label">
+                        Selected
+                    </small>
+
+                    <i th:if="${day.shiftCount > 0}"
+                       th:classappend="${day.selected} ? 'selected-dot'"
+                       aria-hidden="true"></i>
                 </a>
             </nav>
 
-            <nav class="week-navigation" th:if="${schedule.weekView}" aria-label="Change week">
-                <a th:href="@{/member/schedule(date=${schedule.previousWeekDate},view='week')}" aria-label="Previous week"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
-                <strong th:text="${schedule.selectedDateLabel}">Sun, 11 Oct - Sat, 17 Oct</strong>
-                <a th:href="@{/member/schedule(date=${schedule.nextWeekDate},view='week')}" aria-label="Next week"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            <!-- Previous / Next week -->
+            <nav class="week-navigation"
+                 th:if="${schedule.weekView}"
+                 aria-label="Change week">
+                <a th:href="@{/member/schedule(date=${schedule.previousWeekDate},view='week')}"
+                   aria-label="Previous week">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </a>
+
+                <strong th:text="${schedule.selectedDateLabel}">
+                    Sun, 11 Oct - Sat, 17 Oct
+                </strong>
+
+                <a th:href="@{/member/schedule(date=${schedule.nextWeekDate},view='week')}"
+                   aria-label="Next week">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
             </nav>
 
             <section class="schedule-summary" aria-label="Selected day summary">
                 <div>
                     <small th:text="${schedule.selectedDateLabel}">Tuesday, 14 October</small>
-                    <strong><span th:text="${schedule.visibleShiftCount}">0</span> <span th:text="${schedule.visibleShiftCount == 1 ? 'Cast member' : 'Cast shifts'}">Cast members</span> scheduled</strong>
+                    <strong>
+                        <span th:text="${schedule.visibleShiftCount}">0</span>
+                        <span th:text="${schedule.visibleShiftCount == 1 ? 'Cast member' : 'Cast shifts'}">Cast members</span>
+                        scheduled
+                    </strong>
                 </div>
-                <span th:if="${!schedule.weekView and schedule.closingTime != null}" th:text="${'Open until ' + schedule.closingTime}">Open until 23:00</span>
+                <span th:if="${!schedule.weekView and schedule.closingTime != null}"
+                      th:text="${'Open until ' + schedule.closingTime}">
+                    Open until 23:00
+                </span>
             </section>
 
-            <section class="shift-section" th:unless="${schedule.weekView}" aria-labelledby="shift-heading">
+            <!-- Day view -->
+            <section class="shift-section"
+                     th:unless="${schedule.weekView}"
+                     aria-labelledby="shift-heading">
                 <div class="section-title">
                     <h2 id="shift-heading">Approved Shifts</h2>
                 </div>
 
                 <div class="timeline" th:if="${!schedule.shifts.empty}">
-                    <article class="shift-row" th:each="shift : ${schedule.shifts}" th:classappend="${shift.workingNow} ? 'is-live'">
-                        <time th:datetime="${shift.startsAt}" th:text="${shift.startsAt}">14:00</time>
+                    <article class="shift-row"
+                             th:each="shift : ${schedule.shifts}"
+                             th:classappend="${shift.workingNow} ? 'is-live'">
+                        <time th:datetime="${shift.startsAt}"
+                              th:text="${shift.startsAt}">
+                            14:00
+                        </time>
+
                         <span class="timeline-marker" aria-hidden="true"></span>
+
                         <a th:href="@{/casts/{id}(id=${shift.castProfileId})}">
-                            <img class="avatar avatar-photo" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.name}">
-                            <span class="avatar" th:unless="${shift.avatarUrl != null}" th:classappend="${shift.avatarTone}" th:text="${shift.initials}">MN</span>
-                            <span class="shift-copy"><strong th:text="${shift.name}">Mina</strong><small th:text="${shift.shiftTime}">14:00 - 20:00</small></span>
+                            <img class="avatar avatar-photo"
+                                 th:if="${shift.avatarUrl != null}"
+                                 th:src="${shift.avatarUrl}"
+                                 th:alt="${shift.name}">
+
+                            <span class="avatar"
+                                  th:unless="${shift.avatarUrl != null}"
+                                  th:classappend="${shift.avatarTone}"
+                                  th:text="${shift.initials}">
+                                MN
+                            </span>
+
+                            <span class="shift-copy">
+                                <strong th:text="${shift.name}">Mina</strong>
+                                <small th:text="${shift.shiftTime}">14:00 - 20:00</small>
+                            </span>
+
                             <span class="shift-status" th:if="${shift.workingNow}">Now</span>
-                            <span class="shift-status upcoming" th:if="${!shift.workingNow and shift.startingSoon}">Soon</span>
+                            <span class="shift-status upcoming"
+                                  th:if="${!shift.workingNow and shift.startingSoon}">
+                                Soon
+                            </span>
+
                             <i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </a>
                     </article>
@@ -81,39 +153,102 @@
 
                 <div class="home-empty schedule-empty" th:if="${schedule.shifts.empty}">
                     <i class="bi bi-calendar2-check" aria-hidden="true"></i>
-                    <div><strong>No approved shifts</strong><span>Choose another date to see who is working.</span></div>
+                    <div>
+                        <strong>No approved shifts</strong>
+                        <span>Choose another date to see who is working.</span>
+                    </div>
                 </div>
             </section>
 
-            <section class="week-schedule" th:if="${schedule.weekView}" aria-labelledby="week-shift-heading">
-                <div class="section-title"><h2 id="week-shift-heading">Approved Shifts</h2></div>
-                <article class="week-day-card" th:each="group : ${schedule.weekSchedule}" th:classappend="${group.today} ? 'today'">
-                    <header><div><small th:if="${group.today}">Today</small><strong th:text="${group.dateLabel}">Wednesday, 14 October</strong></div><span th:text="${group.shifts.size()}">0</span></header>
+            <!-- Week view -->
+            <section class="week-schedule"
+                     th:if="${schedule.weekView}"
+                     aria-labelledby="week-shift-heading">
+                <div class="section-title">
+                    <h2 id="week-shift-heading">Approved Shifts</h2>
+                </div>
+
+                <article class="week-day-card"
+                         th:each="group : ${schedule.weekSchedule}"
+                         th:classappend="${group.today} ? 'today'">
+                    <header>
+                        <div>
+                            <small th:if="${group.today}">Today</small>
+                            <strong th:text="${group.dateLabel}">
+                                Wednesday, 14 October
+                            </strong>
+                        </div>
+                        <span th:text="${group.shifts.size()}">0</span>
+                    </header>
+
                     <div class="week-shift-list" th:if="${!group.shifts.empty}">
-                        <a th:each="shift : ${group.shifts}" th:href="@{/casts/{id}(id=${shift.castProfileId})}">
-                            <img class="avatar avatar-photo" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.name}">
-                            <span class="avatar" th:unless="${shift.avatarUrl != null}" th:classappend="${shift.avatarTone}" th:text="${shift.initials}">MN</span>
-                            <span><strong th:text="${shift.name}">Mina</strong><small th:text="${shift.shiftTime}">14:00 - 20:00</small></span>
+                        <a th:each="shift : ${group.shifts}"
+                           th:href="@{/casts/{id}(id=${shift.castProfileId})}">
+                            <img class="avatar avatar-photo"
+                                 th:if="${shift.avatarUrl != null}"
+                                 th:src="${shift.avatarUrl}"
+                                 th:alt="${shift.name}">
+
+                            <span class="avatar"
+                                  th:unless="${shift.avatarUrl != null}"
+                                  th:classappend="${shift.avatarTone}"
+                                  th:text="${shift.initials}">
+                                MN
+                            </span>
+
+                            <span>
+                                <strong th:text="${shift.name}">Mina</strong>
+                                <small th:text="${shift.shiftTime}">14:00 - 20:00</small>
+                            </span>
+
                             <i class="bi bi-chevron-right" aria-hidden="true"></i>
                         </a>
                     </div>
+
                     <p th:if="${group.shifts.empty}">No approved shifts</p>
                 </article>
             </section>
 
-            <section class="event-note" th:if="${schedule.upcomingEvent != null}" aria-label="Upcoming event">
-                <span><i class="bi bi-stars" aria-hidden="true"></i></span>
-                <div><small>Coming up</small><strong><span th:text="${schedule.upcomingEvent.title}">Autumn Sweet Night</span> · <span th:text="${schedule.upcomingEvent.dateLabel}">31 Oct</span></strong></div>
-                <a th:href="@{/events/{id}(id=${schedule.upcomingEvent.id})}" aria-label="Open event"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+            <!-- Upcoming event -->
+            <section class="event-note"
+                     th:if="${schedule.upcomingEvent != null}"
+                     aria-label="Upcoming event">
+                <span>
+                    <i class="bi bi-stars" aria-hidden="true"></i>
+                </span>
+
+                <div>
+                    <small>Coming up</small>
+                    <strong>
+                        <span th:text="${schedule.upcomingEvent.title}">Autumn Sweet Night</span>
+                        ·
+                        <span th:text="${schedule.upcomingEvent.dateLabel}">31 Oct</span>
+                    </strong>
+                </div>
+
+                <a th:href="@{/events/{id}(id=${schedule.upcomingEvent.id})}"
+                   aria-label="Open event">
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
             </section>
         </div>
 
-        <th:block sec:authorize="hasRole('MEMBER')" th:replace="~{fragments/navigation :: member('schedule')}"></th:block>
-        <th:block sec:authorize="hasRole('CAST')" th:replace="~{fragments/navigation :: cast('schedule')}"></th:block>
+        <th:block sec:authorize="hasRole('MEMBER')"
+                  th:replace="~{fragments/navigation :: member('schedule')}">
+        </th:block>
 
-        <div class="concept-toast" id="app-toast" role="status" aria-live="polite"></div>
+        <th:block sec:authorize="hasRole('CAST')"
+                  th:replace="~{fragments/navigation :: cast('schedule')}">
+        </th:block>
+
+        <div class="concept-toast"
+             id="app-toast"
+             role="status"
+             aria-live="polite">
+        </div>
     </section>
 </main>
+
 <script th:src="@{/js/member-schedule.js}" defer></script>
 </body>
 </html>

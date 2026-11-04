@@ -37,19 +37,23 @@
                 </button>
             </label>
 
-            <section class="content-block home-promotions" th:if="${!home.featuredPromotions.empty}" aria-labelledby="promotion-title">
+            <section class="content-block home-promotions" aria-labelledby="promotion-title">
                 <div class="section-title"><h2 id="promotion-title">Offers for you</h2><i class="bi bi-megaphone" aria-hidden="true"></i>
                 </div>
                 <div class="promotion-discovery-link my-3">
                 <a th:href="@{/promotions}" class="btn btn-outline-primary sm:btn-sm">
                     View all promotions &rarr;
                 </a></div>
-                <div class="promotion-carousel">
+                <div class="promotion-carousel" th:if="${!home.featuredPromotions.empty}">
                     <article class="home-promotion-card" th:each="promotion : ${home.featuredPromotions}" th:attr="data-search-item=${promotion.title + ' ' + promotion.description}">
                         <img th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
                         <span class="home-promotion-art" th:unless="${promotion.bannerUrl != null}"><i class="bi bi-gift" aria-hidden="true"></i></span>
                         <span class="home-promotion-copy"><small><span th:text="${promotion.storeName}">CastFan</span> · <span th:text="${promotion.endsLabel}">Ends 31 Oct</span></small><strong th:text="${promotion.title}">Member welcome offer</strong><em th:text="${promotion.description}">Promotion details</em><code th:if="${promotion.code != null}" th:text="${promotion.code}">WELCOME10</code></span>
                     </article>
+                </div>
+                <div class="home-empty" th:if="${home.featuredPromotions.empty}">
+                    <i class="bi bi-megaphone" aria-hidden="true"></i>
+                    <div><strong>No active promotions</strong><span>Check back for new offers at CastFan.</span></div>
                 </div>
             </section>
 

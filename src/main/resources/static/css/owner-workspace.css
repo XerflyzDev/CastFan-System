@@ -108,6 +108,26 @@
 .event-action.archive { color: #9b4751; background: #f8e5e7; }
 
 .promotion-management { padding-bottom: 112px; }
+.promotion-list-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.promotion-list-header > div { flex: 1 1 auto; min-width: 0; }
+.promotion-list-header > .owner-create-button {
+	display: flex;
+	width: auto;
+	height: 44px;
+	max-width: 180px;
+	flex: 0 0 auto;
+	min-width: 0;
+	margin-top: 0;
+	margin-left: auto;
+	padding: 10px 14px;
+	border-radius: 12px;
+	white-space: normal;
+	line-height: 1.25;
+	text-decoration: none;
+	text-align: center;
+}
+.owner-create-button span { min-width: 0; }
+.owner-create-button i { flex: 0 0 auto; }
 .owner-promotion-list { display: grid; gap: 9px; }
 .owner-promotion-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 11px; padding: 10px; border-radius: 16px; background: #fff; box-shadow: var(--shadow); }
 .promotion-thumb { width: 76px; height: 76px; border-radius: 13px; object-fit: cover; }

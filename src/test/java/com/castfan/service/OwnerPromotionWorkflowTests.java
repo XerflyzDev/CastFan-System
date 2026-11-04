@@ -58,7 +58,8 @@ class OwnerPromotionWorkflowTests {
 		mockMvc.perform(get("/owner/promotions").with(ownerUser()))
 			.andExpect(status().isOk()).andExpect(view().name("owner/promotions"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promotions &amp; banners")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("/owner/promotions/new")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("/owner/promotions/new")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("confirmation-dialog.js")));
 		mockMvc.perform(get("/owner/promotions/new").with(ownerUser()))
 			.andExpect(status().isOk()).andExpect(view().name("owner/promotion-form"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-picker-date")))

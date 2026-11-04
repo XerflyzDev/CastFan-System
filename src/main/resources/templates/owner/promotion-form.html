@@ -20,7 +20,7 @@
 
             <section class="owner-section owner-form-card" aria-labelledby="promotion-form-heading">
                 <div class="section-title"><div><small th:text="${promotionView.editingPromotionId == null ? 'New campaign' : 'Update campaign'}">New campaign</small><h2 id="promotion-form-heading" th:text="${promotionView.editingPromotionId == null ? 'Promotion details' : 'Update promotion'}">Promotion details</h2></div></div>
-                <form class="owner-event-form" th:action="${promotionFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
+                <form class="owner-event-form" data-promotion-form th:action="${promotionFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save promotion.</span></div>
                     <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" placeholder="Member welcome offer" required><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title is required</small></label>
                     <label><span>Description</span><textarea th:field="*{description}" maxlength="2000" rows="4" placeholder="Describe the benefit and redemption terms." required></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is required</small></label>
@@ -45,7 +45,7 @@
                         <div class="picker-form-field"><span class="picker-field-label">Ends on</span><div data-picker-host><input type="date" th:field="*{endsOn}" required data-picker-date data-picker-label="End date"></div><small class="field-error" th:if="${#fields.hasErrors('endsOn')}" th:errors="*{endsOn}">End date is required</small></div>
                         <div class="picker-form-field"><span class="picker-field-label">At</span><div data-picker-host><input type="time" th:field="*{endsAt}" required data-picker-time data-picker-label="End time"></div><small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End time is required</small></div>
                     </div>
-                    <button class="owner-form-submit" type="submit"><i class="bi" th:classappend="${promotionView.editingPromotionId == null ? 'bi-plus-lg' : 'bi-check2'}" aria-hidden="true"></i><span th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Save changes'}">Create promotion</span></button>
+                    <button class="owner-form-submit" type="submit" data-promotion-submit><i class="bi" th:classappend="${promotionView.editingPromotionId == null ? 'bi-plus-lg' : 'bi-check2'}" aria-hidden="true"></i><span data-promotion-submit-label th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Save changes'}">Create promotion</span></button>
                 </form>
             </section>
         </div>

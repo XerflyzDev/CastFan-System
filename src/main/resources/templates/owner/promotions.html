@@ -26,7 +26,7 @@
             <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update promotion.</span></div>
 
             <section class="owner-section promotion-list-section" aria-labelledby="promotion-list-heading">
-                <div class="section-title"><div><small>Draft, scheduled, active, and archived campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div><a class="owner-form-submit owner-create-button" th:href="@{/owner/promotions/new}" style="width:auto"><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Create promotion</span></a></div>
+                <div class="section-title promotion-list-header"><div><small>Draft, scheduled, active, and archived campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div><a class="owner-form-submit owner-create-button" th:href="@{/owner/promotions/new}"><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Create promotion</span></a></div>
                 <div class="owner-promotion-list" th:if="${!promotionView.promotions.empty}">
                     <article class="owner-promotion-card" th:each="promotion : ${promotionView.promotions}">
                         <img class="promotion-thumb" th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
@@ -39,8 +39,8 @@
                         </div>
                         <div class="event-actions" aria-label="Promotion actions">
                             <a class="event-action" th:if="${promotion.editable}" th:href="@{/owner/promotions/{id}/edit(id=${promotion.id})}" aria-label="Edit promotion" title="Edit"><i class="bi bi-pencil" aria-hidden="true"></i></a>
-                            <form th:if="${promotion.publishable}" th:action="@{/owner/promotions/{id}/publish(id=${promotion.id})}" method="post"><button class="event-action publish" type="submit" aria-label="Publish promotion" title="Publish"><i class="bi bi-broadcast" aria-hidden="true"></i></button></form>
-                            <form th:if="${promotion.archivable}" th:action="@{/owner/promotions/{id}/archive(id=${promotion.id})}" method="post" data-confirm="Archive this promotion? It will remain in your history but will no longer be public."><button class="event-action archive" type="submit" aria-label="Archive promotion" title="Archive"><i class="bi bi-archive" aria-hidden="true"></i></button></form>
+                            <form th:if="${promotion.publishable}" th:action="@{/owner/promotions/{id}/publish(id=${promotion.id})}" method="post" data-promotion-action-form><button class="event-action publish" type="submit" aria-label="Publish promotion" title="Publish"><i class="bi bi-broadcast" aria-hidden="true"></i></button></form>
+                            <form th:if="${promotion.archivable}" th:action="@{/owner/promotions/{id}/archive(id=${promotion.id})}" method="post" data-confirm="Archive this promotion? It will remain in your history but will no longer be public." data-promotion-action-form><button class="event-action archive" type="submit" aria-label="Archive promotion" title="Archive"><i class="bi bi-archive" aria-hidden="true"></i></button></form>
                         </div>
                     </article>
                 </div>
@@ -53,5 +53,6 @@
 </main>
 <script th:src="@{/js/owner-workspace.js}" defer></script>
 <script th:src="@{/js/date-time-picker.js}" defer></script>
+<script th:src="@{/js/confirmation-dialog.js}" defer></script>
 </body>
 </html>

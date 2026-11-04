@@ -30,7 +30,8 @@ class HomeControllerTests {
 			.andExpect(model().attribute("pageTitle", "CastFan"))
 			.andExpect(model().attributeExists("home"))
 			.andExpect(content().string(containsString("Working Today")))
-			.andExpect(content().string(containsString("No approved shifts today")));
+			.andExpect(content().string(containsString("No approved shifts today")))
+			.andExpect(content().string(containsString("View all promotions")));
 	}
 
 	@Test

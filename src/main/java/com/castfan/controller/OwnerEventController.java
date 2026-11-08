@@ -41,10 +41,15 @@ public class OwnerEventController {
 	}
 
 	@GetMapping("/owner/events")
-	public String events(Principal principal, Model model) {
+	public String events(
+		Principal principal,
+		@RequestParam(name = "create", defaultValue = "false") boolean create,
+		Model model
+	) {
 		if (!model.containsAttribute("form")) {
 			model.addAttribute("form", defaultForm());
 		}
+		model.addAttribute("showEventForm", create);
 		populate(principal, model, null);
 		return "owner/events";
 	}
@@ -53,6 +58,7 @@ public class OwnerEventController {
 	public String edit(Principal principal, @PathVariable Long eventId, Model model) {
 		try {
 			model.addAttribute("form", ownerEventService.formForEdit(principal.getName(), eventId));
+			model.addAttribute("showEventForm", true);
 			populate(principal, model, eventId);
 			return "owner/events";
 		} catch (DomainRuleViolationException exception) {
@@ -76,6 +82,7 @@ public class OwnerEventController {
 				bindingResult.reject("event.invalid", exception.getMessage());
 			}
 		}
+		model.addAttribute("showEventForm", true);
 		populate(principal, model, null);
 		return "owner/events";
 	}
@@ -97,6 +104,7 @@ public class OwnerEventController {
 				bindingResult.reject("event.invalid", exception.getMessage());
 			}
 		}
+		model.addAttribute("showEventForm", true);
 		populate(principal, model, eventId);
 		return "owner/events";
 	}

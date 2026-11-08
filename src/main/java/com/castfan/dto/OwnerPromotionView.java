@@ -6,5 +6,5 @@ public record OwnerPromotionView(List<PromotionItem> promotions, Long editingPro
 	String editingImageUrl) {
 	public record PromotionItem(Long id, String title, String description, String code, String bannerUrl,
 		String rangeLabel, String status, String statusTone, boolean editable,
-		boolean activatable, boolean deactivatable) { }
+		boolean publishable, boolean archivable) { }
 }

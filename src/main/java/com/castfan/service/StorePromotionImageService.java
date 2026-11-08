@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.castfan.entity.StorePromotion;
 import com.castfan.entity.StorePromotionImage;
+import com.castfan.entity.PromotionStatus;
 import com.castfan.repository.StorePromotionImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class StorePromotionImageService {
 		return repository.findOwned(id, email).map(this::data);
 	}
 	@Transactional(readOnly = true) public Optional<ImageData> loadPublic(Long id) {
-		return repository.findPublic(id, Instant.now()).map(this::data);
+		return repository.findPublic(id, Instant.now(), PromotionStatus.ACTIVE).map(this::data);
 	}
 	@Transactional(readOnly = true) public String ownerUrl(StorePromotion promotion) {
 		return repository.existsById(promotion.getId())

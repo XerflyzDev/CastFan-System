@@ -10,6 +10,7 @@ import com.castfan.entity.EventStatus;
 import com.castfan.entity.MemberProfile;
 import com.castfan.entity.MemberPointTransaction;
 import com.castfan.entity.MemberPointTransactionType;
+import com.castfan.entity.PromotionStatus;
 import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.Store;
 import com.castfan.entity.StoreCast;
@@ -111,7 +112,7 @@ public class DevDataConfiguration {
 				store, owner, "First visit welcome", "Show this offer to receive a seasonal welcome treat.",
 				"WELCOME10", "/images/autumn-cafe-event.png",
 				today.minusDays(1).atStartOfDay(STORE_ZONE).toInstant(),
-				today.plusDays(30).atTime(23, 59).atZone(STORE_ZONE).toInstant(), true
+				today.plusDays(30).atTime(23, 59).atZone(STORE_ZONE).toInstant(), PromotionStatus.ACTIVE
 			));
 		};
 	}

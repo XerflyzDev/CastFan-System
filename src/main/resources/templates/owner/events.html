@@ -46,7 +46,7 @@
                 <div class="owner-empty" th:if="${eventView.events.empty}"><i class="bi bi-stars" aria-hidden="true"></i><div><strong>No events yet</strong><small>Create a draft below, then publish it when ready.</small></div></div>
             </section>
 
-            <section class="owner-section owner-form-card" aria-labelledby="event-form-heading">
+            <section class="owner-section owner-form-card" th:if="${showEventForm}" aria-labelledby="event-form-heading">
                 <div class="section-title"><div><small th:text="${eventView.editingEventId == null ? 'New CastFan content' : 'Update CastFan content'}">New CastFan content</small><h2 id="event-form-heading" th:text="${eventView.editingEventId == null ? 'Create event' : 'Edit event'}">Create event</h2></div><a th:if="${eventView.editingEventId != null}" th:href="@{/owner/events}" aria-label="Cancel editing" title="Cancel"><i class="bi bi-x-lg" aria-hidden="true"></i></a></div>
                 <form class="owner-event-form" th:action="${eventFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save event.</span></div>
@@ -136,6 +136,14 @@
                 </form>
             </section>
         </div>
+
+        <a class="owner-create-fab"
+           th:unless="${showEventForm}"
+           th:href="@{/owner/events(create=true)} + '#event-form-heading'"
+           aria-label="Create event"
+           title="Create event">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        </a>
 
         <nav th:replace="~{fragments/navigation :: owner('events')}"></nav>
     </section>

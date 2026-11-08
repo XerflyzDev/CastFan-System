@@ -26,7 +26,7 @@
             <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update promotion.</span></div>
 
             <section class="owner-section promotion-list-section" aria-labelledby="promotion-list-heading">
-                <div class="section-title promotion-list-header"><div><small>Draft, scheduled, active, and archived campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div><a class="owner-form-submit owner-create-button" th:href="@{/owner/promotions/new}"><i class="bi bi-plus-lg" aria-hidden="true"></i><span>Create promotion</span></a></div>
+                <div class="section-title promotion-list-header"><div><small>Draft, scheduled, active, and archived campaigns</small><h2 id="promotion-list-heading">Your promotions</h2></div></div>
                 <div class="owner-promotion-list" th:if="${!promotionView.promotions.empty}">
                     <article class="owner-promotion-card" th:each="promotion : ${promotionView.promotions}">
                         <img class="promotion-thumb" th:if="${promotion.bannerUrl != null}" th:src="${promotion.bannerUrl}" th:alt="${promotion.title}" loading="lazy" referrerpolicy="no-referrer">
@@ -47,6 +47,13 @@
                 <div class="owner-empty" th:if="${promotionView.promotions.empty}"><i class="bi bi-megaphone" aria-hidden="true"></i><div><strong>No promotions yet</strong><small>Create a campaign and publish it when the banner is ready.</small></div></div>
             </section>
         </div>
+
+        <a class="owner-create-fab"
+           th:href="@{/owner/promotions/new}"
+           aria-label="Create promotion"
+           title="Create promotion">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        </a>
 
         <nav th:replace="~{fragments/navigation :: owner('promotions')}"></nav>
     </section>

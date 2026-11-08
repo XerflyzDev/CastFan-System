@@ -15,6 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.ShiftSchedule;
@@ -30,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -39,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 class OwnerWorkspaceWorkflowTests {
 
 	private static final ZoneId STORE_ZONE = ZoneId.of("Asia/Bangkok");
+	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM uuuu", Locale.ENGLISH);
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -105,6 +109,8 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(view().name("owner/shifts"))
 			.andExpect(content().string(containsString("Review queue")))
 			.andExpect(content().string(containsString("14:00 - 20:00")))
+			.andExpect(content().string(containsString(FULL_DATE.format(shiftDate))))
+			.andExpect(content().string(containsString("owner-shifts.js")))
 			.andExpect(content().string(containsString("src=\"/avatars/" + cast.getId() + "\"")))
 			.andExpect(content().string(containsString("data-picker-date")))
 			.andExpect(content().string(containsString("date-time-picker.js")))
@@ -127,13 +133,31 @@ class OwnerWorkspaceWorkflowTests {
 	}
 
 	@Test
+	void reviewActionsChangeOnlyTheShiftIdSubmittedByEachCard() throws Exception {
+		var secondShift = submit(shiftDate, LocalTime.of(8, 0), LocalTime.of(12, 0));
+		mockMvc.perform(post("/owner/shifts/{id}/approve", submittedShift.getId())
+				.with(user(owner.getEmail()).roles("OWNER")).with(csrf()).param("date", shiftDate.toString()))
+			.andExpect(status().is3xxRedirection());
+		assertThat(shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow().getStatus()).isEqualTo(ShiftStatus.APPROVED);
+		assertThat(shiftScheduleRepository.findById(secondShift.getId()).orElseThrow().getStatus()).isEqualTo(ShiftStatus.SUBMITTED);
+		mockMvc.perform(post("/owner/shifts/{id}/reject", secondShift.getId())
+				.with(user(owner.getEmail()).roles("OWNER")).with(csrf())
+				.param("date", shiftDate.toString()).param("reviewNote", "Coverage not required"))
+			.andExpect(status().is3xxRedirection());
+		assertThat(shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow().getStatus()).isEqualTo(ShiftStatus.APPROVED);
+		assertThat(shiftScheduleRepository.findById(secondShift.getId()).orElseThrow().getStatus()).isEqualTo(ShiftStatus.REJECTED);
+	}
+
+	@Test
 	void rejectionRequiresAReasonAndThenRecordsIt() throws Exception {
-		mockMvc.perform(post("/owner/shifts/{id}/reject", submittedShift.getId())
+		MvcResult invalidResult = mockMvc.perform(post("/owner/shifts/{id}/reject", submittedShift.getId())
 				.with(user(owner.getEmail()).roles("OWNER"))
 				.with(csrf())
 				.param("date", shiftDate.toString())
 				.param("reviewNote", ""))
-			.andExpect(status().is3xxRedirection());
+			.andExpect(status().is3xxRedirection())
+			.andReturn();
+		assertThat(invalidResult.getResponse().getRedirectedUrl()).contains("error=", "date=" + shiftDate);
 		assertThat(shiftScheduleRepository.findById(submittedShift.getId()).orElseThrow().getStatus())
 			.isEqualTo(ShiftStatus.SUBMITTED);
 

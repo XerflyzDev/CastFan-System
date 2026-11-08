@@ -60,7 +60,13 @@ class DatabaseMySqlMigrationTests {
 		assertThat(contentColumns)
 			.contains("minimum_store_tier_rank")
 			.doesNotContain("minimum_tier_id");
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
+		var promotionColumns = jdbc.queryForList("""
+			select lower(column_name)
+			from information_schema.columns
+			where table_schema = database() and table_name = 'store_promotions'
+			""", String.class);
+		assertThat(promotionColumns).contains("status").doesNotContain("active");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

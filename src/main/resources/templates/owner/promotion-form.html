@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Edit promotion'}">Promotion | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
+    <link th:href="@{/css/date-time-picker.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone" aria-label="Promotion form">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <div class="screen-content owner-content promotion-management">
+            <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><div class="action-group"><a class="round-button page-back-button" th:href="@{/owner/promotions}" aria-label="Back to promotions" title="Back to promotions"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div></div>
+            <header class="owner-heading"><p>CastFan marketing</p><h1 th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Edit promotion'}">Create promotion</h1></header>
+
+            <section class="owner-section owner-form-card" aria-labelledby="promotion-form-heading">
+                <div class="section-title"><div><small th:text="${promotionView.editingPromotionId == null ? 'New campaign' : 'Update campaign'}">New campaign</small><h2 id="promotion-form-heading" th:text="${promotionView.editingPromotionId == null ? 'Promotion details' : 'Update promotion'}">Promotion details</h2></div></div>
+                <form class="owner-event-form" data-promotion-form th:action="${promotionFormAction}" th:object="${form}" method="post" enctype="multipart/form-data">
+                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to save promotion.</span></div>
+                    <label><span>Title</span><input type="text" th:field="*{title}" maxlength="160" placeholder="Member welcome offer" required><small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title is required</small></label>
+                    <label><span>Description</span><textarea th:field="*{description}" maxlength="2000" rows="4" placeholder="Describe the benefit and redemption terms." required></textarea><small class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description is required</small></label>
+                    <label><span>Promotion code <em>Optional, globally unique</em></span><input type="text" th:field="*{code}" maxlength="64" placeholder="WELCOME10"><small class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">Use a valid code</small></label>
+                    <label class="owner-image-upload">
+                        <span>Promotion image <em>Optional</em></span>
+                        <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-event-image-input>
+                        <input type="hidden" th:field="*{removeImage}" data-event-image-remove>
+                        <span class="owner-image-picker">
+                            <img th:if="${promotionView.editingImageUrl != null}" th:src="${promotionView.editingImageUrl}" alt="Current promotion image" data-event-image-preview>
+                            <img th:unless="${promotionView.editingImageUrl != null}" alt="Selected promotion image preview" data-event-image-preview hidden>
+                            <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                            <span><strong data-event-image-name th:text="${promotionView.editingImageUrl != null ? 'Replace image' : 'Choose image'}">Choose image</strong><small>JPG, PNG, or WebP · Maximum 2 MB</small></span>
+                        </span>
+                    </label>
+                    <button class="owner-image-clear" type="button" data-event-image-clear th:hidden="${promotionView.editingImageUrl == null}"><i class="bi bi-x-circle" aria-hidden="true"></i><span>Clear image</span></button>
+                    <div class="owner-form-pair">
+                        <div class="picker-form-field"><span class="picker-field-label">Starts on</span><div data-picker-host><input type="date" th:field="*{startsOn}" required data-picker-date data-picker-label="Start date"></div><small class="field-error" th:if="${#fields.hasErrors('startsOn')}" th:errors="*{startsOn}">Start date is required</small></div>
+                        <div class="picker-form-field"><span class="picker-field-label">At</span><div data-picker-host><input type="time" th:field="*{startsAt}" required data-picker-time data-picker-label="Start time"></div><small class="field-error" th:if="${#fields.hasErrors('startsAt')}" th:errors="*{startsAt}">Start time is required</small></div>
+                    </div>
+                    <div class="owner-form-pair">
+                        <div class="picker-form-field"><span class="picker-field-label">Ends on</span><div data-picker-host><input type="date" th:field="*{endsOn}" required data-picker-date data-picker-label="End date"></div><small class="field-error" th:if="${#fields.hasErrors('endsOn')}" th:errors="*{endsOn}">End date is required</small></div>
+                        <div class="picker-form-field"><span class="picker-field-label">At</span><div data-picker-host><input type="time" th:field="*{endsAt}" required data-picker-time data-picker-label="End time"></div><small class="field-error" th:if="${#fields.hasErrors('endsAt')}" th:errors="*{endsAt}">End time is required</small></div>
+                    </div>
+                    <button class="owner-form-submit" type="submit" data-promotion-submit><i class="bi" th:classappend="${promotionView.editingPromotionId == null ? 'bi-plus-lg' : 'bi-check2'}" aria-hidden="true"></i><span data-promotion-submit-label th:text="${promotionView.editingPromotionId == null ? 'Create promotion' : 'Save changes'}">Create promotion</span></button>
+                </form>
+            </section>
+        </div>
+        <nav th:replace="~{fragments/navigation :: owner('promotions')}"></nav>
+    </section>
+</main>
+<script th:src="@{/js/owner-workspace.js}" defer></script>
+<script th:src="@{/js/date-time-picker.js}" defer></script>
+</body>
+</html>

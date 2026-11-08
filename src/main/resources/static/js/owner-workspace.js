@@ -1,3 +1,23 @@
+document.querySelectorAll("[data-promotion-form]").forEach((form) => {
+    form.addEventListener("submit", () => {
+        const submitButton = form.querySelector("[data-promotion-submit]");
+        const submitLabel = form.querySelector("[data-promotion-submit-label]");
+        if (!submitButton) return;
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+        if (submitLabel) submitLabel.textContent = "Saving...";
+    });
+});
+
+document.querySelectorAll("[data-promotion-action-form]").forEach((form) => {
+    form.addEventListener("submit", () => {
+        const button = form.querySelector("button[type='submit']");
+        if (!button) return;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+    });
+});
+
 document.querySelectorAll("[data-reject]").forEach((button) => {
     button.addEventListener("click", (event) => {
         const note = button.closest("form")?.querySelector("input[name='reviewNote']");

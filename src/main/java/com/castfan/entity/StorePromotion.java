@@ -5,6 +5,8 @@ import java.time.Instant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,7 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 @Entity
 @Table(
 	name = "store_promotions",
-	indexes = @Index(name = "idx_store_promotion_active_range", columnList = "store_id, active, starts_at, ends_at"),
+	indexes = @Index(name = "idx_store_promotion_status_range", columnList = "store_id, status, starts_at, ends_at"),
 	uniqueConstraints = @UniqueConstraint(name = "uk_store_promotion_code", columnNames = "code")
 )
 public class StorePromotion {
@@ -54,8 +56,9 @@ public class StorePromotion {
 	@Column(name = "ends_at", nullable = false)
 	private Instant endsAt;
 
-	@Column(nullable = false)
-	private boolean active;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
+	private PromotionStatus status;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
@@ -66,8 +69,11 @@ public class StorePromotion {
 	protected StorePromotion() { }
 
 	public StorePromotion(Store store, UserAccount createdBy, String title, String description, String code,
-		String bannerUrl, Instant startsAt, Instant endsAt, boolean active) {
+		String bannerUrl, Instant startsAt, Instant endsAt, PromotionStatus status) {
 		validateRange(startsAt, endsAt);
+		if (status == null) {
+			throw new IllegalArgumentException("Promotion status is required.");
+		}
 		this.store = store;
 		this.createdBy = createdBy;
 		this.title = title;
@@ -76,11 +82,17 @@ public class StorePromotion {
 		this.bannerUrl = bannerUrl;
 		this.startsAt = startsAt;
 		this.endsAt = endsAt;
-		this.active = active;
+		this.status = status;
 	}
 
 	public void updateDetails(String title, String description, String code, String bannerUrl,
 		Instant startsAt, Instant endsAt) {
+		if (status == PromotionStatus.ARCHIVED) {
+			throw new IllegalStateException("Archived promotions cannot be edited.");
+		}
+		if (!endsAt.isAfter(Instant.now()) || !this.endsAt.isAfter(Instant.now())) {
+			throw new IllegalStateException("Expired promotions cannot be edited.");
+		}
 		validateRange(startsAt, endsAt);
 		this.title = title;
 		this.description = description;
@@ -90,8 +102,19 @@ public class StorePromotion {
 		this.endsAt = endsAt;
 	}
 
-	public void activate() { active = true; }
-	public void deactivate() { active = false; }
+	public void publish() {
+		if (status != PromotionStatus.DRAFT) {
+			throw new IllegalStateException("Only draft promotions can be published.");
+		}
+		status = PromotionStatus.ACTIVE;
+	}
+
+	public void archive() {
+		if (status == PromotionStatus.ARCHIVED) {
+			throw new IllegalStateException("This promotion is already archived.");
+		}
+		status = PromotionStatus.ARCHIVED;
+	}
 
 	private static void validateRange(Instant startsAt, Instant endsAt) {
 		if (!endsAt.isAfter(startsAt)) {
@@ -118,7 +141,7 @@ public class StorePromotion {
 	public String getBannerUrl() { return bannerUrl; }
 	public Instant getStartsAt() { return startsAt; }
 	public Instant getEndsAt() { return endsAt; }
-	public boolean isActive() { return active; }
+	public PromotionStatus getStatus() { return status; }
 	public Instant getCreatedAt() { return createdAt; }
 	public Instant getUpdatedAt() { return updatedAt; }
 }

@@ -71,6 +71,13 @@ class OwnerEventWorkflowTests {
 			.andExpect(view().name("owner/events"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Event management")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-label=\"Create event\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("data-date-picker"))));
+
+		mockMvc.perform(get("/owner/events").param("create", "true").with(ownerUser()))
+			.andExpect(status().isOk())
+			.andExpect(view().name("owner/events"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Choose image")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-date-picker")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-calendar-days")))

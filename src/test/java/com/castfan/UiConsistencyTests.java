@@ -33,9 +33,9 @@ class UiConsistencyTests {
 			.containsSubsequence(
 				"<span>Home</span>",
 				"<span>Schedule</span>",
+				"<span>Cast</span>",
 				"<span>Cast Profile</span>",
-				"<span>Profile</span>",
-				"<span>Cast</span>"
+				"<span>Profile</span>"
 			)
 			.contains("th:href=\"@{/member/schedule}\"")
 			.contains("th:href=\"@{/cast/public-profile}\"")
@@ -44,6 +44,12 @@ class UiConsistencyTests {
 			.contains("aria-label=\"Cast Profile\"")
 			.contains("aria-label=\"Profile\"")
 			.contains("aria-label=\"Cast\"");
+		assertThat(castNavigation)
+			.contains("active == 'profile' ? 'bi-person-fill' : 'bi-person'");
+		var ownerNavigation = navigation.substring(navigation.indexOf("th:fragment=\"owner(active)\""));
+		assertThat(ownerNavigation)
+			.contains("active == 'events' ? 'bi-calendar-event-fill' : 'bi-calendar-event'")
+			.doesNotContain("bi-stars");
 	}
 
 	@Test

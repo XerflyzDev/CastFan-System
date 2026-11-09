@@ -252,8 +252,9 @@ The persistent Cast navigation contains five destinations in this order:
 
 1. `Home` - the shared public feed, events, promotions, and today's approved shifts.
 2. `Schedule` - the shared approved Cast schedule by day or week.
-3. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
-4. `Profile` - settings for the Cast's public identity, stage name, bio, photo, account email, and sign out. Active Cast profiles are always public.
-5. `Cast` - the private Cast workspace for shift requests and content management.
+3. `Cast` - the private Cast workspace for shift requests and content management, positioned centrally as the primary role action.
+4. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
+5. `Profile` - settings for the Cast's public identity, stage name, bio, photo, account email, and sign out. It uses the same person icon and `Profile` label as the Member role. Active Cast profiles are always public.
 
 Cast accounts use `/cast/profile` as their single Profile destination. The generic `/account` route redirects Cast accounts there so account and public-profile editing are not presented as separate destinations.
+Owner `Events` uses the calendar-event icon, while the stars icon is reserved for the private Cast workspace so unrelated destinations do not share the same symbol.

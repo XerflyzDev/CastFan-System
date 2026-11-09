@@ -43,9 +43,15 @@ public class OwnerPromotionController {
 
 	@GetMapping("/owner/promotions")
 	public String promotions(Principal principal, Model model) {
+		model.addAttribute("promotionView", ownerPromotionService.load(principal.getName(), null));
+		return "owner/promotions";
+	}
+
+	@GetMapping("/owner/promotions/new")
+	public String newPromotion(Principal principal, Model model) {
 		if (!model.containsAttribute("form")) model.addAttribute("form", defaultForm());
 		populate(principal, model, null);
-		return "owner/promotions";
+		return "owner/promotion-form";
 	}
 
 	@GetMapping("/owner/promotions/{promotionId}/edit")
@@ -53,7 +59,7 @@ public class OwnerPromotionController {
 		try {
 			model.addAttribute("form", ownerPromotionService.formForEdit(principal.getName(), promotionId));
 			populate(principal, model, promotionId);
-			return "owner/promotions";
+			return "owner/promotion-form";
 		} catch (DomainRuleViolationException exception) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Promotion not found");
 		}
@@ -71,7 +77,7 @@ public class OwnerPromotionController {
 			}
 		}
 		populate(principal, model, null);
-		return "owner/promotions";
+		return "owner/promotion-form";
 	}
 
 	@PostMapping("/owner/promotions/{promotionId}")
@@ -87,7 +93,7 @@ public class OwnerPromotionController {
 			}
 		}
 		populate(principal, model, promotionId);
-		return "owner/promotions";
+		return "owner/promotion-form";
 	}
 
 	@GetMapping("/owner/promotions/{promotionId}/image")
@@ -98,12 +104,24 @@ public class OwnerPromotionController {
 			.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
-	@PostMapping("/owner/promotions/{promotionId}/{action:activate|deactivate}")
-	public String changeStatus(Principal principal, @PathVariable Long promotionId, @PathVariable String action,
+	@PostMapping("/owner/promotions/{promotionId}/publish")
+	public String publish(Principal principal, @PathVariable Long promotionId,
 		RedirectAttributes redirectAttributes) {
 		try {
-			ownerPromotionService.setActive(principal.getName(), promotionId, action.equals("activate"));
-			redirectAttributes.addAttribute(action.equals("activate") ? "activated" : "deactivated", true);
+			ownerPromotionService.publish(principal.getName(), promotionId);
+			redirectAttributes.addAttribute("published", true);
+		} catch (DomainRuleViolationException exception) {
+			redirectAttributes.addAttribute("error", exception.getMessage());
+		}
+		return "redirect:/owner/promotions";
+	}
+
+	@PostMapping("/owner/promotions/{promotionId}/archive")
+	public String archive(Principal principal, @PathVariable Long promotionId,
+		RedirectAttributes redirectAttributes) {
+		try {
+			ownerPromotionService.archive(principal.getName(), promotionId);
+			redirectAttributes.addAttribute("archived", true);
 		} catch (DomainRuleViolationException exception) {
 			redirectAttributes.addAttribute("error", exception.getMessage());
 		}

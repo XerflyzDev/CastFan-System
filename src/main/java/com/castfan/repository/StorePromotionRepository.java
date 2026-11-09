@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.castfan.entity.StorePromotion;
+import com.castfan.entity.PromotionStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,14 @@ public interface StorePromotionRepository extends JpaRepository<StorePromotion, 
 		""")
 	Optional<StorePromotion> findByIdForUpdate(@Param("promotionId") Long promotionId);
 
+	@Query("""
+		select promotion from StorePromotion promotion
+		join fetch promotion.store store
+		where promotion.status = com.castfan.entity.PromotionStatus.ACTIVE
+		  and promotion.endsAt <= :now
+		""")
+	List<StorePromotion> findExpiredActivePromotions(@Param("now") Instant now);
+
 	boolean existsByCodeIgnoreCase(String code);
 
 	boolean existsByCodeIgnoreCaseAndIdNot(String code, Long id);
@@ -38,10 +47,11 @@ public interface StorePromotionRepository extends JpaRepository<StorePromotion, 
 		select promotion from StorePromotion promotion
 		join fetch promotion.store store
 		where store.active = true
-		  and promotion.active = true
+		  and promotion.status = :status
 		  and promotion.startsAt <= :now
 		  and promotion.endsAt > :now
 		order by promotion.startsAt desc
 		""")
-	List<StorePromotion> findCurrentPublicPromotions(@Param("now") Instant now, Pageable pageable);
+	List<StorePromotion> findCurrentPublicPromotions(@Param("now") Instant now,
+		@Param("status") PromotionStatus status, Pageable pageable);
 }

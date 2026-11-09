@@ -28,8 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class OwnerWorkspaceService {
 
 	private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Bangkok");
-	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.ENGLISH);
-	private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
+	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM uuuu", Locale.ENGLISH);
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 
 	private final UserAccountRepository userAccountRepository;
@@ -126,7 +125,7 @@ public class OwnerWorkspaceService {
 			initials(profile.getStageName()),
 			profile.getAvatarUrl(),
 			SystemStoreService.DISPLAY_NAME,
-			SHORT_DATE.format(startsAt),
+			FULL_DATE.format(startsAt),
 			TIME.format(startsAt) + " - " + TIME.format(endsAt),
 			statusLabel(schedule.getStatus()),
 			schedule.getStatus().name().toLowerCase(Locale.ENGLISH),

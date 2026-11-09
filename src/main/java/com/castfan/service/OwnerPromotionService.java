@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import com.castfan.dto.OwnerPromotionForm;
 import com.castfan.dto.OwnerPromotionView;
+import com.castfan.entity.PromotionStatus;
 import com.castfan.entity.Store;
 import com.castfan.entity.StorePromotion;
 import com.castfan.entity.UserRole;
@@ -28,17 +29,21 @@ public class OwnerPromotionService {
 	private final SystemStoreService systemStoreService;
 	private final StorePromotionRepository storePromotionRepository;
 	private final StorePromotionImageService storePromotionImageService;
+	private final PromotionLifecycleService promotionLifecycleService;
 
 	public OwnerPromotionService(UserAccountRepository userAccountRepository, SystemStoreService systemStoreService,
-		StorePromotionRepository storePromotionRepository, StorePromotionImageService storePromotionImageService) {
+		StorePromotionRepository storePromotionRepository, StorePromotionImageService storePromotionImageService,
+		PromotionLifecycleService promotionLifecycleService) {
 		this.userAccountRepository = userAccountRepository;
 		this.systemStoreService = systemStoreService;
 		this.storePromotionRepository = storePromotionRepository;
 		this.storePromotionImageService = storePromotionImageService;
+		this.promotionLifecycleService = promotionLifecycleService;
 	}
 
 	@Transactional(readOnly = true)
 	public OwnerPromotionView load(String email, Long editingPromotionId) {
+		promotionLifecycleService.archiveExpiredPromotions();
 		var owner = requireOwner(email);
 		return new OwnerPromotionView(
 			storePromotionRepository.findAllForOwner(email).stream().map(this::toItem).toList(),
@@ -51,7 +56,14 @@ public class OwnerPromotionService {
 
 	@Transactional(readOnly = true)
 	public OwnerPromotionForm formForEdit(String email, Long promotionId) {
+		promotionLifecycleService.archiveExpiredPromotions();
 		var promotion = requireOwnedPromotion(email, promotionId);
+		if (promotion.getStatus() == PromotionStatus.ARCHIVED) {
+			throw new DomainRuleViolationException("Archived promotions cannot be edited.");
+		}
+		if (!promotion.getEndsAt().isAfter(Instant.now())) {
+			throw new DomainRuleViolationException("Expired promotions cannot be edited.");
+		}
 		var zone = safeZone(promotion.getStore().getTimezone());
 		var startsAt = promotion.getStartsAt().atZone(zone);
 		var endsAt = promotion.getEndsAt().atZone(zone);
@@ -75,9 +87,15 @@ public class OwnerPromotionService {
 		var range = range(form, store);
 		try {
 			var promotion = storePromotionRepository.saveAndFlush(new StorePromotion(
-				store, owner, cleanRequired(form.getTitle(), "Title", 160),
-				cleanRequired(form.getDescription(), "Description", 2000), code,
-				null, range.startsAt(), range.endsAt(), false
+				store, 
+				owner, 
+				cleanRequired(form.getTitle(), "Title", 160),
+				cleanRequired(form.getDescription(), "Description", 2000), 
+				code,
+				null, 
+				range.startsAt(), 
+				range.endsAt(),
+				PromotionStatus.DRAFT
 			));
 			storePromotionImageService.store(promotion, image);
 			return promotion;
@@ -88,7 +106,14 @@ public class OwnerPromotionService {
 
 	@Transactional
 	public void update(String email, Long promotionId, OwnerPromotionForm form, MultipartFile image) {
+		promotionLifecycleService.archiveExpiredPromotions();
 		var promotion = requireOwnedPromotionForUpdate(email, promotionId);
+		if (promotion.getStatus() == PromotionStatus.ARCHIVED) {
+			throw new DomainRuleViolationException("Archived promotions cannot be edited.");
+		}
+		if (!promotion.getEndsAt().isAfter(Instant.now())) {
+			throw new DomainRuleViolationException("Expired promotions cannot be edited.");
+		}
 		var code = cleanCode(form.getCode());
 		requireUniqueCode(code, promotionId);
 		var range = range(form, promotion.getStore());
@@ -106,31 +131,52 @@ public class OwnerPromotionService {
 	}
 
 	@Transactional
-	public void setActive(String email, Long promotionId, boolean active) {
+	public void publish(String email, Long promotionId) {
+		promotionLifecycleService.archiveExpiredPromotions();
 		var promotion = requireOwnedPromotionForUpdate(email, promotionId);
-		if (active && !promotion.getEndsAt().isAfter(Instant.now())) {
-			throw new DomainRuleViolationException("Expired promotions cannot be activated.");
+		if (!promotion.getEndsAt().isAfter(Instant.now())) {
+			throw new DomainRuleViolationException("Past promotions cannot be published.");
 		}
-		if (active && !promotion.getStore().isActive()) {
-			throw new DomainRuleViolationException("Promotions cannot be activated for an inactive store.");
+		if (!promotion.getStore().isActive()) {
+			throw new DomainRuleViolationException("Promotions cannot be published for an inactive store.");
 		}
-		if (active) promotion.activate(); else promotion.deactivate();
+		try {
+			promotion.publish();
+		} catch (IllegalStateException exception) {
+			throw new DomainRuleViolationException(exception.getMessage());
+		}
+		storePromotionRepository.saveAndFlush(promotion);
+	}
+
+	@Transactional
+	public void archive(String email, Long promotionId) {
+		var promotion = requireOwnedPromotionForUpdate(email, promotionId);
+		try {
+			promotion.archive();
+		} catch (IllegalStateException exception) {
+			throw new DomainRuleViolationException(exception.getMessage());
+		}
 		storePromotionRepository.saveAndFlush(promotion);
 	}
 
 	private OwnerPromotionView.PromotionItem toItem(StorePromotion promotion) {
 		var now = Instant.now();
 		var zone = safeZone(promotion.getStore().getTimezone());
-		var state = !promotion.isActive() ? "Paused"
+		var status = promotion.getStatus();
+		var expired = status != PromotionStatus.ARCHIVED && !now.isBefore(promotion.getEndsAt());
+		var state = status == com.castfan.entity.PromotionStatus.ARCHIVED || expired ? "Archived"
+			: status == com.castfan.entity.PromotionStatus.DRAFT ? "Draft"
 			: now.isBefore(promotion.getStartsAt()) ? "Scheduled"
-			: !now.isBefore(promotion.getEndsAt()) ? "Expired" : "Live";
+			: "Active";
 		return new OwnerPromotionView.PromotionItem(
 			promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
 			storePromotionImageService.ownerUrl(promotion),
 			RANGE_FORMAT.format(promotion.getStartsAt().atZone(zone)) + " - "
 				+ RANGE_FORMAT.format(promotion.getEndsAt().atZone(zone)),
-			state, state.toLowerCase(Locale.ENGLISH), true,
-			!promotion.isActive() && promotion.getEndsAt().isAfter(now), promotion.isActive()
+			state, state.toLowerCase(Locale.ENGLISH), 
+			status != PromotionStatus.ARCHIVED && !expired,
+			status == PromotionStatus.DRAFT && promotion.getEndsAt().isAfter(now),
+			status != PromotionStatus.ARCHIVED && !expired
 		);
 	}
 

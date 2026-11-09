@@ -9,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/member-home.css}" rel="stylesheet">
     <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
+    <link th:href="@{/css/owner-shifts.css}" rel="stylesheet">
     <link th:href="@{/css/date-time-picker.css}" rel="stylesheet">
 </head>
 <body>
@@ -27,19 +28,30 @@
             <section class="owner-section review-section" aria-labelledby="review-queue-heading">
                 <div class="section-title"><div><small>Waiting for a decision</small><h2 id="review-queue-heading">Review queue</h2></div><span class="owner-count" th:text="${workspace.pendingShifts.size()}">0</span></div>
                 <div class="review-list" th:if="${!workspace.pendingShifts.empty}">
-                    <article class="review-card" th:each="shift : ${workspace.pendingShifts}">
-                        <header>
+                    <article class="review-card owner-review-card" th:each="shift : ${workspace.pendingShifts}" th:attr="data-shift-id=${shift.id}">
+                        <header class="review-card-heading">
                             <img class="owner-avatar" th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.castName}">
                             <span class="owner-avatar" th:unless="${shift.avatarUrl != null}" th:text="${shift.initials}">MN</span>
-                            <div><strong th:text="${shift.castName}">Mina</strong><small><span th:text="${shift.storeName}">CastFan</span> · <span th:text="${shift.dateLabel}">15 Oct</span></small></div>
-                            <span class="status-pill pending">Pending</span>
+                            <div class="review-cast-identity"><strong th:text="${shift.castName}">Mina</strong><small th:text="${shift.storeName}">CastFan</small></div>
+                            <span class="status-pill" th:classappend="${shift.statusTone}" th:text="${shift.status}">Pending</span>
                         </header>
-                        <p><i class="bi bi-clock" aria-hidden="true"></i><span th:text="${shift.timeLabel}">14:00 - 20:00</span></p>
-                        <form class="review-form" th:action="@{/owner/shifts/{id}/approve(id=${shift.id})}" method="post">
-                            <input type="hidden" name="date" th:value="${workspace.selectedDate}">
-                            <label><span>Review note</span><input type="text" name="reviewNote" maxlength="500" placeholder="Optional approval note"></label>
-                            <div><button class="reject-button" type="submit" th:formaction="@{/owner/shifts/{id}/reject(id=${shift.id})}" data-reject><i class="bi bi-x-lg" aria-hidden="true"></i>Reject</button><button class="approve-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Approve</button></div>
-                        </form>
+                        <div class="review-shift-details">
+                            <p class="review-shift-date"><i class="bi bi-calendar3" aria-hidden="true"></i><span th:text="${shift.dateLabel}">Monday, 2 November 2026</span></p>
+                            <p class="review-shift-time"><i class="bi bi-clock" aria-hidden="true"></i><span th:text="${shift.timeLabel}">14:00 - 20:00</span></p>
+                        </div>
+                        <div class="review-actions">
+                            <form class="review-action-form" th:action="@{/owner/shifts/{id}/reject(id=${shift.id})}" method="post" data-shift-review-form data-review-action="reject">
+                                <input type="hidden" name="date" th:value="${workspace.selectedDate}">
+                                <label class="review-reason-label"><span>Rejection reason <span aria-hidden="true">*</span></span><input type="text" name="reviewNote" maxlength="500" required placeholder="Enter a reason"></label>
+                                <button class="review-submit-button reject-button" type="submit"><i class="bi bi-x-lg" aria-hidden="true"></i>Reject</button>
+                            </form>
+                            <form class="review-action-form approve-review-form" th:action="@{/owner/shifts/{id}/approve(id=${shift.id})}" method="post" data-shift-review-form data-review-action="approve">
+                                <input type="hidden" name="date" th:value="${workspace.selectedDate}">
+                                <label class="review-reason-label"><span>Review note <span>(optional)</span></span><input type="text" name="reviewNote" maxlength="500" placeholder="Optional approval note"></label>
+                                <button class="review-submit-button approve-button" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Approve</button>
+                            </form>
+                        </div>
+                        <p class="review-submit-status" data-submit-status role="status" aria-live="polite"></p>
                     </article>
                 </div>
                 <div class="owner-empty" th:if="${workspace.pendingShifts.empty}"><i class="bi bi-check2-circle" aria-hidden="true"></i><div><strong>No pending requests</strong><small>New Cast submissions will appear here.</small></div></div>
@@ -64,6 +76,7 @@
     </section>
 </main>
 <script th:src="@{/js/owner-workspace.js}" defer></script>
+<script th:src="@{/js/owner-shifts.js}" defer></script>
 <script th:src="@{/js/date-time-picker.js}" defer></script>
 </body>
 </html>

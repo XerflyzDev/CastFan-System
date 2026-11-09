@@ -2,6 +2,8 @@ package com.castfan.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.castfan.entity.MemberProfile;
 import com.castfan.entity.UserRole;
@@ -18,6 +20,23 @@ public interface MemberProfileRepository extends JpaRepository<MemberProfile, Lo
 
 	@Query("select profile from MemberProfile profile join fetch profile.userAccount account where lower(account.email) = lower(:email)")
 	Optional<MemberProfile> findByUserAccountEmailIgnoreCase(@Param("email") String email);
+
+	@Query(value = """
+		select profile from MemberProfile profile
+		join fetch profile.userAccount account
+		where account.role = :role and account.status = :status
+		  and (:query = '' or lower(account.displayName) like concat('%', :query, '%')
+		    or lower(account.email) like concat('%', :query, '%'))
+		order by lower(account.displayName), lower(account.email), profile.id
+		""",
+		countQuery = """
+		select count(profile) from MemberProfile profile join profile.userAccount account
+		where account.role = :role and account.status = :status
+		  and (:query = '' or lower(account.displayName) like concat('%', :query, '%')
+		    or lower(account.email) like concat('%', :query, '%'))
+		""")
+	Page<MemberProfile> searchActiveMembers(@Param("query") String query, @Param("role") UserRole role,
+		@Param("status") UserStatus status, Pageable pageable);
 
 	boolean existsByUserAccountId(Long userAccountId);
 

@@ -50,6 +50,8 @@ class OwnerMemberPointsControllerTests {
 		mockMvc.perform(get("/owner/member-points").param("q", "Mina").with(ownerUser))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/member-points"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 member")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("single-result")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Member")));
 
 		mockMvc.perform(post("/owner/member-points/preview").with(ownerUser).with(csrf())
@@ -64,7 +66,7 @@ class OwnerMemberPointsControllerTests {
 				.param("memberProfileId", member.getId().toString()).param("paidAmount", "199.75")
 				.param("receiptReference", "RCPT-WORKFLOW-1"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/owner/member-points?memberId=" + member.getId()))
+			.andExpect(redirectedUrl("/owner/member-points?memberId=" + member.getId() + "&page=0&anchor=" + member.getId() + "#member-" + member.getId()))
 			.andExpect(flash().attributeExists("success"))
 			.andReturn();
 		mockMvc.perform(get("/owner/member-points").param("memberId", member.getId().toString())
@@ -79,6 +81,81 @@ class OwnerMemberPointsControllerTests {
 		assertThat(summary.transactions()).hasSize(1);
 		assertThat(summary.transactions().getFirst().pointsDelta()).isEqualTo(199);
 		assertThat(summary.transactions().getFirst().createdByDisplayName()).isEqualTo("Cafe Owner");
+	}
+
+	@Test
+	void ownerDirectoryPagesAndFiltersOneThousandMembersAndClampsBadPages() throws Exception {
+		var owner = account("paging-owner@castfan.test", UserRole.OWNER, "Paging Owner");
+		for (int index = 0; index < 1000; index++) {
+			member(String.format("directory-%04d@castfan.test", index), String.format("Directory Member %04d", index));
+		}
+		var ownerUser = user(owner.getEmail()).roles("OWNER");
+
+		mockMvc.perform(get("/owner/member-points").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1000 members")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 1 of 40")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("rel=\"next\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0000")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Directory Member 0025"))));
+
+		mockMvc.perform(get("/owner/member-points").param("page", "39").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 40 of 40")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("rel=\"prev\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("rel=\"next\""))))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0999")));
+
+		mockMvc.perform(get("/owner/member-points").param("page", "99999").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 40 of 40")));
+		mockMvc.perform(get("/owner/member-points").param("page", "2147483647").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 40 of 40")));
+		mockMvc.perform(get("/owner/member-points").param("page", "not-a-page").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 1 of 40")));
+		mockMvc.perform(get("/owner/member-points").param("page", "-8").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Page 1 of 40")));
+
+		mockMvc.perform(get("/owner/member-points").param("q", "directory-0999@").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("1 member")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Directory Member 0999")));
+		mockMvc.perform(get("/owner/member-points").param("q", "no-such-member").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("0 members")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("No Members found")));
+	}
+
+	@Test
+	void openingLaterPageMemberPreservesDirectoryStateThroughPointConfirmAndReturnLink() throws Exception {
+		var owner = account("anchor-owner@castfan.test", UserRole.OWNER, "Anchor Owner");
+		for (int index = 0; index < 30; index++) {
+			member(String.format("anchor-%02d@castfan.test", index), String.format("Anchor Member %02d", index));
+		}
+		var target = member("anchor-target@castfan.test", "Anchor Target");
+		var ownerUser = user(owner.getEmail()).roles("OWNER");
+
+		mockMvc.perform(get("/owner/member-points").param("q", "Anchor").param("page", "1").with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("member-" + target.getId())))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("anchor=" + target.getId())));
+
+		mockMvc.perform(post("/owner/member-points/confirm").with(ownerUser).with(csrf())
+				.param("memberProfileId", target.getId().toString()).param("paidAmount", "12")
+				.param("receiptReference", "ANCHOR-RECEIPT").param("q", "Anchor")
+				.param("page", "1").param("anchor", target.getId().toString()))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/member-points?memberId=" + target.getId()
+				+ "&q=Anchor&page=1&anchor=" + target.getId() + "#member-" + target.getId()));
+
+		mockMvc.perform(get("/owner/member-points").param("memberId", target.getId().toString())
+				.param("q", "Anchor").param("page", "1").param("anchor", target.getId().toString()).with(ownerUser))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Back to Member selection")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("q=Anchor&amp;page=1&amp;anchor=" + target.getId() + "#member-" + target.getId())));
 	}
 
 	@Test
@@ -143,16 +220,21 @@ class OwnerMemberPointsControllerTests {
 		mockMvc.perform(post("/owner/member-points/adjustment/preview").with(ownerUser).with(csrf())
 				.param("memberProfileId", member.getId().toString())
 				.param("originalTransactionId", earned.transaction().id().toString())
-				.param("correctedPaidAmount", "4999.99").param("reason", "Receipt was entered incorrectly"))
+				.param("correctedPaidAmount", "4999.99").param("reason", "Receipt was entered incorrectly")
+				.param("q", "Adjustment").param("page", "0").param("anchor", member.getId().toString()))
 			.andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Correction preview")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"q\" value=\"Adjustment\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Tier 1")));
 
 		mockMvc.perform(post("/owner/member-points/adjustment/confirm").with(ownerUser).with(csrf())
 				.param("memberProfileId", member.getId().toString())
 				.param("originalTransactionId", earned.transaction().id().toString())
-				.param("correctedPaidAmount", "4999.99").param("reason", "Receipt was entered incorrectly"))
-			.andExpect(status().is3xxRedirection());
+				.param("correctedPaidAmount", "4999.99").param("reason", "Receipt was entered incorrectly")
+				.param("q", "Adjustment").param("page", "0").param("anchor", member.getId().toString()))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/member-points?memberId=" + member.getId()
+				+ "&q=Adjustment&page=0&anchor=" + member.getId() + "#member-" + member.getId()));
 		assertThat(membershipService.memberPointsForOwner(owner.getEmail(), member.getId()).pointsBalance()).isEqualTo(4999);
 
 		var nextEarn = membershipService.recordPurchasePoints(owner.getEmail(), member.getId(),
@@ -160,9 +242,11 @@ class OwnerMemberPointsControllerTests {
 		mockMvc.perform(post("/owner/member-points/reversal").with(ownerUser).with(csrf())
 				.param("memberId", member.getId().toString())
 				.param("transactionId", nextEarn.transaction().id().toString())
-				.param("reason", "Purchase was refunded"))
+				.param("reason", "Purchase was refunded")
+				.param("q", "Adjustment").param("page", "0").param("anchor", member.getId().toString()))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/owner/member-points?memberId=" + member.getId()));
+			.andExpect(redirectedUrl("/owner/member-points?memberId=" + member.getId()
+				+ "&q=Adjustment&page=0&anchor=" + member.getId() + "#member-" + member.getId()));
 
 		var summary = membershipService.memberPointsForOwner(owner.getEmail(), member.getId());
 		assertThat(summary.pointsBalance()).isEqualTo(4999);

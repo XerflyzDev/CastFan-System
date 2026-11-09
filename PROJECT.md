@@ -118,6 +118,7 @@ Together, these courses require the project to demonstrate:
 3. The store Owner approves or rejects it.
 4. Only approved shifts appear in Member schedules and public-facing summaries.
 5. A Cast cannot modify another Cast's shift, and an Owner cannot review another Owner's store data.
+6. Pending review queues show only submitted shifts whose start time is still in the future; expired submissions remain stored for history and audit purposes.
 
 ### Following And Membership
 

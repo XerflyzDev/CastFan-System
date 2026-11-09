@@ -15,9 +15,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import com.castfan.dto.OwnerWorkspaceView;
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.ShiftStatus;
@@ -65,6 +67,9 @@ class OwnerWorkspaceWorkflowTests {
 	@Autowired
 	private ShiftScheduleRepository shiftScheduleRepository;
 
+	@Autowired
+	private OwnerWorkspaceService ownerWorkspaceService;
+
 	private UserAccount owner;
 	private UserAccount cast;
 	private StoreCast assignment;
@@ -100,7 +105,19 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("owner/dashboard"))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("CastFan")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Review")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Mina Review")))
+			.andExpect(content().string(containsString("Active Cast members")))
+			.andExpect(content().string(containsString("Pending shift requests")))
+			.andExpect(content().string(containsString("Shifts approved today")))
+			.andExpect(content().string(containsString("Upcoming published events")))
+			.andExpect(content().string(containsString("Manage Cast accounts")))
+			.andExpect(content().string(containsString("Add Members as Cast and manage active Cast access")))
+			.andExpect(content().string(containsString("View all requests")))
+			.andExpect(content().string(containsString("Member points")))
+			.andExpect(content().string(containsString("Pending review")))
+			.andExpect(content().string(not(containsString("Needs review"))))
+			.andExpect(content().string(not(containsString("Review schedule"))))
+			.andExpect(content().string(not(containsString("Promotions &amp; banners"))));
 
 		mockMvc.perform(get("/owner/shifts")
 				.param("date", shiftDate.toString())
@@ -112,9 +129,70 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(content().string(containsString(FULL_DATE.format(shiftDate))))
 			.andExpect(content().string(containsString("owner-shifts.js")))
 			.andExpect(content().string(containsString("src=\"/avatars/" + cast.getId() + "\"")))
-			.andExpect(content().string(containsString("data-picker-date")))
-			.andExpect(content().string(containsString("date-time-picker.js")))
+			.andExpect(content().string(containsString("owner-schedule-navigator")))
+			.andExpect(content().string(containsString("owner-week-range")))
+			.andExpect(content().string(containsString("Choose another date")))
+			.andExpect(content().string(containsString("owner-calendar-panel")))
+			.andExpect(content().string(containsString("data-owner-calendar-grid")))
+			.andExpect(content().string(not(containsString("type=\"date\""))))
+			.andExpect(content().string(containsString(">Today</a>")))
+			.andExpect(content().string(containsString("Previous week")))
+			.andExpect(content().string(containsString("Next week")))
+			.andExpect(content().string(not(containsString("Advanced"))))
+			.andExpect(content().string(containsString("aria-label=\"Choose a schedule date\"")))
+			.andExpect(content().string(containsString("aria-current=\"date\"")))
+			.andExpect(content().string(not(containsString("data-picker-date"))))
+			.andExpect(content().string(not(containsString("date-time-picker.js"))))
 			.andExpect(content().string(not(containsString("aria-label=\"Local time\""))));
+	}
+
+	@Test
+	void dashboardExcludesExpiredSubmittedShiftsWithoutDeletingHistory() {
+		var expired = shiftScheduleService.submitShift(
+			cast,
+			assignment.getId(),
+			java.time.Instant.now().minusSeconds(7_200),
+			java.time.Instant.now().minusSeconds(3_600)
+		);
+
+		var workspace = ownerWorkspaceService.load(owner.getEmail(), null);
+
+		assertThat(workspace.pendingCount()).isEqualTo(1);
+		assertThat(workspace.days()).hasSize(7);
+		assertThat(workspace.days()).filteredOn(OwnerWorkspaceView.ScheduleDay::selected).hasSize(1);
+		assertThat(workspace.todayDate()).isNotBlank();
+		assertThat(workspace.pendingShifts()).hasSize(1);
+		assertThat(workspace.pendingShifts().getFirst().id()).isEqualTo(submittedShift.getId());
+		assertThat(shiftScheduleRepository.findById(expired.getId())).isPresent();
+		assertThat(shiftScheduleRepository.findById(expired.getId()).orElseThrow().getStatus())
+			.isEqualTo(ShiftStatus.SUBMITTED);
+	}
+
+	@Test
+	void futurePendingQueryUsesStrictInstantBoundaryAcrossTheStoreTimezone() {
+		var cutoff = ZonedDateTime.of(
+			LocalDate.of(2026, 11, 9), LocalTime.NOON, STORE_ZONE
+		).toInstant();
+		var past = shiftScheduleService.submitShift(
+			cast, assignment.getId(), cutoff.minusSeconds(3_600), cutoff.minusSeconds(1_800)
+		);
+		var boundary = shiftScheduleService.submitShift(
+			cast, assignment.getId(), cutoff, cutoff.plusSeconds(1_800)
+		);
+		var future = shiftScheduleService.submitShift(
+			cast, assignment.getId(), cutoff.plusSeconds(3_600), cutoff.plusSeconds(5_400)
+		);
+
+		var result = shiftScheduleRepository.findFutureForOwnerByStatus(
+			owner.getEmail(), ShiftStatus.SUBMITTED, cutoff, org.springframework.data.domain.PageRequest.of(0, 25)
+		);
+
+		assertThat(result).extracting(ShiftSchedule::getId)
+			.contains(future.getId())
+			.doesNotContain(past.getId(), boundary.getId());
+		assertThat(shiftScheduleRepository.countFutureForOwnerByStatus(
+			owner.getEmail(), ShiftStatus.SUBMITTED, cutoff
+		)).isEqualTo(result.size());
 	}
 
 	@Test

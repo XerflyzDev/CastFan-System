@@ -44,11 +44,13 @@ public interface ShiftScheduleRepository extends JpaRepository<ShiftSchedule, Lo
 		join fetch profile.userAccount account
 		where lower(store.owner.email) = lower(:email)
 		  and schedule.status = :status
+		  and schedule.startsAt > :after
 		order by schedule.startsAt asc
 		""")
-	List<ShiftSchedule> findForOwnerByStatus(
+	List<ShiftSchedule> findFutureForOwnerByStatus(
 		@Param("email") String email,
 		@Param("status") ShiftStatus status,
+		@Param("after") Instant after,
 		Pageable pageable
 	);
 
@@ -57,10 +59,12 @@ public interface ShiftScheduleRepository extends JpaRepository<ShiftSchedule, Lo
 		from ShiftSchedule schedule
 		where lower(schedule.storeCast.store.owner.email) = lower(:email)
 		  and schedule.status = :status
+		  and schedule.startsAt > :after
 		""")
-	long countForOwnerByStatus(
+	long countFutureForOwnerByStatus(
 		@Param("email") String email,
-		@Param("status") ShiftStatus status
+		@Param("status") ShiftStatus status,
+		@Param("after") Instant after
 	);
 
 	@Query("""

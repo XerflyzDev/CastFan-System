@@ -24,6 +24,48 @@
 .review-submit-status { min-height: 0; margin: -2px 0 0; color: #55575d; font-size: 0.53rem; }
 .review-submit-status:empty { display: none; }
 .review-submit-button.is-loading::before { width: 11px; height: 11px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; content: ""; animation: owner-shift-spin 700ms linear infinite; }
+.owner-schedule-navigator { display: grid; gap: 12px; margin-bottom: 14px; padding: 14px; border: 1px solid #e3e3e6; border-radius: 18px; background: linear-gradient(145deg, #fff 0%, #f8f8f9 100%); box-shadow: 0 10px 28px rgba(30, 32, 38, 0.055); }
+.owner-week-toolbar { display: grid; grid-template-columns: 32px minmax(0, 1fr) 32px auto; align-items: center; gap: 7px; }
+.owner-week-toolbar a { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #e1e1e4; border-radius: 10px; color: #34363b; background: #fff; text-decoration: none; }
+.owner-week-toolbar a:hover { border-color: #c9c9ce; background: #f3f3f4; }
+.owner-week-toolbar a:focus-visible { outline: 2px solid rgba(48, 50, 56, 0.42); outline-offset: 2px; }
+.owner-date-jump-form { position: relative; min-width: 0; }
+.owner-week-range { display: grid; width: 100%; min-height: 42px; min-width: 0; place-items: center; gap: 1px; padding: 5px 7px; border: 0; border-radius: 11px; color: var(--ink); background: transparent; font: inherit; cursor: pointer; }
+.owner-week-range small { color: var(--muted); font-size: 0.44rem; font-weight: 650; }
+.owner-week-range strong { overflow: hidden; max-width: 100%; font-size: 0.58rem; text-overflow: ellipsis; white-space: nowrap; }
+.owner-week-range:hover { background: #f0f0f2; }
+.owner-week-range:focus-visible { outline: 2px solid rgba(48, 50, 56, 0.42); outline-offset: 1px; }
+.owner-date-jump-form noscript button { width: 100%; min-height: 36px; border: 1px solid #dedee2; border-radius: 10px; background: #fff; font: inherit; font-size: 0.54rem; font-weight: 700; }
+.owner-week-toolbar .owner-today-link { width: auto; min-width: 45px; padding: 0 8px; color: #fff; background: #25272c; font-size: 0.5rem; font-weight: 750; }
+.owner-week-toolbar .owner-today-link:hover { border-color: #111318; color: #fff; background: #111318; }
+.owner-calendar-panel { display: grid; gap: 9px; padding: 11px; border: 1px solid #dedee2; border-radius: 14px; background: #fff; box-shadow: 0 12px 30px rgba(30, 32, 38, 0.09); }
+.owner-calendar-panel[hidden] { display: none; }
+.owner-calendar-heading { display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; gap: 8px; }
+.owner-calendar-heading strong { font-size: 0.65rem; text-align: center; }
+.owner-calendar-heading button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #e2e2e5; border-radius: 9px; color: #3d3f44; background: #f7f7f8; cursor: pointer; }
+.owner-calendar-heading button:hover { border-color: #cbccd0; background: #eeeef0; }
+.owner-calendar-heading button:focus-visible,
+.owner-calendar-grid button:focus-visible,
+.owner-calendar-today:focus-visible { outline: 2px solid rgba(48, 50, 56, 0.42); outline-offset: 2px; }
+.owner-calendar-weekdays,
+.owner-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.owner-calendar-weekdays span { color: #777980; font-size: 0.46rem; font-weight: 750; text-align: center; }
+.owner-calendar-grid button { display: grid; min-width: 0; min-height: 31px; place-items: center; border: 1px solid transparent; border-radius: 9px; color: #303238; background: transparent; font: inherit; font-size: 0.55rem; font-weight: 650; cursor: pointer; }
+.owner-calendar-grid button:hover { background: #eeeeF0; }
+.owner-calendar-grid button.is-outside-month { color: #b0b1b5; }
+.owner-calendar-grid button.is-today { border-color: #c8c9cd; }
+.owner-calendar-grid button.is-selected { border-color: #25272c; color: #fff; background: #25272c; }
+.owner-calendar-today { min-height: 34px; border: 0; border-radius: 10px; color: #34363b; background: #efeff1; font: inherit; font-size: 0.52rem; font-weight: 750; cursor: pointer; }
+.owner-calendar-today:hover { background: #e5e5e8; }
+.owner-week-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.owner-week-days a { position: relative; display: grid; min-width: 0; min-height: 64px; place-items: center; align-content: center; gap: 4px; border: 1px solid transparent; border-radius: 12px; color: #74767c; background: #f1f1f3; text-decoration: none; }
+.owner-week-days span { font-size: 0.49rem; font-weight: 650; }
+.owner-week-days strong { color: var(--ink); font-size: 0.76rem; }
+.owner-week-days small { position: absolute; right: 4px; bottom: 4px; min-width: 14px; padding: 1px 4px; border-radius: 999px; color: #5d5f65; background: #fff; font-size: 0.43rem; font-weight: 800; text-align: center; }
+.owner-week-days a.active { border-color: #25272c; color: #fff; background: #25272c; box-shadow: 0 7px 18px rgba(30, 32, 38, 0.18); }
+.owner-week-days a.active strong { color: #fff; }
+.owner-week-days a.active small { color: #25272c; }
+.owner-week-days a:focus-visible { outline: 2px solid rgba(48, 50, 56, 0.42); outline-offset: 2px; }
 @keyframes owner-shift-spin { to { transform: rotate(360deg); } }
 @media (max-width: 370px) {
     .owner-review-card { padding: 11px; gap: 9px; }
@@ -31,6 +73,13 @@
     .owner-review-card > .review-card-heading .status-pill { grid-column: 2; justify-self: start; }
     .review-actions { grid-template-columns: minmax(0, 1fr); }
     .review-submit-button { min-height: 40px; }
+    .owner-schedule-navigator { padding: 11px; gap: 10px; }
+    .owner-week-toolbar { grid-template-columns: 30px minmax(0, 1fr) 30px; gap: 5px; }
+    .owner-week-toolbar a { width: 30px; height: 30px; }
+    .owner-week-toolbar .owner-today-link { grid-column: 1 / -1; width: 100%; min-height: 32px; }
+    .owner-week-days { gap: 2px; }
+    .owner-week-days a { min-height: 58px; border-radius: 10px; }
+    .owner-week-days small { right: 2px; bottom: 3px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .review-submit-button.is-loading::before { animation: none; }

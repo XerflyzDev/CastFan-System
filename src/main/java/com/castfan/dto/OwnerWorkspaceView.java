@@ -12,11 +12,26 @@ public record OwnerWorkspaceView(
 	long upcomingEventCount,
 	String selectedDate,
 	String selectedDateLabel,
+	String todayDate,
+	String selectedWeekLabel,
+	String previousWeekDate,
+	String nextWeekDate,
+	List<ScheduleDay> days,
 	List<ShiftItem> pendingShifts,
 	List<ShiftItem> dailyShifts
 ) {
 
 	public record StoreItem(Long id, String name, String address, String timezone, boolean active) {
+	}
+
+	public record ScheduleDay(
+		String isoDate,
+		String dayLabel,
+		String dayNumber,
+		boolean selected,
+		boolean today,
+		int shiftCount
+	) {
 	}
 
 	public record ShiftItem(

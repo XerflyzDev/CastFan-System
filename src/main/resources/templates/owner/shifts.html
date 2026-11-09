@@ -10,7 +10,6 @@
     <link th:href="@{/css/member-home.css}" rel="stylesheet">
     <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
     <link th:href="@{/css/owner-shifts.css}" rel="stylesheet">
-    <link th:href="@{/css/date-time-picker.css}" rel="stylesheet">
 </head>
 <body>
 <main class="concept-stage">
@@ -59,7 +58,40 @@
 
             <section class="owner-section daily-section" aria-labelledby="daily-heading">
                 <div class="section-title"><div><small th:text="${workspace.selectedDateLabel}">Wednesday, 14 October</small><h2 id="daily-heading">Daily schedule</h2></div></div>
-                <form class="date-picker" th:action="@{/owner/shifts}" method="get"><label for="schedule-date">Schedule date</label><div data-picker-host><input id="schedule-date" type="date" name="date" th:value="${workspace.selectedDate}" data-picker-date data-picker-label="Schedule date"></div><button type="submit" aria-label="Open selected date"><i class="bi bi-arrow-right" aria-hidden="true"></i></button></form>
+                <div class="owner-schedule-navigator">
+                    <div class="owner-week-toolbar">
+                        <a th:href="@{/owner/shifts(date=${workspace.previousWeekDate})}" aria-label="Previous week"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+                        <form class="owner-date-jump-form" method="get" action="/owner/shifts" data-owner-date-form>
+                            <button class="owner-week-range" type="button" data-owner-date-trigger aria-label="Choose another date"
+                                    aria-expanded="false" aria-controls="owner-calendar-panel">
+                                <small>Selected week</small>
+                                <strong th:text="${workspace.selectedWeekLabel}">8 Nov - 14 Nov 2026</strong>
+                            </button>
+                            <input type="hidden" name="date" th:value="${workspace.selectedDate}" data-owner-date-input th:attr="data-today=${workspace.todayDate}">
+                            <noscript><button type="submit">View date</button></noscript>
+                        </form>
+                        <a th:href="@{/owner/shifts(date=${workspace.nextWeekDate})}" aria-label="Next week"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                        <a class="owner-today-link" th:href="@{/owner/shifts(date=${workspace.todayDate})}">Today</a>
+                    </div>
+                    <div class="owner-calendar-panel" id="owner-calendar-panel" data-owner-calendar-panel hidden role="dialog" aria-label="Choose a date">
+                        <div class="owner-calendar-heading">
+                            <button type="button" data-owner-calendar-previous aria-label="Previous month"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                            <strong data-owner-calendar-month>November 2026</strong>
+                            <button type="button" data-owner-calendar-next aria-label="Next month"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="owner-calendar-weekdays" aria-hidden="true"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+                        <div class="owner-calendar-grid" data-owner-calendar-grid></div>
+                        <button class="owner-calendar-today" type="button" data-owner-calendar-today>Go to today</button>
+                    </div>
+                    <nav class="owner-week-days" aria-label="Choose a schedule date">
+                        <a th:each="day : ${workspace.days}" th:href="@{/owner/shifts(date=${day.isoDate})}"
+                           th:classappend="${day.selected} ? 'active'" th:attr="aria-current=${day.selected ? 'date' : null}">
+                            <span th:text="${day.dayLabel}">Tue</span>
+                            <strong th:text="${day.dayNumber}">10</strong>
+                            <small th:if="${day.shiftCount > 0}" th:text="${day.shiftCount}">2</small>
+                        </a>
+                    </nav>
+                </div>
                 <div class="owner-shift-list" th:if="${!workspace.dailyShifts.empty}">
                     <article class="owner-shift-row" th:each="shift : ${workspace.dailyShifts}">
                         <img th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.castName}">
@@ -77,6 +109,5 @@
 </main>
 <script th:src="@{/js/owner-workspace.js}" defer></script>
 <script th:src="@{/js/owner-shifts.js}" defer></script>
-<script th:src="@{/js/date-time-picker.js}" defer></script>
 </body>
 </html>

@@ -25,7 +25,7 @@ public interface ShiftScheduleRepository extends JpaRepository<ShiftSchedule, Lo
 		join fetch assignment.store store
 		join fetch assignment.castProfile profile
 		join fetch profile.userAccount account
-		where lower(account.email) = lower(:email)
+		where lower(account.loginIdentifier) = lower(:email)
 		  and schedule.endsAt > :from
 		order by schedule.startsAt asc
 		""")

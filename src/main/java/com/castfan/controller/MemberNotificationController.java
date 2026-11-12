@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 @PreAuthorize("hasAnyRole('MEMBER', 'CAST')")
@@ -21,6 +22,14 @@ public class MemberNotificationController {
 	@GetMapping("/member/notifications")
 	public String notifications(Principal principal, Model model) {
 		model.addAttribute("notifications", memberNotificationService.load(principal.getName()));
+		return "member/notifications";
+	}
+
+	@GetMapping("/s/{slug}/notifications")
+	@PreAuthorize("hasRole('MEMBER')")
+	public String notificationsForStore(@PathVariable String slug, Principal principal, Model model) {
+		model.addAttribute("storeSlug", slug);
+		model.addAttribute("notifications", memberNotificationService.load(principal.getName(), slug));
 		return "member/notifications";
 	}
 }

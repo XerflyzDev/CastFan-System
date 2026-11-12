@@ -82,11 +82,11 @@ class OwnerWorkspaceWorkflowTests {
 		owner = provisioningService.provisionOwner(
 			"owner-workspace-" + suffix + "@castfan.test", "secure-owner-pass-123", "Hoshi Owner"
 		);
-		cast = provisioningService.provisionCast(
-			"owner-cast-" + suffix + "@castfan.test", "secure-cast-pass-123", "Mina Cast", "Mina Review " + suffix
-		);
 		var store = storeService.createStore(
 			owner, "Hoshi Review Cafe", "hoshi-review-" + suffix, null, "Bangkok", STORE_ZONE.getId()
+		);
+		cast = provisioningService.provisionCast(
+			"owner-cast-" + suffix + "@castfan.test", "secure-cast-pass-123", "Mina Cast", "Mina Review " + suffix
 		);
 		assignment = storeCastService.assignCast(owner, store.getId(), requireProfile(cast).getId());
 		shiftDate = LocalDate.now(STORE_ZONE).plusDays(3);
@@ -111,7 +111,7 @@ class OwnerWorkspaceWorkflowTests {
 			.andExpect(content().string(containsString("Shifts approved today")))
 			.andExpect(content().string(containsString("Upcoming published events")))
 			.andExpect(content().string(containsString("Manage Cast accounts")))
-			.andExpect(content().string(containsString("Add Members as Cast and manage active Cast access")))
+			.andExpect(content().string(containsString("Create store-specific Cast IDs and manage access")))
 			.andExpect(content().string(containsString("View all requests")))
 			.andExpect(content().string(containsString("Member points")))
 			.andExpect(content().string(containsString("Pending review")))

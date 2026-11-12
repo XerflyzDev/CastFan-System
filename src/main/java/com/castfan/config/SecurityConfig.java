@@ -2,6 +2,7 @@ package com.castfan.config;
 
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.UserAccountRepository;
+import com.castfan.service.StoreEntryService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -23,13 +25,16 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(
 		HttpSecurity http,
+		UserAccountRepository userAccountRepository,
+		StoreEntryService storeEntryService,
 		@Value("${castfan.security.development-endpoints:false}") boolean developmentEndpoints,
 		@Value("${castfan.security.require-https:false}") boolean requireHttps
+		, MustChangePasswordFilter mustChangePasswordFilter
 	) throws Exception {
 		http
 			.authorizeHttpRequests(authorize -> {
 				authorize.requestMatchers(
-					"/", "/login", "/signup", "/casts/**", "/events/**", "/promotions/**", "/avatars/**",
+					"/", "/login", "/signup", "/signup/store", "/s/**", "/casts/**", "/events/**", "/promotions/**", "/avatars/**",
 					"/css/**", "/js/**", "/images/**", "/fonts/**", "/error",
 					"/actuator/health", "/actuator/health/**"
 				).permitAll();
@@ -51,12 +56,25 @@ public class SecurityConfig {
 				.loginPage("/login")
 				.usernameParameter("email")
 				.successHandler((request, response, authentication) -> {
+					var account = userAccountRepository.findByLoginIdentifierIgnoreCase(authentication.getName())
+						.orElseThrow();
+					if (account.isMustChangePassword()) {
+						response.sendRedirect(request.getContextPath() + "/account/change-password");
+						return;
+					}
 					var authorities = authentication.getAuthorities().stream()
 						.map(authority -> authority.getAuthority())
 						.collect(java.util.stream.Collectors.toSet());
-					var destination = authorities.contains("ROLE_OWNER")
+					String destination;
+					if (authorities.contains("ROLE_MEMBER")) {
+						var storeSlug = (String) request.getSession().getAttribute(StoreEntryService.SESSION_STORE_SLUG);
+						destination = storeSlug == null ? "/account/stores" : storeEntryService.joinAndHome(account, storeSlug);
+						request.getSession().removeAttribute(StoreEntryService.SESSION_STORE_SLUG);
+					} else {
+						destination = authorities.contains("ROLE_OWNER")
 						? "/"
 						: authorities.contains("ROLE_CAST") ? "/cast" : "/account";
+					}
 					response.sendRedirect(request.getContextPath() + destination);
 				})
 				.failureUrl("/login?error")
@@ -88,6 +106,7 @@ public class SecurityConfig {
 		if (requireHttps) {
 			http.redirectToHttps(Customizer.withDefaults());
 		}
+		http.addFilterAfter(mustChangePasswordFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}
@@ -99,12 +118,12 @@ public class SecurityConfig {
 
 	@Bean
 	UserDetailsService userDetailsService(UserAccountRepository userAccountRepository) {
-		return email -> userAccountRepository.findByEmailIgnoreCase(email.trim())
-			.map(account -> User.withUsername(account.getEmail())
+		return credential -> userAccountRepository.findByLoginIdentifierIgnoreCase(credential.trim())
+			.map(account -> User.withUsername(account.getLoginIdentifier())
 				.password(account.getPasswordHash())
 				.roles(account.getRole().name())
 				.disabled(account.getStatus() != UserStatus.ACTIVE)
 				.build())
-			.orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
+			.orElseThrow(() -> new UsernameNotFoundException("Invalid email, Cast ID, or password"));
 	}
 }

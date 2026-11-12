@@ -1,10 +1,10 @@
 # Membership Points And Tier Workflow
 
-This document defines CastFan's confirmed store-wide membership program. The points balance, immutable ledger, tier derivation, Owner workflow, Member summary/history, and store-tier content access are implemented as the only membership workflow.
+This document defines CastFan's confirmed per-store membership program. The points balance, immutable ledger, tier derivation, Owner workflow, Member summary/history, and store-tier content access are isolated for each store membership.
 
 ## Confirmed Requirements
 
-- The first release serves one cafe.
+- A Member can use one global account across stores, but receives a separate membership in each store.
 - Every newly registered Member starts with `0` points and no tier (`NONE`).
 - The cafe checks and settles the bill outside CastFan.
 - Only an authenticated `OWNER` records points in CastFan after the bill has been checked.
@@ -53,7 +53,7 @@ Point history should remain auditable. An Owner must not edit or delete a comple
 
 ### MemberProfile
 
-`pointsBalance` is a required `BIGINT`, defaults to `0`, and cannot be negative. The current tier is derived from this balance rather than independently selected by a Member.
+The legacy `MemberProfile.pointsBalance` value is migrated into the first store membership. Current balances and notification preferences belong to `StoreMembership`, where `pointsBalance` is a required `BIGINT`, defaults to `0`, and cannot be negative. The current tier is derived from that store-specific balance rather than independently selected by a Member.
 
 ### MemberPointTransaction
 
@@ -62,11 +62,11 @@ An immutable ledger entry for every point change.
 Implemented fields:
 
 - `id`
-- `memberProfileId`
+- `storeMembershipId` and `storeId`
 - `type`: `EARN`, `CORRECTION`, or `REVERSAL`
 - `purchaseAmount`: nullable for manual corrections
 - `pointsDelta`: positive or negative integer
-- `receiptReference`: required for earned purchase points and unique within the cafe
+- `receiptReference`: required for earned purchase points and unique within that store
 - `reason`: required for corrections and reversals
 - `originalTransactionId`: nullable self-reference to the original entry
 - `createdByUserId`: the authenticated Owner
@@ -84,12 +84,12 @@ The core uses the fixed `StoreMembershipTier` definition `NONE`, `TIER_1`, `TIER
 
 `MembershipService` exposes the UI-independent contract used by the dependent Owner and Member work:
 
-- `previewEarnPoints(ownerEmail, memberProfileId, paidAmount, receiptReference)` validates the request and returns the point/tier outcome without mutation.
+- `previewEarnPoints(ownerLogin, memberProfileId, paidAmount, receiptReference)` resolves the Owner's store and validates the request without mutation.
 - `recordPurchasePoints(...)` appends an `EARN` entry and updates the locked balance atomically.
 - `previewCorrection(...)`, `correctPurchasePoints(...)`, and `reversePurchasePoints(...)` preserve the original entry and return the resulting balance and tier.
-- `memberPoints(memberEmail)` returns only the authenticated Member's summary and history.
-- `memberPointsForOwner(ownerEmail, memberProfileId)` provides the active Owner with the selected Member's summary and history.
-- `hasStoreTierAccess(memberEmail, minimumRank)` is the backend access check for store-tier content.
+- `memberPoints(memberLogin, storeSlug)` returns only the authenticated Member's summary and history for that store.
+- `memberPointsForOwner(ownerLogin, memberProfileId)` resolves the Owner's store and returns only that store membership.
+- `hasStoreTierAccess(memberLogin, storeId, minimumRank)` is the backend access check for store-tier content.
 
 The preview result includes the current balance/tier, point delta, and resulting balance/tier. A confirmed result includes the immutable transaction view, resulting balance, and resulting tier. Controllers pass the authenticated principal email; they never accept an Owner ID as proof of authority.
 
@@ -101,7 +101,8 @@ An original earned entry may receive one correction or reversal. A second adjust
 - Resolve the acting Owner from the authenticated principal; never accept an Owner ID as proof of authority.
 - Every point change must create a ledger entry containing actor and timestamp.
 - Use one transaction to append the ledger entry and update the balance.
-- Reject duplicate receipt references to prevent awarding the same purchase twice.
+- Reject duplicate receipt references within the same store to prevent awarding the same purchase twice.
+- Reject every cross-store Member, Cast, content, follow, and ledger reference in both service logic and database constraints.
 - Reject changes that would produce a negative balance.
 - Member access is read-only and limited to their own balance and history.
 - Do not store payment-card data or complete bill details in CastFan.

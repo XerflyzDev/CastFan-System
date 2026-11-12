@@ -20,6 +20,7 @@ import com.castfan.entity.UserStatus;
 import com.castfan.repository.AccountAvatarRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.UserAccountRepository;
+import com.castfan.repository.StoreMembershipRepository;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = "spring.profiles.active=test")
 @AutoConfigureMockMvc
+@Transactional
 class AuthFlowTests {
 
 	@Autowired
@@ -49,9 +52,13 @@ class AuthFlowTests {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	@Autowired
+	private StoreMembershipRepository storeMembershipRepository;
+
 	@BeforeEach
 	void clearAccounts() {
 		accountAvatarRepository.deleteAll();
+		storeMembershipRepository.deleteAll();
 		memberProfileRepository.deleteAll();
 		userAccountRepository.deleteAll();
 	}
@@ -282,7 +289,7 @@ class AuthFlowTests {
 				.param("email", "signed-in@example.com")
 				.param("password", "secure-pass-123"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/account"))
+			.andExpect(redirectedUrl("/account/stores"))
 			.andReturn()
 			.getRequest()
 			.getSession(false);

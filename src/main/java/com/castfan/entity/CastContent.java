@@ -35,6 +35,10 @@ public class CastContent {
 	@JoinColumn(name = "cast_profile_id", nullable = false)
 	private CastProfile castProfile;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
+
 	@Column(nullable = false, length = 160)
 	private String title;
 
@@ -70,6 +74,7 @@ public class CastContent {
 		ContentAudience audience, StoreMembershipTier minimumStoreTier) {
 		var content = new CastContent();
 		content.castProfile = castProfile;
+		content.store = castProfile.getStore();
 		content.status = ContentStatus.DRAFT;
 		content.updateStoreTierDetails(title, body, imageUrl, audience, minimumStoreTier);
 		return content;
@@ -124,6 +129,7 @@ public class CastContent {
 
 	public Long getId() { return id; }
 	public CastProfile getCastProfile() { return castProfile; }
+	public Store getStore() { return store; }
 	public String getTitle() { return title; }
 	public String getBody() { return body; }
 	public String getImageUrl() { return imageUrl; }

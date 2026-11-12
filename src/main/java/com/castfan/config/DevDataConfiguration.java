@@ -16,6 +16,7 @@ import com.castfan.entity.Store;
 import com.castfan.entity.StoreCast;
 import com.castfan.entity.StoreEvent;
 import com.castfan.entity.StorePromotion;
+import com.castfan.entity.StoreMembership;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -27,6 +28,7 @@ import com.castfan.repository.StoreCastRepository;
 import com.castfan.repository.StoreEventRepository;
 import com.castfan.repository.StorePromotionRepository;
 import com.castfan.repository.StoreRepository;
+import com.castfan.repository.StoreMembershipRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +49,7 @@ public class DevDataConfiguration {
 		MemberProfileRepository memberProfileRepository,
 		MemberPointTransactionRepository memberPointTransactionRepository,
 		StoreRepository storeRepository,
+		StoreMembershipRepository storeMembershipRepository,
 		StoreCastRepository storeCastRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
 		StoreEventRepository storeEventRepository,
@@ -66,7 +69,7 @@ public class DevDataConfiguration {
 				owner,
 				"CastFan",
 				"castfan",
-				"A single-store Cast cafe in Bangkok.",
+				"A Cast cafe in Bangkok.",
 				"Bangkok, Thailand",
 				STORE_ZONE.getId(),
 				true
@@ -75,7 +78,8 @@ public class DevDataConfiguration {
 				"member@castfan.local", password, "Mina Fan", UserRole.MEMBER, UserStatus.ACTIVE
 			));
 			var memberProfile = memberProfileRepository.save(new MemberProfile(member, null, null));
-			seedMemberPoints(memberProfile, owner, memberProfileRepository, memberPointTransactionRepository);
+			var membership = storeMembershipRepository.save(new StoreMembership(store, memberProfile));
+			seedMemberPoints(membership, owner, storeMembershipRepository, memberPointTransactionRepository);
 
 			var today = LocalDate.now(STORE_ZONE);
 			seedCast(
@@ -118,9 +122,9 @@ public class DevDataConfiguration {
 	}
 
 	private void seedMemberPoints(
-		MemberProfile memberProfile,
+		StoreMembership membership,
 		UserAccount owner,
-		MemberProfileRepository memberProfileRepository,
+		StoreMembershipRepository storeMembershipRepository,
 		MemberPointTransactionRepository memberPointTransactionRepository
 	) {
 		for (var purchase : new Object[][] {
@@ -130,9 +134,9 @@ public class DevDataConfiguration {
 			var amount = (BigDecimal) purchase[0];
 			var points = (long) purchase[1];
 			var receipt = (String) purchase[2];
-			memberProfile.applyPointsDelta(points);
+			membership.applyPointsDelta(points);
 			memberPointTransactionRepository.save(new MemberPointTransaction(
-				memberProfile,
+				membership,
 				owner,
 				MemberPointTransactionType.EARN,
 				amount,
@@ -143,7 +147,7 @@ public class DevDataConfiguration {
 				null
 			));
 		}
-		memberProfileRepository.save(memberProfile);
+		storeMembershipRepository.save(membership);
 	}
 
 	private void seedCast(
@@ -168,7 +172,7 @@ public class DevDataConfiguration {
 		));
 		memberProfileRepository.save(new MemberProfile(account, null, null));
 		var profile = castProfileRepository.save(new CastProfile(
-			account, stageName, stageName.toLowerCase(), bio, avatarUrl
+			account, store, stageName, stageName.toLowerCase(), bio, avatarUrl
 		));
 		var assignment = storeCastRepository.save(new StoreCast(store, profile, true));
 		var shift = new ShiftSchedule(

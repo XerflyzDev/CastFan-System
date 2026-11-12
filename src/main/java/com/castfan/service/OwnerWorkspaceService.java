@@ -63,7 +63,7 @@ public class OwnerWorkspaceService {
 
 	@Transactional(readOnly = true)
 	public OwnerWorkspaceView load(String email, LocalDate requestedDate) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		var stores = storeRepository.findFirstByOwnerIdAndActiveTrueOrderByIdAsc(account.getId()).stream().toList();
 		var zone = stores.stream().findFirst()
@@ -124,14 +124,14 @@ public class OwnerWorkspaceService {
 
 	@Transactional
 	public void approve(String email, Long shiftId, String reviewNote) {
-		var owner = userAccountRepository.findByEmailIgnoreCase(email)
+		var owner = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		shiftScheduleService.approveShift(owner, shiftId, reviewNote);
 	}
 
 	@Transactional
 	public void reject(String email, Long shiftId, String reviewNote) {
-		var owner = userAccountRepository.findByEmailIgnoreCase(email)
+		var owner = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		if (reviewNote == null || reviewNote.isBlank()) {
 			throw new DomainRuleViolationException("A reason is required when rejecting a shift.");

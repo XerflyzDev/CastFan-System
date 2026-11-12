@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AccountAvatarRepository extends JpaRepository<AccountAvatar, Long> {
 
-	Optional<AccountAvatar> findByUserAccountEmailIgnoreCase(String email);
+	Optional<AccountAvatar> findByUserAccountLoginIdentifierIgnoreCase(String loginIdentifier);
 
 	boolean existsByUserAccountEmailIgnoreCase(String email);
 

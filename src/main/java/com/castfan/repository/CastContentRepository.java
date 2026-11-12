@@ -17,7 +17,7 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 
 	@Query("""
 		select content from CastContent content
-		where lower(content.castProfile.userAccount.email) = lower(:email)
+		where lower(content.castProfile.userAccount.loginIdentifier) = lower(:email)
 		order by content.createdAt desc
 		""")
 	List<CastContent> findAllOwned(@Param("email") String email);
@@ -50,6 +50,19 @@ public interface CastContentRepository extends JpaRepository<CastContent, Long> 
 		@Param("userStatus") UserStatus userStatus,
 		Pageable pageable
 	);
+
+	@Query("""
+		select content from CastContent content
+		join fetch content.castProfile profile
+		join fetch profile.userAccount account
+		where content.store.id = :storeId and content.status = :status and account.status = :userStatus
+		  and exists (select follow.id from CastFollow follow
+		      where follow.storeMembership.id = :membershipId and follow.castProfile.id = profile.id)
+		order by content.publishedAt desc
+		""")
+	List<CastContent> findFeedForStoreMembership(@Param("storeId") Long storeId,
+		@Param("membershipId") Long membershipId, @Param("status") ContentStatus status,
+		@Param("userStatus") UserStatus userStatus, Pageable pageable);
 
 	@Query("""
 		select content from CastContent content

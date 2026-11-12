@@ -211,7 +211,7 @@ document
 
             try {
                 const response = await fetch(
-                    "/member/profile/notification-preferences",
+                    form.action,
                     {
                         method: "POST",
                         credentials: "same-origin",

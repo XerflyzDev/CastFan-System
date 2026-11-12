@@ -43,7 +43,7 @@ public class AccountController {
 
 	@GetMapping("/account")
 	public String account(Principal principal, Model model) {
-		var account = userAccountRepository.findByEmailIgnoreCase(principal.getName())
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(principal.getName())
 			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
 		if (account.getRole() == UserRole.CAST) {
 			return "redirect:/cast/profile";

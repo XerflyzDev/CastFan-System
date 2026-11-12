@@ -83,4 +83,15 @@
     };
     password?.addEventListener("input", updatePasswordStrength);
     updatePasswordStrength();
+
+    const storeName = document.getElementById("storeName");
+    const storeSlug = document.getElementById("slug");
+    let slugEdited = Boolean(storeSlug?.value);
+    storeSlug?.addEventListener("input", () => { slugEdited = true; });
+    storeName?.addEventListener("input", () => {
+        if (!storeSlug || slugEdited) return;
+        storeSlug.value = storeName.value.toLowerCase().normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "").slice(0, 100);
+    });
 })();

@@ -148,7 +148,7 @@ public class CastContentService {
 	}
 
 	private CastProfile requireCast(String email) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(value -> value.getRole() == UserRole.CAST && value.getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Active Cast account not found."));
 		return castProfileRepository.findByUserAccountId(account.getId())

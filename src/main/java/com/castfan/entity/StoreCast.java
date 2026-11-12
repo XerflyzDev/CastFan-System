@@ -52,6 +52,7 @@ public class StoreCast {
 	public StoreCast(Store store, CastProfile castProfile, boolean active) {
 		this.store = store;
 		this.castProfile = castProfile;
+		this.castProfile.assignStoreIfAbsent(store);
 		this.active = active;
 	}
 

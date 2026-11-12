@@ -24,7 +24,7 @@ public class AccountService {
 			throw new DomainRuleViolationException("Name must not exceed 80 characters.");
 		}
 
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
 		account.updateDisplayName(cleanedName);
 		userAccountRepository.save(account);

@@ -14,6 +14,8 @@ import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 
 public interface StoreEventRepository extends JpaRepository<StoreEvent, Long> {
+	List<StoreEvent> findAllByStoreIdAndStatusAndEndsAtAfterOrderByStartsAtAsc(
+		Long storeId, EventStatus status, Instant now, Pageable pageable);
 
 	@Query("""
 		select event

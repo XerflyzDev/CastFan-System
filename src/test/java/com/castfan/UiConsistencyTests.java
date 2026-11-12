@@ -37,7 +37,7 @@ class UiConsistencyTests {
 				"<span>Cast Profile</span>",
 				"<span>Profile</span>"
 			)
-			.contains("th:href=\"@{/member/schedule}\"")
+			.contains("th:href=\"@{/cast/schedule}\"")
 			.contains("th:href=\"@{/cast/public-profile}\"")
 			.contains("th:href=\"@{/cast/profile}\"")
 			.contains("th:href=\"@{/cast}\"")
@@ -113,7 +113,8 @@ class UiConsistencyTests {
 			.contains("Choose your updates")
 			.contains("Changes are saved automatically")
 			.contains("data-notification-preference")
-			.contains("th:href=\"@{/member/notifications}\"");
+			.contains("@{/s/{slug}/notifications(slug=${storeSlug})}")
+			.contains("@{/member/notifications}");
 		assertThat(resource("static/css/member-profile.css"))
 			.contains("input[type=\"checkbox\"]:checked ~ i")
 			.contains("input[type=\"checkbox\"]:focus-visible ~ i");
@@ -225,7 +226,7 @@ class UiConsistencyTests {
 		var workflowParents = Map.ofEntries(
 			Map.entry("templates/member/notifications.html", "th:href=\"@{/}\" aria-label=\"Back to Home\""),
 			Map.entry("templates/member/profile.html", "th:href=\"@{/account}\" aria-label=\"Back to Profile\""),
-			Map.entry("templates/member/casts.html", "th:href=\"@{/member/following}\" aria-label=\"Back to Following\""),
+			Map.entry("templates/member/casts.html", "@{/s/{slug}/following(slug=${storeSlug})}"),
 			Map.entry("templates/member/memberships.html", "th:href=\"@{/account}\" aria-label=\"Back to Profile\""),
 			Map.entry("templates/cast/schedule.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
 			Map.entry("templates/cast/content.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),

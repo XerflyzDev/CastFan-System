@@ -35,10 +35,38 @@ public class MemberCastController {
 		return "member/casts";
 	}
 
+	@GetMapping("/s/{slug}/casts")
+	public String discoverForStore(@PathVariable String slug, Principal principal,
+		@RequestParam(defaultValue = "0") int page, Model model) {
+		model.addAttribute("storeSlug", slug);
+		model.addAttribute("castPage", memberCastService.discover(principal.getName(), slug,
+			PageRequest.of(Math.max(page, 0), PAGE_SIZE)));
+		return "member/casts";
+	}
+
 	@GetMapping("/member/following")
 	public String following(Principal principal, Model model) {
 		model.addAttribute("castList", memberCastService.following(principal.getName()));
 		return "member/following";
+	}
+
+	@GetMapping("/s/{slug}/following")
+	public String followingForStore(@PathVariable String slug, Principal principal, Model model) {
+		model.addAttribute("storeSlug", slug);
+		model.addAttribute("castList", memberCastService.following(principal.getName(), slug));
+		return "member/following";
+	}
+
+	@PostMapping("/s/{slug}/casts/{castProfileId}/follow")
+	public String followForStore(@PathVariable String slug, Principal principal, @PathVariable Long castProfileId) {
+		memberCastService.follow(principal.getName(), slug, castProfileId);
+		return "redirect:/s/" + slug + "/casts";
+	}
+
+	@PostMapping("/s/{slug}/casts/{castProfileId}/unfollow")
+	public String unfollowForStore(@PathVariable String slug, Principal principal, @PathVariable Long castProfileId) {
+		memberCastService.unfollow(principal.getName(), slug, castProfileId);
+		return "redirect:/s/" + slug + "/following";
 	}
 
 	@PostMapping("/member/casts/{castProfileId}/follow")

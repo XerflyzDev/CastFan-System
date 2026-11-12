@@ -5,6 +5,7 @@ import java.security.Principal;
 import com.castfan.dto.MemberProfileForm;
 import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.ProfileService;
+import com.castfan.service.MembershipService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,9 +24,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberProfileController {
 
 	private final ProfileService profileService;
+	private final MembershipService membershipService;
 
-	public MemberProfileController(ProfileService profileService) {
+	public MemberProfileController(ProfileService profileService, MembershipService membershipService) {
 		this.profileService = profileService;
+		this.membershipService = membershipService;
+	}
+
+	@GetMapping("/s/{slug}/notification-settings")
+	@PreAuthorize("hasRole('MEMBER')")
+	public String storeNotificationSettings(@PathVariable String slug, Principal principal, Model model) {
+		model.addAttribute("storeSlug", slug);
+		model.addAttribute("form", membershipService.notificationPreferenceForm(principal.getName(), slug));
+		return "member/notification-settings";
 	}
 
 	@GetMapping("/member/profile")
@@ -68,6 +80,23 @@ public class MemberProfileController {
 	) {
 		try {
 			profileService.updateMemberNotificationPreference(principal.getName(), preference, enabled);
+			return ResponseEntity.noContent().build();
+		} catch (DomainRuleViolationException exception) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	@PostMapping("/s/{slug}/notification-preferences")
+	@PreAuthorize("hasRole('MEMBER')")
+	@ResponseBody
+	public ResponseEntity<Void> updateStoreNotificationPreference(
+		@PathVariable String slug,
+		Principal principal,
+		@RequestParam("preference") String preference,
+		@RequestParam("enabled") boolean enabled
+	) {
+		try {
+			membershipService.updateNotificationPreference(principal.getName(), slug, preference, enabled);
 			return ResponseEntity.noContent().build();
 		} catch (DomainRuleViolationException exception) {
 			return ResponseEntity.badRequest().build();

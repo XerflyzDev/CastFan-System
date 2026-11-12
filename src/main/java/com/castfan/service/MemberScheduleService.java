@@ -42,15 +42,18 @@ public class MemberScheduleService {
 	private final StoreRepository storeRepository;
 	private final ShiftScheduleRepository shiftScheduleRepository;
 	private final StoreEventRepository storeEventRepository;
+	private final SystemStoreService systemStoreService;
 
 	public MemberScheduleService(
 		StoreRepository storeRepository,
 		ShiftScheduleRepository shiftScheduleRepository,
-		StoreEventRepository storeEventRepository
+		StoreEventRepository storeEventRepository,
+		SystemStoreService systemStoreService
 	) {
 		this.storeRepository = storeRepository;
 		this.shiftScheduleRepository = shiftScheduleRepository;
 		this.storeEventRepository = storeEventRepository;
+		this.systemStoreService = systemStoreService;
 	}
 
 	@Transactional(readOnly = true)
@@ -60,8 +63,14 @@ public class MemberScheduleService {
 
 	@Transactional(readOnly = true)
 	public MemberScheduleView load(LocalDate requestedDate, boolean weekView) {
+		return load("castfan", requestedDate, weekView);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberScheduleView load(String storeSlug, LocalDate requestedDate, boolean weekView) {
 		var now = Instant.now();
-		var store = storeRepository.findFirstByActiveTrueOrderByIdAsc();
+		var store = storeRepository.findBySlugAndActiveTrue(storeSlug)
+			.or(() -> "castfan".equals(storeSlug) ? systemStoreService.findActive() : java.util.Optional.empty());
 		var zone = store.map(value -> safeZone(value.getTimezone())).orElse(DEFAULT_ZONE);
 		var today = LocalDate.ofInstant(now, zone);
 		if (requestedDate != null
@@ -101,9 +110,10 @@ public class MemberScheduleService {
 			);
 		}).toList();
 
-		var upcomingEvent = storeEventRepository.findUpcomingPublicEvents(
-			EventStatus.PUBLISHED, selectedDate.atStartOfDay(zone).toInstant(), PageRequest.of(0, 1)
-		).stream().findFirst().map(event -> new MemberScheduleView.UpcomingEvent(
+		var upcomingEvent = store.map(value -> storeEventRepository.findAllByStoreIdAndStatusAndEndsAtAfterOrderByStartsAtAsc(
+			value.getId(), EventStatus.PUBLISHED, selectedDate.atStartOfDay(zone).toInstant(), PageRequest.of(0, 1)
+		).stream().findFirst()).orElseGet(java.util.Optional::empty)
+		.map(event -> new MemberScheduleView.UpcomingEvent(
 			event.getId(), event.getTitle(), EVENT_DATE.format(event.getStartsAt().atZone(zone))
 		)).orElse(null);
 
@@ -114,7 +124,7 @@ public class MemberScheduleService {
 			.orElse(null);
 
 		return new MemberScheduleView(
-			SystemStoreService.DISPLAY_NAME,
+			store.map(com.castfan.entity.Store::getName).orElse("CastFan"),
 			selectedDate.toString(),
 			weekView ? SHORT_DATE.format(weekStartsOn) + " - " + SHORT_DATE.format(weekStartsOn.plusDays(6)) : FULL_DATE.format(selectedDate),
 			MONTH.format(selectedDate),

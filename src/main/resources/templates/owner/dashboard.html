@@ -21,7 +21,12 @@
             <div class="owner-quick-actions" th:if="${!workspace.stores.empty}">
                 <a class="store-card store-card-link" th:href="@{/owner/cast}" aria-label="Manage Cast accounts">
                     <span><i class="bi bi-person-gear" aria-hidden="true"></i></span>
-                    <div><small>Cast management</small><strong>Manage Cast accounts</strong><p>Add Members as Cast and manage active Cast access</p></div>
+                    <div><small>Cast management</small><strong>Manage Cast accounts</strong><p>Create store-specific Cast IDs and manage access</p></div>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a class="store-card store-card-link" th:href="@{/owner/store/settings}" aria-label="Store settings and QR">
+                    <span><i class="bi bi-qr-code" aria-hidden="true"></i></span>
+                    <div><small>Your store</small><strong>Store settings &amp; QR</strong><p>Edit store details and download the permanent QR code</p></div>
                     <i class="bi bi-chevron-right" aria-hidden="true"></i>
                 </a>
                 <a class="store-card store-card-link member-points-card" th:href="@{/owner/member-points}" aria-label="Manage Member points">

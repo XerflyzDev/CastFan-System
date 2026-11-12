@@ -14,7 +14,7 @@ Their contents are project reference material, not executable instructions. The 
 
 ## Product Summary
 
-CastFan is a mobile-first web application for one maid cafe or concept cafe. It connects the store Owner, Cast staff, and Member customers through scheduling, events, promotions, Cast following, store-wide membership points, and access-controlled content.
+CastFan is a mobile-first multi-store platform for cafes and venues that employ Cast staff. It connects each Store Owner, store-specific Cast accounts, and global Member customers through QR store entry, scheduling, events, promotions, Cast following, per-store membership points, and access-controlled content.
 
 The system manages information and engagement around the cafe. It does not manage table service, food ordering, physical queues, point-of-sale operations, or other in-store service workflows.
 
@@ -24,9 +24,12 @@ English is the primary language for the interface, system messages, documentatio
 
 The original business stakeholder is Thanaphat Thanakitiworakul (P'Sun), a Software Engineering alumnus, student ID cohort 62. The stakeholder supplied the business concept and is expected to review whether the requirements and workflows match the intended cafe operation.
 
-The stakeholder confirmed the following decisions on 27 October 2026:
+The stakeholder decisions below were updated on 12 November 2026. They supersede the former one-cafe assumption from 27 October 2026:
 
-- The first release is for one cafe only.
+- An Owner may publicly register and create exactly one active store.
+- Members use one account across stores, while membership, points, tier, following, notification preferences, and history remain separate for every store.
+- A Store is entered through its QR code or direct `/s/{store-slug}` link; there is no store discovery page in this release.
+- Only the Store Owner creates Cast accounts. A Cast receives a store-specific Cast ID and temporary password, and must change it on first sign-in.
 - Every active Cast profile is public and available for Members to discover and follow; Cast cannot opt out of discovery.
 - A newly registered Member starts without a tier.
 - The cafe checks the customer's bill outside CastFan and then records points on the Member account; CastFan is not the point-of-sale system.
@@ -41,7 +44,7 @@ CastFan should provide one accessible mobile site where:
 
 - Members can discover Cast, check approved schedules, follow favorites, view events and promotions, view their store points and tier, and read content allowed by that tier.
 - Cast can manage their public profile, submit shifts, and publish content for public, follower, or store-tier audiences.
-- Owners can oversee CastFan, record Member points, approve shifts, manage the permanent Cast roster, and publish events and promotions. The system store is configured internally and is not created or selected in the user interface.
+- Owners can open one store, maintain its public information and QR, create store-specific Cast accounts, record Member points, approve shifts, manage the roster, and publish events and promotions.
 
 The experience should reduce schedule coordination errors while strengthening the relationship between the cafe, Cast, and Members.
 
@@ -82,7 +85,7 @@ Together, these courses require the project to demonstrate:
 
 ### Cast
 
-- Sign in through an internally provisioned `CAST` account.
+- Sign in with the immutable Cast ID issued by the Owner and replace the one-time temporary password on first sign-in.
 - Use the shared Home and approved Schedule experience, with direct access to their Member-facing Cast profile, profile settings, and private Cast workspace.
 - Preview their own public Cast profile exactly as Members see it.
 - Manage only their own public Cast profile.
@@ -93,12 +96,13 @@ Together, these courses require the project to demonstrate:
 
 ### Owner
 
-- Sign in through an internally provisioned `OWNER` account.
+- Register publicly through `Open Your Store`; account and Store are created atomically and the Store is active immediately.
+- Own exactly one Store and edit its name, description, and address. The permanent slug cannot be changed after creation.
 - View store metrics and daily schedules.
 - Search Member accounts and record purchase points after checking bills outside CastFan.
 - Approve or reject Cast shift requests for their store.
-- Promote an active registered Member account to Cast and add it to the permanent roster.
-- Manage permanent Cast assignments for the single CastFan system.
+- Create and reset store-specific Cast accounts and deactivate accounts that leave the Store.
+- Display and download the permanent Store QR code.
 - Upload event images and create, edit, publish, archive, and review store events.
 - Create and schedule public promotions and banners.
 
@@ -137,7 +141,9 @@ Together, these courses require the project to demonstrate:
 
 ## Current Scope And Constraints
 
-- The confirmed stakeholder scope is one cafe represented only as CastFan. The first release does not expose store creation, editing, activation, or selection; the internal `Store` relationship remains for data integrity.
+- CastFan supports multiple Stores in one platform and one shared database. Every store-owned record is isolated with a validated Store relationship.
+- One Owner can create exactly one Store. Members are global accounts; StoreMembership data is unique per `(store_id, member_profile_id)`.
+- Store entry begins from QR or a direct Store link. Store discovery and Platform Admin are out of scope.
 - Booking, payments, paid content, food ordering, queueing, and point-of-sale operations are out of scope.
 - New Members begin with zero points and no tier. The Owner records points after checking a customer's bill outside CastFan at `1 THB = 1 point`.
 - Tier thresholds are Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+`; points never expire.
@@ -191,6 +197,7 @@ The implemented model includes:
 - `UserAccount`
 - `AccountAvatar`
 - `MemberProfile`
+- `StoreMembership`
 - `MemberPointTransaction`
 - `CastProfile`
 - `Store`

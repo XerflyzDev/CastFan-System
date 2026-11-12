@@ -163,7 +163,7 @@ public class OwnerEventService {
 	}
 
 	private com.castfan.entity.UserAccount requireOwner(String email) {
-		return userAccountRepository.findByEmailIgnoreCase(email)
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(account -> account.getRole() == UserRole.OWNER && account.getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 	}

@@ -2,6 +2,7 @@ package com.castfan.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -124,6 +126,22 @@ class MultiStoreWorkflowTests {
 			.andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Join this store")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/join")));
+	}
+
+	@Test
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	void myStoresRendersAfterRepositoryTransactionCloses() throws Exception {
+		var suffix = String.valueOf(System.nanoTime());
+		var store = storeSignupService.register(storeForm("My Stores Owner", "my-stores-owner-" + suffix + "@test.local",
+			"my-stores-" + suffix));
+		var memberAccount = registrationService.registerMember(memberForm("my-stores-member-" + suffix + "@test.local"));
+		storeEntryService.joinAndHome(memberAccount, store.getSlug());
+
+		mockMvc.perform(get("/account/stores")
+				.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(store.getName())))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/home")));
 	}
 
 	private StoreSignupForm storeForm(String owner, String email, String slug) {

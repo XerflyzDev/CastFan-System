@@ -75,6 +75,9 @@ SET store_membership_id = (SELECT MIN(id) FROM store_memberships
     WHERE store_memberships.member_profile_id = cast_follows.member_profile_id
       AND store_memberships.store_id = cast_follows.store_id);
 
+-- MySQL uses the legacy composite unique index to support fk_cast_follow_member.
+-- Add a dedicated replacement before removing that unique relationship.
+CREATE INDEX idx_cast_follow_member ON cast_follows (member_profile_id);
 ALTER TABLE cast_follows DROP INDEX uk_cast_follow_member_cast;
 ALTER TABLE cast_follows MODIFY store_id BIGINT NOT NULL;
 ALTER TABLE cast_follows MODIFY store_membership_id BIGINT NOT NULL;

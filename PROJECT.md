@@ -61,7 +61,7 @@ Together, these courses require the project to demonstrate:
 - Spring Boot as the primary backend framework.
 - Spring Data JPA as the real persistence layer.
 - Embedded H2 for local development and automated tests.
-- MySQL through Google Cloud SQL for the deployed environment.
+- MySQL 8.4 through Aiven for the deployed environment.
 - Traceable stakeholder, functional, non-functional, and system requirements.
 - A documented relational data model with appropriate keys, constraints, relationships, and migrations.
 - A clear Controller, Service, Repository, Entity, DTO/form, configuration, and security structure.
@@ -162,10 +162,10 @@ Together, these courses require the project to demonstrate:
 | Persistence | Spring Data JPA |
 | Schema migration | Flyway |
 | Local/test database | Embedded H2 |
-| Deployed database | Cloud SQL for MySQL 8.4 |
-| Hosting | Google Cloud Run |
-| Secrets | Google Secret Manager |
-| Container registry | Artifact Registry |
+| Deployed database | Aiven MySQL 8.4 |
+| Hosting | Render Web Service |
+| Secrets | Render protected environment variables |
+| Container build | Render Docker build from `main` |
 | Build | Maven Wrapper, Docker |
 | Tests | JUnit and Spring Boot Test |
 
@@ -175,7 +175,7 @@ Runtime flow:
 Mobile/Desktop Browser
         |
         v
-Google Cloud Run
+Render Web Service
         |
         v
 Spring MVC Controller
@@ -187,7 +187,7 @@ Service + authorization rules
 Spring Data JPA Repository
         |
         +-- H2 for dev/test
-        `-- Cloud SQL MySQL for prod
+        `-- Aiven MySQL 8.4 for prod
 ```
 
 ## Data Model
@@ -228,7 +228,7 @@ The complete visual source of truth is [`docs/ui-design-system.md`](docs/ui-desi
 - Enforce role and resource ownership in the service layer.
 - Keep CSRF protection enabled for cookie-authenticated state changes.
 - Use secure, HTTP-only, SameSite session cookies in production.
-- Require HTTPS and honor Cloud Run forwarded headers.
+- Require HTTPS and honor Render forwarded headers.
 - Prevent IDOR by deriving ownership from the authenticated principal.
 - Validate all input server-side and render user content safely.
 - Never expose H2 Console, design concepts, secrets, or non-health Actuator endpoints in production.
@@ -241,16 +241,15 @@ Remaining security work is tracked in [`docs/security-review.md`](docs/security-
 
 | Resource | Value |
 | --- | --- |
-| Project | `castfan-system` |
-| Region | `asia-southeast1` |
-| Cloud Run | `https://castfan-473125501009.asia-southeast1.run.app` |
-| Cloud SQL | `castfan-system:asia-southeast1:castfan-mysql` |
-| Database | `castfan` |
-| Artifact Registry | `castfan-images` |
-| Runtime service account | `castfan-runtime@castfan-system.iam.gserviceaccount.com` |
-| Deployment automation | GitHub Actions with keyless Workload Identity Federation |
+| Render service | `CastFan-System` |
+| Public URL | `https://castfan-system.onrender.com` |
+| Render region/plan | Singapore / Free |
+| Production branch | `main` |
+| Database | Aiven MySQL 8.4 / `defaultdb` |
+| Health endpoint | `/actuator/health` |
+| Deployment automation | GitHub CI checks, followed by Render Auto-Deploy on `main` |
 
-The Cloud SQL instance is currently a 30-day free-trial resource intended for development and demonstration. It has no backup support and must be exported or upgraded before its trial counter expires. Deployment details are maintained in [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md).
+The current Aiven service is operational but its plan cost and public network allowlist require a separate approved optimization task. Render/Aiven release details are maintained in [`docs/render-aiven-deployment.md`](docs/render-aiven-deployment.md). The former Google Cloud resources remain unchanged until a backup and decommission plan is approved.
 
 ## Success Criteria
 
@@ -259,7 +258,7 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - Content access cannot be bypassed by changing URLs or identifiers.
 - Owner and Cast actions are scoped to the correct store and identity.
 - H2 tests and the opt-in MySQL migration test pass.
-- The deployed service reports healthy and persists through Cloud SQL.
+- The deployed service reports healthy on Render and persists through Aiven MySQL.
 - The interface is responsive, consistent, English-first, and aligned with the approved design system.
 - No production secret is present in source control.
 - The project can be demonstrated from registration through role-specific workflows.
@@ -282,5 +281,6 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - [`docs/database-migrations.md`](docs/database-migrations.md): Flyway and MySQL verification workflow.
 - [`docs/ui-design-system.md`](docs/ui-design-system.md): authoritative visual and interaction rules.
 - [`docs/security-review.md`](docs/security-review.md): security controls and remaining risks.
-- [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): Cloud resources and deployment procedure.
+- [`docs/render-aiven-deployment.md`](docs/render-aiven-deployment.md): current Render/Aiven release and rollback procedure.
+- [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): historical Google Cloud recovery reference.
 

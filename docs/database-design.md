@@ -1,6 +1,6 @@
 # CastFan Database Design
 
-This document is the source of truth for the first CastFan relational schema. The model is designed for Spring Data JPA and must remain compatible with both embedded H2 and Cloud SQL for MySQL.
+This document is the source of truth for the CastFan relational schema. The model is designed for Spring Data JPA and must remain compatible with embedded H2 and the deployed Aiven MySQL 8.4 database.
 
 ## Design Principles
 
@@ -250,5 +250,5 @@ Rules:
 4. `CastFollow` and Member discovery queries.
 5. `MemberPointTransaction`, store-tier derivation, and access checks.
 6. `CastContent`, `StoreEvent`, and `StorePromotion`.
-7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 9.
-8. Run the migration and Hibernate validation against a disposable MySQL database before the next Cloud SQL deployment.
+7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 12.
+8. Run the migration and Hibernate validation against a disposable MySQL database before the next Render/Aiven deployment.

@@ -1,6 +1,6 @@
 # Security and Production Readiness Review
 
-Review date: 29 October 2026
+Review date: 14 November 2026
 
 ## Implemented Controls
 
@@ -11,29 +11,32 @@ Review date: 29 October 2026
 - Bean Validation and service-level domain validation before persistence.
 - Generic sign-in failures and production error responses that do not expose exception messages.
 - H2 Console and static design concepts restricted to the development and test profiles.
-- Production HTTPS enforcement behind forwarded Cloud Run headers.
+- Production HTTPS enforcement behind Render's forwarded proxy headers.
 - Secure, HTTP-only, SameSite session cookies with a configurable timeout.
 - Production Content Security Policy, clickjacking protection, MIME sniffing protection, referrer policy, and browser permissions policy.
-- Production connection-pool limits suitable for an initial Cloud Run deployment.
+- Production connection-pool limits suitable for the Render Free instance and the Aiven MySQL service.
 - Automated tests for role boundaries, ownership boundaries, CSRF-sensitive workflows, content visibility, and production browser headers.
-- Flyway version 1 production schema with migration naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
-- Opt-in integration coverage that applies Flyway and runs Hibernate schema validation against real MySQL; version 1 passed on MySQL 8.4.11 on 15 October 2026.
-- Public aggregate health and liveness endpoints for Cloud Run probes, with component details hidden and every non-health Actuator route denied.
-- GitHub Actions post-deployment verification that waits for the deployed Cloud Run health endpoint to report `UP`.
-- Trivy source-dependency scanning before tests/deployment and immutable container-image scanning before a revision is deployed.
+- Forward-only Flyway production migrations with naming validation, disabled production cleanup, and automated Hibernate schema validation in H2 MySQL mode.
+- Integration coverage that applies every Flyway migration and runs Hibernate schema validation against disposable MySQL 8.4 in GitHub CI.
+- Public aggregate health and liveness endpoints for Render health probes, with component details hidden and every non-health Actuator route denied.
+- Render health checks against `/actuator/health`, with the deployed service required to report `UP`.
+- Trivy source-dependency and locally built container-image scanning before merge.
 - Responsive and accessibility smoke coverage across Member, Cast, and Owner routes at 320 px, 390 px, and desktop widths, with no root-level horizontal overflow in the reviewed pages.
 
 ## Remaining Production Gates
 
-- Add login rate limiting at the edge with Google Cloud Armor or an equivalent shared store. Per-instance memory counters are not sufficient when Cloud Run scales horizontally.
+- Add login rate limiting at the edge or through an equivalent shared store. Per-instance memory counters are not sufficient across deployments or instances.
 - Add an account recovery process before accepting real users.
 - Review personal data retention and audit logging requirements with the stakeholder.
-- Configure Cloud SQL backups, Secret Manager rotation, budget alerts, and least-privilege IAM.
+- Reduce or replace the current Aiven `business-4` plan after a verified backup and migration rehearsal.
+- Restrict the Aiven public network allowlist when Render provides an approved static-egress or private-network option.
+- Configure backup verification, credential rotation, cost alerts, and least-privilege database users.
 
 ## Deployment Rules
 
 - Production must run with `SPRING_PROFILES_ACTIVE=prod`.
 - Never pass production credentials as command-line literals or commit them to properties files.
-- Use numbered Secret Manager versions for predictable releases.
-- Keep Cloud Run and Cloud SQL in the same region.
+- Keep `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` only in protected Render environment variables.
+- Require TLS for Aiven MySQL connections and keep Render and Aiven in Singapore where possible.
+- Keep Render Auto-Deploy scoped to the protected `main` branch.
 - Treat failed security tests or schema validation as release blockers.

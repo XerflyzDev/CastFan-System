@@ -1,5 +1,7 @@
 # Google Cloud Deployment
 
+> **Historical deployment reference:** CastFan production moved to Render and Aiven MySQL on 14 November 2026. Do not use this document for a normal release. The current release procedure is [`render-aiven-deployment.md`](render-aiven-deployment.md). Google Cloud resources remain untouched until a separately approved backup and decommission plan is completed.
+
 ## Deployment Decision
 
 CastFan will use the following production services:

@@ -20,7 +20,7 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Cloud Run health checks and production readiness**
+> **Render deployment and production readiness**
 
 The project includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production migrations, database-backed authentication, multi-store onboarding, QR Store entry, StoreMembership isolation, store-specific Cast credentials, scheduling, following, content, event, promotion, and points workflows. Owners create one active Store and can download its permanent QR. Members retain one global account while joining multiple Stores independently. Cast accounts are issued by one Store Owner with a temporary password and forced first-login password change. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB. Published Store data is always queried through a validated Store context.
 
@@ -73,9 +73,9 @@ Every active Cast profile is public and available for Member discovery and follo
 | Web | Spring MVC, Thymeleaf |
 | Persistence | Spring Data JPA |
 | Development Database | Embedded H2 Database |
-| Deployment Database | Cloud SQL for MySQL |
-| Application Hosting | Google Cloud Run |
-| Secret Storage | Google Cloud Secret Manager |
+| Deployment Database | Aiven MySQL 8.4 |
+| Application Hosting | Render Web Service |
+| Secret Storage | Render protected environment variables |
 | Frontend | HTML, JavaScript, Bootstrap, Custom CSS |
 | Build Tool | Maven |
 | Testing | JUnit, Spring Boot Test |
@@ -86,7 +86,7 @@ Every active Cast profile is public and available for Member discovery and follo
 Client / Mobile Browser
           |
           v
-Google Cloud Run
+Render Web Service
           |
           v
 Spring MVC Controller
@@ -99,7 +99,7 @@ Spring Data JPA Repository
           |
           +-- H2 Database (development and test)
           |
-          `-- Cloud SQL MySQL (deployment)
+          `-- Aiven MySQL 8.4 (deployment, TLS required)
 ```
 
 The backend will be organized by responsibility into `Controller`, `Service`, `Repository`, `Entity`, `DTO`, configuration, and security packages to keep the system maintainable and testable.
@@ -108,7 +108,7 @@ The backend will be organized by responsibility into `Controller`, `Service`, `R
 
 - `dev` - Embedded H2 for local development.
 - `test` - Isolated H2 database for automated tests.
-- `prod` - Cloud SQL for MySQL, configured through environment variables or a secret manager.
+- `prod` - Aiven MySQL 8.4, configured through protected Render environment variables.
 
 Sensitive data such as database passwords, API secrets, and service-account keys must never be committed to the repository.
 
@@ -138,9 +138,9 @@ Entity details, relationships, constraints, and implementation order are documen
 
 The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its Flyway V6 core, V9 legacy-schema removal, Owner workflow, Member views, and Cast content-access integration are implemented.
 
-The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
+The production deployment target and release checklist are documented in [docs/render-aiven-deployment.md](docs/render-aiven-deployment.md). The former Google Cloud procedure is retained as historical recovery documentation.
 
-Pushes to `main` are prepared to run the full H2/MySQL test suite and deploy an immutable image to Cloud Run through keyless GitHub Actions Workload Identity Federation. The workflow is stored at [`.github/workflows/google-cloud-deploy.yml`](.github/workflows/google-cloud-deploy.yml).
+Pull requests and pushes to `main` run the H2/MySQL suite, source scan, Docker build, and container scan through [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Render deploys the tested `main` branch automatically after merge.
 
 The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
 
@@ -185,10 +185,10 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
 - [x] Add the initial Flyway production schema and validate it against H2 MySQL mode and MySQL 8.4.
 - [x] Add the store-wide Membership Points core, immutable ledger, tier boundaries, and Owner-only service contract in Flyway V6.
-- [x] Add restricted production health and liveness endpoints for Cloud Run probes.
-- [x] Connect Cloud SQL for MySQL through the Cloud SQL Java Connector.
-- [x] Deploy the Spring Boot service to Google Cloud Run.
-- [x] Store production credentials in Google Cloud Secret Manager.
+- [x] Add restricted production health and liveness endpoints for Render probes.
+- [x] Connect Aiven MySQL 8.4 with TLS through protected Render environment variables.
+- [x] Deploy the Spring Boot container as a Render Web Service.
+- [x] Keep production credentials in protected Render environment variables.
 - [x] Support multiple independently scoped stores, with one store per Owner and QR-based Member entry.
 - [x] Use the confirmed Owner-recorded, store-wide points model as the only membership workflow.
 - [ ] Add validation, error handling, and broader automated tests.
@@ -241,13 +241,13 @@ The development H2 Console is available at [http://localhost:8080/h2-console](ht
 
 ### Production Database
 
-Set `SPRING_PROFILES_ACTIVE=prod` and the following environment variables before connecting to Cloud SQL for MySQL:
+Set `SPRING_PROFILES_ACTIVE=prod` and the following protected Render environment variables before connecting to Aiven MySQL:
 
 - `DB_URL`
 - `DB_USERNAME`
 - `DB_PASSWORD`
 
-Production will run on Google Cloud Run and connect to Cloud SQL for MySQL. Credentials must be provided from Secret Manager rather than committed files. See [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md) for the planned deployment process.
+Production runs on Render and connects to Aiven MySQL with TLS required. Credentials must remain in protected Render environment variables and must never be committed. See [docs/render-aiven-deployment.md](docs/render-aiven-deployment.md) for the release and rollback procedure.
 
 ## Repository
 

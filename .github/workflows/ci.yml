@@ -1,0 +1,97 @@
+name: Test and scan CastFan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-scan:
+    name: Scan source dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Scan dependencies and repository files
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+  test:
+    name: Test with H2 and MySQL
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: castfan
+          MYSQL_USER: castfan
+          MYSQL_PASSWORD: castfan_test
+          MYSQL_ROOT_PASSWORD: castfan_root_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --host=127.0.0.1 --user=root --password=castfan_root_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      CASTFAN_MYSQL_TEST_URL: jdbc:mysql://127.0.0.1:3306/castfan
+      CASTFAN_MYSQL_TEST_USERNAME: castfan
+      CASTFAN_MYSQL_TEST_PASSWORD: castfan_test
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run H2 and MySQL test suite
+        run: ./mvnw --batch-mode test
+
+  container-scan:
+    name: Build and scan container image
+    needs: [security-scan, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build local CI image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          push: false
+          tags: castfan-ci:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: castfan-ci:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH

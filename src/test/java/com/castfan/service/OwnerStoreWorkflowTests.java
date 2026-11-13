@@ -53,10 +53,10 @@ class OwnerStoreWorkflowTests {
 		var suffix = Long.toString(System.nanoTime());
 		owner = provisioningService.provisionOwner("roster-owner-" + suffix + "@castfan.test",
 			"secure-owner-pass-123", "CastFan Owner");
-		cast = provisioningService.provisionCast("roster-cast-" + suffix + "@castfan.test",
-			"secure-cast-pass-123", "Cast account", "Mina " + suffix);
 		store = storeService.createStore(owner, "Internal system store", "system-" + suffix,
 			null, "Bangkok", "Asia/Bangkok");
+		cast = provisioningService.provisionCast("roster-cast-" + suffix + "@castfan.test",
+			"secure-cast-pass-123", "Cast account", "Mina " + suffix);
 	}
 
 	@Test
@@ -76,11 +76,12 @@ class OwnerStoreWorkflowTests {
 
 	@Test
 	void ownerCanManageRosterWithoutSendingAStoreId() throws Exception {
-		var profile = castProfileRepository.findByUserAccountId(cast.getId()).orElseThrow();
-		mockMvc.perform(post("/owner/cast").with(ownerUser()).with(csrf())
-				.param("castProfileId", profile.getId().toString()))
-			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/cast?assigned"));
+		mockMvc.perform(post("/owner/cast/create").with(ownerUser()).with(csrf())
+				.param("displayName", "New Cast Account")
+				.param("stageName", "New Store Cast"))
+			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/cast?created"));
 
+		var profile = castProfileRepository.findByStoreIdAndStageNameKey(store.getId(), "new store cast").orElseThrow();
 		var assignment = storeCastRepository.findByStoreIdAndCastProfileId(store.getId(), profile.getId()).orElseThrow();
 		mockMvc.perform(post("/owner/cast/{id}/deactivate", assignment.getId()).with(ownerUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/cast?removed=true"));
@@ -92,36 +93,22 @@ class OwnerStoreWorkflowTests {
 	}
 
 	@Test
-	void ownerCanPromoteRegisteredMemberAndAddThemToRoster() throws Exception {
+	void registeredMemberCannotBePromotedIntoAStoreCastAccount() throws Exception {
 		var member = userAccountRepository.saveAndFlush(new UserAccount(
 			"promote-member-" + System.nanoTime() + "@castfan.test", "existing-password-hash",
 			"Registered Member", UserRole.MEMBER, UserStatus.ACTIVE
 		));
 		var memberProfile = profileService.createMemberProfile(member);
-		assertThat(ownerStoreService.load(owner.getEmail()).promotableMembers())
-			.anyMatch(candidate -> candidate.id().equals(memberProfile.getId()));
-
-		mockMvc.perform(get("/owner/cast").with(ownerUser()))
-			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Promote member")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString(member.getEmail())));
-
 		mockMvc.perform(post("/owner/cast/promote").with(ownerUser()).with(csrf())
 				.param("memberProfileId", memberProfile.getId().toString())
 				.param("stageName", "New Cast"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/owner/cast?promoted"));
+			.andExpect(status().isNotFound());
 
 		var promotedAccount = userAccountRepository.findById(member.getId()).orElseThrow();
-		assertThat(promotedAccount.getRole()).isEqualTo(UserRole.CAST);
+		assertThat(promotedAccount.getRole()).isEqualTo(UserRole.MEMBER);
 		assertThat(promotedAccount.getPasswordHash()).isEqualTo("existing-password-hash");
 		assertThat(memberProfileRepository.findByUserAccountId(member.getId())).isPresent();
-		var castProfile = castProfileRepository.findByUserAccountId(member.getId()).orElseThrow();
-		assertThat(castProfile.getStageName()).isEqualTo("New Cast");
-		assertThat(storeCastRepository.findByStoreIdAndCastProfileId(store.getId(), castProfile.getId())
-			.orElseThrow().isActive()).isTrue();
-		assertThat(ownerStoreService.load(owner.getEmail()).promotableMembers())
-			.noneMatch(candidate -> candidate.id().equals(memberProfile.getId()));
+		assertThat(castProfileRepository.findByUserAccountId(member.getId())).isEmpty();
 	}
 
 	@Test

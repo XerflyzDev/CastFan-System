@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CastContentImageRepository extends JpaRepository<CastContentImage, Long> {
-	@Query("select image from CastContentImage image where image.castContent.id = :id and lower(image.castContent.castProfile.userAccount.email) = lower(:email)")
+	@Query("select image from CastContentImage image where image.castContent.id = :id and lower(image.castContent.castProfile.userAccount.loginIdentifier) = lower(:email)")
 	Optional<CastContentImage> findOwned(@Param("id") Long id, @Param("email") String email);
 
 	@Query("select image from CastContentImage image where image.castContent.id = :id and image.castContent.castProfile.id = :profileId and image.castContent.status = :status and image.castContent.castProfile.userAccount.status = :userStatus")

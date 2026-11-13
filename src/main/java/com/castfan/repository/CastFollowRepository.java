@@ -14,6 +14,8 @@ public interface CastFollowRepository extends JpaRepository<CastFollow, Long> {
 
 	boolean existsByMemberProfileIdAndCastProfileId(Long memberProfileId, Long castProfileId);
 
+	boolean existsByStoreMembershipIdAndCastProfileId(Long storeMembershipId, Long castProfileId);
+
 	long countByCastProfileId(Long castProfileId);
 
 	@Query("""
@@ -43,4 +45,16 @@ public interface CastFollowRepository extends JpaRepository<CastFollow, Long> {
 
 	@Modifying
 	long deleteByMemberProfileIdAndCastProfileId(Long memberProfileId, Long castProfileId);
+
+	long deleteByStoreMembershipIdAndCastProfileId(Long storeMembershipId, Long castProfileId);
+
+	@Query("""
+		select follow from CastFollow follow
+		join fetch follow.castProfile profile
+		join fetch profile.userAccount account
+		where follow.storeMembership.id = :membershipId and account.status = :status
+		order by profile.stageName asc
+		""")
+	List<CastFollow> findVisibleFollowingForMembership(@Param("membershipId") Long membershipId,
+		@Param("status") UserStatus status);
 }

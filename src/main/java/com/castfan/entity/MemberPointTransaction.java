@@ -22,7 +22,7 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
 	name = "member_point_transactions",
 	uniqueConstraints = {
-		@UniqueConstraint(name = "uk_member_point_receipt_key", columnNames = "receipt_reference_key"),
+		@UniqueConstraint(name = "uk_member_point_store_receipt", columnNames = {"store_id", "receipt_reference_key"}),
 		@UniqueConstraint(name = "uk_member_point_original", columnNames = "original_transaction_id")
 	},
 	indexes = {
@@ -39,6 +39,14 @@ public class MemberPointTransaction {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "member_profile_id", nullable = false)
 	private MemberProfile memberProfile;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_membership_id")
+	private StoreMembership storeMembership;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "created_by_user_id", nullable = false)
@@ -74,6 +82,24 @@ public class MemberPointTransaction {
 	}
 
 	public MemberPointTransaction(
+		StoreMembership storeMembership,
+		UserAccount createdBy,
+		MemberPointTransactionType type,
+		BigDecimal purchaseAmount,
+		long pointsDelta,
+		String receiptReference,
+		String receiptReferenceKey,
+		String reason,
+		MemberPointTransaction originalTransaction
+	) {
+		this(storeMembership.getMemberProfile(), createdBy, type, purchaseAmount, pointsDelta,
+			receiptReference, receiptReferenceKey, reason, originalTransaction);
+		this.storeMembership = storeMembership;
+		this.store = storeMembership.getStore();
+	}
+
+	@Deprecated(forRemoval = false)
+	public MemberPointTransaction(
 		MemberProfile memberProfile,
 		UserAccount createdBy,
 		MemberPointTransactionType type,
@@ -102,6 +128,8 @@ public class MemberPointTransaction {
 
 	public Long getId() { return id; }
 	public MemberProfile getMemberProfile() { return memberProfile; }
+	public Store getStore() { return store; }
+	public StoreMembership getStoreMembership() { return storeMembership; }
 	public UserAccount getCreatedBy() { return createdBy; }
 	public MemberPointTransactionType getType() { return type; }
 	public BigDecimal getPurchaseAmount() { return purchaseAmount; }

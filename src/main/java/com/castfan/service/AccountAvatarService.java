@@ -37,7 +37,7 @@ public class AccountAvatarService {
 
 	@Transactional(readOnly = true)
 	public Optional<AvatarData> load(String email) {
-		return accountAvatarRepository.findByUserAccountEmailIgnoreCase(email)
+		return accountAvatarRepository.findByUserAccountLoginIdentifierIgnoreCase(email)
 			.map(avatar -> new AvatarData(avatar.getContentType(), avatar.getImageData()));
 	}
 
@@ -55,7 +55,7 @@ public class AccountAvatarService {
 			throw new DomainRuleViolationException("Choose an image to upload.");
 		}
 		var upload = ImageUploadSupport.read(file, "Profile");
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
 		var existingAvatar = accountAvatarRepository.findById(account.getId());
 		var avatar = existingAvatar.orElseGet(() -> new AccountAvatar(account, upload.contentType(), upload.data()));
@@ -68,7 +68,7 @@ public class AccountAvatarService {
 
 	@Transactional
 	public void remove(String email) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
 		accountAvatarRepository.deleteById(account.getId());
 		syncProfileUrl(account.getId(), null);

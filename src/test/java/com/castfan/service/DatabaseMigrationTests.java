@@ -24,7 +24,7 @@ class DatabaseMigrationTests {
 
 	private static final List<String> EXPECTED_TABLES = List.of(
 		"account_avatars", "cast_content", "cast_content_images", "cast_follows", "cast_profiles", "flyway_schema_history",
-		"member_point_transactions", "member_profiles", "shift_schedules", "store_cast", "store_event_images", "store_events",
+		"member_point_transactions", "member_profiles", "store_memberships", "shift_schedules", "store_cast", "store_event_images", "store_events",
 		"store_promotion_images", "store_promotions", "stores", "user_accounts"
 	);
 
@@ -60,7 +60,7 @@ class DatabaseMigrationTests {
 			where table_schema = 'public' and table_name = 'store_promotions'
 			""", String.class);
 		assertThat(promotionColumns).contains("status").doesNotContain("active");
-		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("11");
+		assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("12");
 		assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 	}
 }

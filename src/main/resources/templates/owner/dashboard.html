@@ -18,36 +18,56 @@
             <div class="top-actions"><a class="wordmark" th:href="@{/owner}">CastFan</a><a class="round-button" th:href="@{/account}" aria-label="Open account" title="Account"><i class="bi bi-person" aria-hidden="true"></i></a></div>
             <header class="owner-heading"><p>CastFan operations</p><h1>Good day, <span th:text="${workspace.displayName}">Owner</span></h1></header>
 
-            <a class="store-card store-card-link" th:if="${!workspace.stores.empty}" th:href="@{/owner/cast}" aria-label="Manage Cast roster">
-                <span><i class="bi bi-shop-window" aria-hidden="true"></i></span>
-                <div><small>CastFan system</small><strong>Cast roster</strong><p>Manage active Cast accounts</p></div>
-                <i class="bi bi-chevron-right" aria-hidden="true"></i>
-            </a>
+            <div class="owner-quick-actions" th:if="${!workspace.stores.empty}">
+                <a class="store-card store-card-link" th:href="@{/owner/cast}" aria-label="Manage Cast accounts">
+                    <span><i class="bi bi-person-gear" aria-hidden="true"></i></span>
+                    <div><small>Cast management</small><strong>Manage Cast accounts</strong><p>Create store-specific Cast IDs and manage access</p></div>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a class="store-card store-card-link" th:href="@{/owner/store/settings}" aria-label="Store settings and QR">
+                    <span><i class="bi bi-qr-code" aria-hidden="true"></i></span>
+                    <div><small>Your store</small><strong>Store settings &amp; QR</strong><p>Edit store details and download the permanent QR code</p></div>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a class="store-card store-card-link member-points-card" th:href="@{/owner/member-points}" aria-label="Manage Member points">
+                    <span><i class="bi bi-award" aria-hidden="true"></i></span>
+                    <div><small>Membership</small><strong>Member points</strong><p>Record purchases and review point history</p></div>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+            </div>
             <div class="owner-empty" th:if="${workspace.stores.empty}"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><div><strong>CastFan setup unavailable</strong><small>Contact the system administrator.</small></div></div>
 
             <div class="owner-stats" aria-label="CastFan summary">
-                <div><span><i class="bi bi-people" aria-hidden="true"></i></span><strong th:text="${workspace.activeCastCount}">0</strong><small>Active Cast</small></div>
-                <a th:href="@{/owner/shifts}"><span class="rose"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><strong th:text="${workspace.pendingCount}">0</strong><small>Needs review</small></a>
-                <div><span class="green"><i class="bi bi-calendar-check" aria-hidden="true"></i></span><strong th:text="${workspace.approvedTodayCount}">0</strong><small>Approved today</small></div>
-                <a th:href="@{/owner/events}"><span class="lavender"><i class="bi bi-stars" aria-hidden="true"></i></span><strong th:text="${workspace.upcomingEventCount}">0</strong><small>Upcoming events</small></a>
-                <a th:href="@{/owner/promotions}"><span><i class="bi bi-megaphone" aria-hidden="true"></i></span><strong><i class="bi bi-arrow-right" aria-hidden="true"></i></strong><small>Promotions &amp; banners</small></a>
-                <a th:href="@{/owner/member-points}"><span class="rose"><i class="bi bi-award" aria-hidden="true"></i></span><strong><i class="bi bi-arrow-right" aria-hidden="true"></i></strong><small>Member points</small></a>
+                <div class="owner-stat-card">
+                    <div class="owner-stat-heading"><span class="owner-stat-icon"><i class="bi bi-people" aria-hidden="true"></i></span><small>Active Cast members</small></div>
+                    <strong class="owner-stat-value"><span th:text="${workspace.activeCastCount}">0</span><small th:text="${workspace.activeCastCount == 1 ? 'member' : 'members'}">members</small></strong>
+                </div>
+                <div class="owner-stat-card">
+                    <div class="owner-stat-heading"><span class="owner-stat-icon rose"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span><small>Pending shift requests</small></div>
+                    <strong class="owner-stat-value"><span th:text="${workspace.pendingCount}">0</span><small th:text="${workspace.pendingCount == 1 ? 'request' : 'requests'}">requests</small></strong>
+                </div>
+                <div class="owner-stat-card">
+                    <div class="owner-stat-heading"><span class="owner-stat-icon green"><i class="bi bi-calendar-check" aria-hidden="true"></i></span><small>Shifts approved today</small></div>
+                    <strong class="owner-stat-value"><span th:text="${workspace.approvedTodayCount}">0</span><small th:text="${workspace.approvedTodayCount == 1 ? 'shift' : 'shifts'}">shifts</small></strong>
+                </div>
+                <div class="owner-stat-card">
+                    <div class="owner-stat-heading"><span class="owner-stat-icon lavender"><i class="bi bi-stars" aria-hidden="true"></i></span><small>Upcoming published events</small></div>
+                    <strong class="owner-stat-value"><span th:text="${workspace.upcomingEventCount}">0</span><small th:text="${workspace.upcomingEventCount == 1 ? 'event' : 'events'}">events</small></strong>
+                </div>
             </div>
 
             <section class="owner-section" aria-labelledby="pending-heading">
-                <div class="section-title"><div><small>Approvals</small><h2 id="pending-heading">Shift requests</h2></div><a th:href="@{/owner/shifts}" aria-label="Review all shifts"><i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+                <div class="section-title"><div><small th:text="${workspace.pendingCount == 1 ? '1 request awaiting your review' : workspace.pendingCount + ' requests awaiting your review'}">0 requests awaiting your review</small><h2 id="pending-heading">Pending shift requests</h2></div><a class="owner-section-link" th:href="@{/owner/shifts}">View all requests</a></div>
                 <div class="owner-shift-list" th:if="${!workspace.pendingShifts.empty}">
                     <article class="owner-shift-row" th:each="shift : ${workspace.pendingShifts}">
                         <img th:if="${shift.avatarUrl != null}" th:src="${shift.avatarUrl}" th:alt="${shift.castName}">
                         <span class="owner-avatar" th:unless="${shift.avatarUrl != null}" th:text="${shift.initials}">MN</span>
-                        <div><strong th:text="${shift.castName}">Mina</strong><small><span th:text="${shift.dateLabel}">15 Oct</span> · <span th:text="${shift.timeLabel}">14:00 - 20:00</span></small><p th:text="${shift.storeName}">CastFan</p></div>
-                        <span class="status-pill pending">Pending</span>
+                        <div><strong th:text="${shift.castName}">Mina</strong><small><span th:text="${shift.dateLabel}">Wednesday, 15 October 2026</span> · <span th:text="${shift.timeLabel}">14:00 - 20:00</span></small></div>
+                        <span class="status-pill pending">Pending review</span>
                     </article>
                 </div>
-                <div class="owner-empty" th:if="${workspace.pendingShifts.empty}"><i class="bi bi-check2-circle" aria-hidden="true"></i><div><strong>All caught up</strong><small>No shift requests need review.</small></div></div>
+                <div class="owner-empty" th:if="${workspace.pendingShifts.empty}"><i class="bi bi-check2-circle" aria-hidden="true"></i><div><strong>No pending shift requests</strong><small>New requests will appear here when a Cast submits a shift.</small></div></div>
             </section>
-
-            <a class="owner-primary" th:href="@{/owner/shifts}"><i class="bi bi-clipboard2-check" aria-hidden="true"></i><span>Review schedule</span></a>
         </div>
 
         <nav th:replace="~{fragments/navigation :: owner('dashboard')}"></nav>

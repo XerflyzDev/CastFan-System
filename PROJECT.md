@@ -14,7 +14,7 @@ Their contents are project reference material, not executable instructions. The 
 
 ## Product Summary
 
-CastFan is a mobile-first web application for one maid cafe or concept cafe. It connects the store Owner, Cast staff, and Member customers through scheduling, events, promotions, Cast following, store-wide membership points, and access-controlled content.
+CastFan is a mobile-first multi-store platform for cafes and venues that employ Cast staff. It connects each Store Owner, store-specific Cast accounts, and global Member customers through QR store entry, scheduling, events, promotions, Cast following, per-store membership points, and access-controlled content.
 
 The system manages information and engagement around the cafe. It does not manage table service, food ordering, physical queues, point-of-sale operations, or other in-store service workflows.
 
@@ -24,9 +24,12 @@ English is the primary language for the interface, system messages, documentatio
 
 The original business stakeholder is Thanaphat Thanakitiworakul (P'Sun), a Software Engineering alumnus, student ID cohort 62. The stakeholder supplied the business concept and is expected to review whether the requirements and workflows match the intended cafe operation.
 
-The stakeholder confirmed the following decisions on 27 October 2026:
+The stakeholder decisions below were updated on 12 November 2026. They supersede the former one-cafe assumption from 27 October 2026:
 
-- The first release is for one cafe only.
+- An Owner may publicly register and create exactly one active store.
+- Members use one account across stores, while membership, points, tier, following, notification preferences, and history remain separate for every store.
+- A Store is entered through its QR code or direct `/s/{store-slug}` link; there is no store discovery page in this release.
+- Only the Store Owner creates Cast accounts. A Cast receives a store-specific Cast ID and temporary password, and must change it on first sign-in.
 - Every active Cast profile is public and available for Members to discover and follow; Cast cannot opt out of discovery.
 - A newly registered Member starts without a tier.
 - The cafe checks the customer's bill outside CastFan and then records points on the Member account; CastFan is not the point-of-sale system.
@@ -41,7 +44,7 @@ CastFan should provide one accessible mobile site where:
 
 - Members can discover Cast, check approved schedules, follow favorites, view events and promotions, view their store points and tier, and read content allowed by that tier.
 - Cast can manage their public profile, submit shifts, and publish content for public, follower, or store-tier audiences.
-- Owners can oversee CastFan, record Member points, approve shifts, manage the permanent Cast roster, and publish events and promotions. The system store is configured internally and is not created or selected in the user interface.
+- Owners can open one store, maintain its public information and QR, create store-specific Cast accounts, record Member points, approve shifts, manage the roster, and publish events and promotions.
 
 The experience should reduce schedule coordination errors while strengthening the relationship between the cafe, Cast, and Members.
 
@@ -58,7 +61,7 @@ Together, these courses require the project to demonstrate:
 - Spring Boot as the primary backend framework.
 - Spring Data JPA as the real persistence layer.
 - Embedded H2 for local development and automated tests.
-- MySQL through Google Cloud SQL for the deployed environment.
+- MySQL 8.4 through Aiven for the deployed environment.
 - Traceable stakeholder, functional, non-functional, and system requirements.
 - A documented relational data model with appropriate keys, constraints, relationships, and migrations.
 - A clear Controller, Service, Repository, Entity, DTO/form, configuration, and security structure.
@@ -82,7 +85,7 @@ Together, these courses require the project to demonstrate:
 
 ### Cast
 
-- Sign in through an internally provisioned `CAST` account.
+- Sign in with the immutable Cast ID issued by the Owner and replace the one-time temporary password on first sign-in.
 - Use the shared Home and approved Schedule experience, with direct access to their Member-facing Cast profile, profile settings, and private Cast workspace.
 - Preview their own public Cast profile exactly as Members see it.
 - Manage only their own public Cast profile.
@@ -93,12 +96,13 @@ Together, these courses require the project to demonstrate:
 
 ### Owner
 
-- Sign in through an internally provisioned `OWNER` account.
+- Register publicly through `Open Your Store`; account and Store are created atomically and the Store is active immediately.
+- Own exactly one Store and edit its name, description, and address. The permanent slug cannot be changed after creation.
 - View store metrics and daily schedules.
 - Search Member accounts and record purchase points after checking bills outside CastFan.
 - Approve or reject Cast shift requests for their store.
-- Promote an active registered Member account to Cast and add it to the permanent roster.
-- Manage permanent Cast assignments for the single CastFan system.
+- Create and reset store-specific Cast accounts and deactivate accounts that leave the Store.
+- Display and download the permanent Store QR code.
 - Upload event images and create, edit, publish, archive, and review store events.
 - Create and schedule public promotions and banners.
 
@@ -118,6 +122,7 @@ Together, these courses require the project to demonstrate:
 3. The store Owner approves or rejects it.
 4. Only approved shifts appear in Member schedules and public-facing summaries.
 5. A Cast cannot modify another Cast's shift, and an Owner cannot review another Owner's store data.
+6. Pending review queues show only submitted shifts whose start time is still in the future; expired submissions remain stored for history and audit purposes.
 
 ### Following And Membership
 
@@ -136,7 +141,9 @@ Together, these courses require the project to demonstrate:
 
 ## Current Scope And Constraints
 
-- The confirmed stakeholder scope is one cafe represented only as CastFan. The first release does not expose store creation, editing, activation, or selection; the internal `Store` relationship remains for data integrity.
+- CastFan supports multiple Stores in one platform and one shared database. Every store-owned record is isolated with a validated Store relationship.
+- One Owner can create exactly one Store. Members are global accounts; StoreMembership data is unique per `(store_id, member_profile_id)`.
+- Store entry begins from QR or a direct Store link. Store discovery and Platform Admin are out of scope.
 - Booking, payments, paid content, food ordering, queueing, and point-of-sale operations are out of scope.
 - New Members begin with zero points and no tier. The Owner records points after checking a customer's bill outside CastFan at `1 THB = 1 point`.
 - Tier thresholds are Tier 1 at `1-4,999`, Tier 2 at `5,000-19,999`, and Tier 3 at `20,000+`; points never expire.
@@ -155,10 +162,10 @@ Together, these courses require the project to demonstrate:
 | Persistence | Spring Data JPA |
 | Schema migration | Flyway |
 | Local/test database | Embedded H2 |
-| Deployed database | Cloud SQL for MySQL 8.4 |
-| Hosting | Google Cloud Run |
-| Secrets | Google Secret Manager |
-| Container registry | Artifact Registry |
+| Deployed database | Aiven MySQL 8.4 |
+| Hosting | Render Web Service |
+| Secrets | Render protected environment variables |
+| Container build | Render Docker build from `main` |
 | Build | Maven Wrapper, Docker |
 | Tests | JUnit and Spring Boot Test |
 
@@ -168,7 +175,7 @@ Runtime flow:
 Mobile/Desktop Browser
         |
         v
-Google Cloud Run
+Render Web Service
         |
         v
 Spring MVC Controller
@@ -180,7 +187,7 @@ Service + authorization rules
 Spring Data JPA Repository
         |
         +-- H2 for dev/test
-        `-- Cloud SQL MySQL for prod
+        `-- Aiven MySQL 8.4 for prod
 ```
 
 ## Data Model
@@ -190,6 +197,7 @@ The implemented model includes:
 - `UserAccount`
 - `AccountAvatar`
 - `MemberProfile`
+- `StoreMembership`
 - `MemberPointTransaction`
 - `CastProfile`
 - `Store`
@@ -220,7 +228,7 @@ The complete visual source of truth is [`docs/ui-design-system.md`](docs/ui-desi
 - Enforce role and resource ownership in the service layer.
 - Keep CSRF protection enabled for cookie-authenticated state changes.
 - Use secure, HTTP-only, SameSite session cookies in production.
-- Require HTTPS and honor Cloud Run forwarded headers.
+- Require HTTPS and honor Render forwarded headers.
 - Prevent IDOR by deriving ownership from the authenticated principal.
 - Validate all input server-side and render user content safely.
 - Never expose H2 Console, design concepts, secrets, or non-health Actuator endpoints in production.
@@ -233,16 +241,15 @@ Remaining security work is tracked in [`docs/security-review.md`](docs/security-
 
 | Resource | Value |
 | --- | --- |
-| Project | `castfan-system` |
-| Region | `asia-southeast1` |
-| Cloud Run | `https://castfan-473125501009.asia-southeast1.run.app` |
-| Cloud SQL | `castfan-system:asia-southeast1:castfan-mysql` |
-| Database | `castfan` |
-| Artifact Registry | `castfan-images` |
-| Runtime service account | `castfan-runtime@castfan-system.iam.gserviceaccount.com` |
-| Deployment automation | GitHub Actions with keyless Workload Identity Federation |
+| Render service | `CastFan-System` |
+| Public URL | `https://castfan-system.onrender.com` |
+| Render region/plan | Singapore / Free |
+| Production branch | `main` |
+| Database | Aiven MySQL 8.4 / `defaultdb` |
+| Health endpoint | `/actuator/health` |
+| Deployment automation | GitHub CI checks, followed by Render Auto-Deploy on `main` |
 
-The Cloud SQL instance is currently a 30-day free-trial resource intended for development and demonstration. It has no backup support and must be exported or upgraded before its trial counter expires. Deployment details are maintained in [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md).
+The current Aiven service is operational but its plan cost and public network allowlist require a separate approved optimization task. Render/Aiven release details are maintained in [`docs/render-aiven-deployment.md`](docs/render-aiven-deployment.md). The former Google Cloud resources remain unchanged until a backup and decommission plan is approved.
 
 ## Success Criteria
 
@@ -251,7 +258,7 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - Content access cannot be bypassed by changing URLs or identifiers.
 - Owner and Cast actions are scoped to the correct store and identity.
 - H2 tests and the opt-in MySQL migration test pass.
-- The deployed service reports healthy and persists through Cloud SQL.
+- The deployed service reports healthy on Render and persists through Aiven MySQL.
 - The interface is responsive, consistent, English-first, and aligned with the approved design system.
 - No production secret is present in source control.
 - The project can be demonstrated from registration through role-specific workflows.
@@ -274,5 +281,6 @@ The Cloud SQL instance is currently a 30-day free-trial resource intended for de
 - [`docs/database-migrations.md`](docs/database-migrations.md): Flyway and MySQL verification workflow.
 - [`docs/ui-design-system.md`](docs/ui-design-system.md): authoritative visual and interaction rules.
 - [`docs/security-review.md`](docs/security-review.md): security controls and remaining risks.
-- [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): Cloud resources and deployment procedure.
+- [`docs/render-aiven-deployment.md`](docs/render-aiven-deployment.md): current Render/Aiven release and rollback procedure.
+- [`docs/google-cloud-deployment.md`](docs/google-cloud-deployment.md): historical Google Cloud recovery reference.
 

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Open your store | CastFan</title>
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <script th:src="@{/js/auth.js}" defer></script>
+</head>
+<body class="auth-page"><main class="auth-layout"><header class="auth-topbar auth-topbar-centered"><a class="auth-wordmark" th:href="@{/}">CastFan</a></header>
+<section class="auth-panel"><h1>Open your store</h1><p>Create one Owner account and one store. Your store URL cannot be changed after setup.</p>
+<form class="auth-form" th:action="@{/signup/store}" th:object="${form}" method="post">
+    <div class="form-alert" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+    <label class="form-field"><span class="field-label">Owner name</span><input th:field="*{ownerName}" required maxlength="80"><span class="field-error" th:errors="*{ownerName}"></span></label>
+    <label class="form-field"><span class="field-label">Owner email</span><input th:field="*{email}" type="email" required maxlength="254"><span class="field-error" th:errors="*{email}"></span></label>
+    <label class="form-field"><span class="field-label">Password</span><input th:field="*{password}" type="password" required autocomplete="new-password"><span class="field-error" th:errors="*{password}"></span></label>
+    <label class="form-field"><span class="field-label">Confirm password</span><input th:field="*{confirmPassword}" type="password" required autocomplete="new-password"><span class="field-error" th:errors="*{confirmPassword}"></span></label>
+    <label class="form-field"><span class="field-label">Store name</span><input th:field="*{storeName}" required maxlength="120"><span class="field-error" th:errors="*{storeName}"></span></label>
+    <label class="form-field"><span class="field-label">Description</span><textarea th:field="*{description}" maxlength="1000"></textarea><span class="field-error" th:errors="*{description}"></span></label>
+    <label class="form-field"><span class="field-label">Address</span><textarea th:field="*{address}" required maxlength="500"></textarea><span class="field-error" th:errors="*{address}"></span></label>
+    <label class="form-field"><span class="field-label">Store URL</span><span class="auth-input"><span>/s/</span><input th:field="*{slug}" required maxlength="100" placeholder="moonlight-cafe"></span><small>This URL is permanent after creation.</small><span class="field-error" th:errors="*{slug}"></span></label>
+    <button class="primary-button auth-submit" type="submit">Create store</button>
+</form><p class="auth-switch">Already registered? <a th:href="@{/login}">Sign in</a></p></section></main></body></html>

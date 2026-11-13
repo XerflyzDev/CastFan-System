@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import com.castfan.dto.OwnerCastAssignmentForm;
 import com.castfan.dto.OwnerCastPromotionForm;
+import com.castfan.dto.OwnerCastCreateForm;
 import com.castfan.service.DomainConflictException;
 import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.OwnerStoreService;
@@ -31,35 +32,33 @@ public class OwnerStoreController {
 		return "owner/stores";
 	}
 
-	@PostMapping("/owner/cast")
-	public String assignCast(Principal principal, @Valid @ModelAttribute("assignmentForm") OwnerCastAssignmentForm form,
-		BindingResult bindingResult, Model model) {
+	@PostMapping("/owner/cast/create")
+	public String createCast(Principal principal, @Valid @ModelAttribute("createForm") OwnerCastCreateForm form,
+		BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 		if (!bindingResult.hasErrors()) {
 			try {
-				ownerStoreService.assignCast(principal.getName(), form);
-				return "redirect:/owner/cast?assigned";
+				var credentials = ownerStoreService.createCast(principal.getName(), form);
+				redirectAttributes.addFlashAttribute("newCredentials", credentials);
+				return "redirect:/owner/cast?created";
 			} catch (DomainConflictException | DomainRuleViolationException exception) {
-				bindingResult.reject("assignment.invalid", exception.getMessage());
+				bindingResult.reject("cast.invalid", exception.getMessage());
 			}
 		}
 		populate(principal, model);
 		return "owner/stores";
 	}
 
-	@PostMapping("/owner/cast/promote")
-	public String promoteMember(Principal principal,
-		@Valid @ModelAttribute("promotionForm") OwnerCastPromotionForm form,
-		BindingResult bindingResult, Model model) {
-		if (!bindingResult.hasErrors()) {
-			try {
-				ownerStoreService.promoteMember(principal.getName(), form);
-				return "redirect:/owner/cast?promoted";
-			} catch (DomainConflictException | DomainRuleViolationException exception) {
-				bindingResult.reject("promotion.invalid", exception.getMessage());
-			}
+	@PostMapping("/owner/cast/{assignmentId}/reset-password")
+	public String resetPassword(Principal principal, @PathVariable Long assignmentId,
+		RedirectAttributes redirectAttributes) {
+		try {
+			redirectAttributes.addFlashAttribute("newCredentials",
+				ownerStoreService.resetCastPassword(principal.getName(), assignmentId));
+			redirectAttributes.addAttribute("reset", true);
+		} catch (DomainRuleViolationException exception) {
+			redirectAttributes.addAttribute("error", exception.getMessage());
 		}
-		populate(principal, model);
-		return "owner/stores";
+		return "redirect:/owner/cast";
 	}
 
 	@PostMapping("/owner/cast/{assignmentId}/{action:activate|deactivate}")
@@ -81,6 +80,7 @@ public class OwnerStoreController {
 		if (!model.containsAttribute("promotionForm")) {
 			model.addAttribute("promotionForm", new OwnerCastPromotionForm());
 		}
+		if (!model.containsAttribute("createForm")) model.addAttribute("createForm", new OwnerCastCreateForm());
 		model.addAttribute("storeView", ownerStoreService.load(principal.getName()));
 	}
 }

@@ -1,13 +1,16 @@
 package com.castfan.service;
 
 import java.time.DateTimeException;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.castfan.dto.OwnerWorkspaceView;
 import com.castfan.entity.EventStatus;
@@ -28,7 +31,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class OwnerWorkspaceService {
 
 	private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Bangkok");
+	private static final DateTimeFormatter DAY_NAME = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH);
+	private static final DateTimeFormatter DAY_NUMBER = DateTimeFormatter.ofPattern("d", Locale.ENGLISH);
 	private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE, d MMMM uuuu", Locale.ENGLISH);
+	private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH);
+	private static final DateTimeFormatter SHORT_DATE_YEAR = DateTimeFormatter.ofPattern("d MMM uuuu", Locale.ENGLISH);
 	private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
 
 	private final UserAccountRepository userAccountRepository;
@@ -56,7 +63,7 @@ public class OwnerWorkspaceService {
 
 	@Transactional(readOnly = true)
 	public OwnerWorkspaceView load(String email, LocalDate requestedDate) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		var stores = storeRepository.findFirstByOwnerIdAndActiveTrueOrderByIdAsc(account.getId()).stream().toList();
 		var zone = stores.stream().findFirst()
@@ -68,13 +75,28 @@ public class OwnerWorkspaceService {
 		}
 		var selectedStartsAt = selectedDate.atStartOfDay(zone).toInstant();
 		var selectedEndsAt = selectedDate.plusDays(1).atStartOfDay(zone).toInstant();
+		var weekStartsOn = selectedDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+		var weekStartsAt = weekStartsOn.atStartOfDay(zone).toInstant();
+		var weekEndsAt = weekStartsOn.plusDays(7).atStartOfDay(zone).toInstant();
 		var todayStartsAt = today.atStartOfDay(zone).toInstant();
 		var todayEndsAt = today.plusDays(1).atStartOfDay(zone).toInstant();
 		var assignments = storeCastRepository.findActiveForOwner(email);
-		var pending = shiftScheduleRepository.findForOwnerByStatus(
-			email, ShiftStatus.SUBMITTED, PageRequest.of(0, 25)
+		var now = Instant.now();
+		var pending = shiftScheduleRepository.findFutureForOwnerByStatus(
+			email, ShiftStatus.SUBMITTED, now, PageRequest.of(0, 25)
 		);
 		var daily = shiftScheduleRepository.findForOwnerInRange(email, selectedStartsAt, selectedEndsAt);
+		var weekly = shiftScheduleRepository.findForOwnerInRange(email, weekStartsAt, weekEndsAt);
+		var days = IntStream.range(0, 7)
+			.mapToObj(weekStartsOn::plusDays)
+			.map(date -> new OwnerWorkspaceView.ScheduleDay(
+				date.toString(), DAY_NAME.format(date), DAY_NUMBER.format(date),
+				date.equals(selectedDate), date.equals(today),
+				(int) weekly.stream()
+					.filter(schedule -> LocalDate.ofInstant(schedule.getStartsAt(), zone).equals(date))
+					.count()
+			))
+			.toList();
 		var approvedTodayCount = shiftScheduleRepository.findForOwnerInRange(email, todayStartsAt, todayEndsAt)
 			.stream().filter(shift -> shift.getStatus() == ShiftStatus.APPROVED).count();
 
@@ -85,11 +107,16 @@ public class OwnerWorkspaceService {
 				store.getId(), SystemStoreService.DISPLAY_NAME, store.getAddress(), store.getTimezone(), store.isActive()
 			)).toList(),
 			assignments.stream().map(assignment -> assignment.getCastProfile().getId()).distinct().count(),
-			shiftScheduleRepository.countForOwnerByStatus(email, ShiftStatus.SUBMITTED),
+			shiftScheduleRepository.countFutureForOwnerByStatus(email, ShiftStatus.SUBMITTED, now),
 			approvedTodayCount,
-			storeEventRepository.countUpcomingForOwner(email, EventStatus.PUBLISHED, Instant.now()),
+			storeEventRepository.countUpcomingForOwner(email, EventStatus.PUBLISHED, now),
 			selectedDate.toString(),
 			FULL_DATE.format(selectedDate),
+			today.toString(),
+			SHORT_DATE.format(weekStartsOn) + " - " + SHORT_DATE_YEAR.format(weekStartsOn.plusDays(6)),
+			selectedDate.minusWeeks(1).toString(),
+			selectedDate.plusWeeks(1).toString(),
+			days,
 			pending.stream().map(this::toShiftItem).toList(),
 			daily.stream().map(this::toShiftItem).toList()
 		);
@@ -97,14 +124,14 @@ public class OwnerWorkspaceService {
 
 	@Transactional
 	public void approve(String email, Long shiftId, String reviewNote) {
-		var owner = userAccountRepository.findByEmailIgnoreCase(email)
+		var owner = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		shiftScheduleService.approveShift(owner, shiftId, reviewNote);
 	}
 
 	@Transactional
 	public void reject(String email, Long shiftId, String reviewNote) {
-		var owner = userAccountRepository.findByEmailIgnoreCase(email)
+		var owner = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Owner account not found."));
 		if (reviewNote == null || reviewNote.isBlank()) {
 			throw new DomainRuleViolationException("A reason is required when rejecting a shift.");

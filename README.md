@@ -1,6 +1,6 @@
 # CastFan System
 
-CastFan System is a web application for managing a maid cafe or concept cafe. It connects store owners (`Owner`), staff members (`Cast`), and customers (`Member`) in one system.
+CastFan System is a multi-store web platform for cafes and venues with Cast staff. It connects Store Owners (`Owner`), store-specific staff accounts (`Cast`), and global customer accounts (`Member`) while isolating membership and operational data per Store.
 
 This project is being built from scratch for three courses: **Web Application Development**, **Software Requirements Analysis and Specification**, and **Database Systems**. It combines requirements engineering, relational database design, and a database-backed Spring Boot web application.
 
@@ -20,13 +20,13 @@ English is the primary language for the user interface, system messages, documen
 
 ## Project Status
 
-> **Cloud Run health checks and production readiness**
+> **Render deployment and production readiness**
 
-The project currently includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production schema migration, database-backed authentication, role profiles, Store and Cast scheduling domains, Member follow and membership workflows, and the approved mobile interface. Member Home, Notifications, day and week Schedule views, Following, Profile, public Cast Profile, public Content Detail, and public Event Detail use Spring Data JPA. The notification center aggregates access-controlled updates from followed Cast and upcoming published events while respecting each Member's persisted Cast-update and event-reminder preferences. Members edit their display name, bio, and profile photo through an ownership-protected profile route, while a dedicated notification-settings route controls Cast updates and event reminders. The Member Home includes a feed from followed Cast with server-side audience and store-tier access checks. Cast accounts share Home and the approved Schedule, have direct navigation to their own Member-facing Cast Profile, use Profile for editing that identity, and have a fifth Cast destination for their private workspace. Cast can upload content images, submit or cancel shifts, and publish audience-controlled content through a streamlined social composer with direct publishing, optional headlines, store-tier audience selection, and draft support. Owners can review CastFan metrics, inspect schedules by date, approve or reject shift requests, manage the permanent Cast roster, upload event and promotion images, publish events, schedule promotion banners, and record or correct Member points through ownership-protected routes. Store creation and selection are intentionally hidden because the first release represents one cafe only as CastFan; the internal Store entity remains for relational integrity. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB instead of image links. Active, in-range promotions appear on the public Member Home. Published events also provide downloadable iCalendar files.
+The project includes the Spring Boot foundation, Maven Wrapper, H2/MySQL profiles, Flyway production migrations, database-backed authentication, multi-store onboarding, QR Store entry, StoreMembership isolation, store-specific Cast credentials, scheduling, following, content, event, promotion, and points workflows. Owners create one active Store and can download its permanent QR. Members retain one global account while joining multiple Stores independently. Cast accounts are issued by one Store Owner with a temporary password and forced first-login password change. User-facing image forms accept JPG, PNG, or WebP uploads up to 2 MB. Published Store data is always queried through a validated Store context.
 
 Every active Cast profile is public and available for Member discovery and following. Cast can edit their public identity but cannot hide an active profile.
 
-> **Requirement alignment notice:** The stakeholder confirmed on 27 October 2026 that the first release supports one cafe. The implemented store-wide points workflow provides zero-state registration, Owner-only earning/correction/reversal, an immutable receipt-protected ledger, derived tiers at `1 THB = 1 point`, read-only Member history, and store-tier content access.
+> **Requirement alignment notice:** The scope changed on 12 November 2026 to a multi-store platform. Owners open one active Store, Members enter through `/s/{slug}` QR links, and points, tier, following, notifications, content, shifts, events, and promotions are isolated by Store. Cast accounts are created by that Store's Owner and use a store-specific Cast ID.
 
 ## Objectives
 
@@ -73,9 +73,9 @@ Every active Cast profile is public and available for Member discovery and follo
 | Web | Spring MVC, Thymeleaf |
 | Persistence | Spring Data JPA |
 | Development Database | Embedded H2 Database |
-| Deployment Database | Cloud SQL for MySQL |
-| Application Hosting | Google Cloud Run |
-| Secret Storage | Google Cloud Secret Manager |
+| Deployment Database | Aiven MySQL 8.4 |
+| Application Hosting | Render Web Service |
+| Secret Storage | Render protected environment variables |
 | Frontend | HTML, JavaScript, Bootstrap, Custom CSS |
 | Build Tool | Maven |
 | Testing | JUnit, Spring Boot Test |
@@ -86,7 +86,7 @@ Every active Cast profile is public and available for Member discovery and follo
 Client / Mobile Browser
           |
           v
-Google Cloud Run
+Render Web Service
           |
           v
 Spring MVC Controller
@@ -99,7 +99,7 @@ Spring Data JPA Repository
           |
           +-- H2 Database (development and test)
           |
-          `-- Cloud SQL MySQL (deployment)
+          `-- Aiven MySQL 8.4 (deployment, TLS required)
 ```
 
 The backend will be organized by responsibility into `Controller`, `Service`, `Repository`, `Entity`, `DTO`, configuration, and security packages to keep the system maintainable and testable.
@@ -108,13 +108,13 @@ The backend will be organized by responsibility into `Controller`, `Service`, `R
 
 - `dev` - Embedded H2 for local development.
 - `test` - Isolated H2 database for automated tests.
-- `prod` - Cloud SQL for MySQL, configured through environment variables or a secret manager.
+- `prod` - Aiven MySQL 8.4, configured through protected Render environment variables.
 
 Sensitive data such as database passwords, API secrets, and service-account keys must never be committed to the repository.
 
-Public registration always creates a `MEMBER`. Privileged access is created only through the internal provisioning service or an Owner-authorized Member-to-Cast promotion; there is no public role-selection or privileged-account endpoint.
+Public Member registration always creates a `MEMBER`. `Open Your Store` atomically creates an `OWNER` and exactly one Store. There is no public role selector. Only the authenticated Store Owner creates or resets a store-specific `CAST` account.
 
-An authenticated Owner can promote an existing active Member to Cast from the Cast roster. The account keeps its login and Member profile, receives a public Cast profile, and is assigned to the permanent roster in one transaction.
+Member and Cast identities are deliberately separate. When a Cast joins another Store, its new Owner creates a new Cast account; the former Store account and history remain isolated and can be deactivated.
 
 ## Core Data Model
 
@@ -123,6 +123,7 @@ Implemented and planned entities:
 - `UserAccount`
 - `AccountAvatar`
 - `MemberProfile`
+- `StoreMembership`
 - `MemberPointTransaction`
 - `CastProfile`
 - `Store`
@@ -137,9 +138,9 @@ Entity details, relationships, constraints, and implementation order are documen
 
 The confirmed store-wide points and tier workflow and service/view contract are documented in [docs/membership-points.md](docs/membership-points.md). Its Flyway V6 core, V9 legacy-schema removal, Owner workflow, Member views, and Cast content-access integration are implemented.
 
-The production deployment target and release checklist are documented in [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md).
+The production deployment target and release checklist are documented in [docs/render-aiven-deployment.md](docs/render-aiven-deployment.md). The former Google Cloud procedure is retained as historical recovery documentation.
 
-Pushes to `main` are prepared to run the full H2/MySQL test suite and deploy an immutable image to Cloud Run through keyless GitHub Actions Workload Identity Federation. The workflow is stored at [`.github/workflows/google-cloud-deploy.yml`](.github/workflows/google-cloud-deploy.yml).
+Pull requests and pushes to `main` run the H2/MySQL suite, source scan, Docker build, and container scan through [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Render deploys the tested `main` branch automatically after merge.
 
 The implemented controls and remaining security gates are documented in [docs/security-review.md](docs/security-review.md).
 
@@ -184,11 +185,11 @@ The consolidated product requirements, scope, stakeholder context, and current d
 - [x] Add the production security baseline for HTTPS, secure sessions, browser headers, and development-only routes.
 - [x] Add the initial Flyway production schema and validate it against H2 MySQL mode and MySQL 8.4.
 - [x] Add the store-wide Membership Points core, immutable ledger, tier boundaries, and Owner-only service contract in Flyway V6.
-- [x] Add restricted production health and liveness endpoints for Cloud Run probes.
-- [x] Connect Cloud SQL for MySQL through the Cloud SQL Java Connector.
-- [x] Deploy the Spring Boot service to Google Cloud Run.
-- [x] Store production credentials in Google Cloud Secret Manager.
-- [x] Restrict the first release to one cafe and remove exposed multi-store creation behavior.
+- [x] Add restricted production health and liveness endpoints for Render probes.
+- [x] Connect Aiven MySQL 8.4 with TLS through protected Render environment variables.
+- [x] Deploy the Spring Boot container as a Render Web Service.
+- [x] Keep production credentials in protected Render environment variables.
+- [x] Support multiple independently scoped stores, with one store per Owner and QR-based Member entry.
 - [x] Use the confirmed Owner-recorded, store-wide points model as the only membership workflow.
 - [ ] Add validation, error handling, and broader automated tests.
 - [x] Complete security and responsive UI reviews.
@@ -240,13 +241,13 @@ The development H2 Console is available at [http://localhost:8080/h2-console](ht
 
 ### Production Database
 
-Set `SPRING_PROFILES_ACTIVE=prod` and the following environment variables before connecting to Cloud SQL for MySQL:
+Set `SPRING_PROFILES_ACTIVE=prod` and the following protected Render environment variables before connecting to Aiven MySQL:
 
 - `DB_URL`
 - `DB_USERNAME`
 - `DB_PASSWORD`
 
-Production will run on Google Cloud Run and connect to Cloud SQL for MySQL. Credentials must be provided from Secret Manager rather than committed files. See [docs/google-cloud-deployment.md](docs/google-cloud-deployment.md) for the planned deployment process.
+Production runs on Render and connects to Aiven MySQL with TLS required. Credentials must remain in protected Render environment variables and must never be committed. See [docs/render-aiven-deployment.md](docs/render-aiven-deployment.md) for the release and rollback procedure.
 
 ## Repository
 

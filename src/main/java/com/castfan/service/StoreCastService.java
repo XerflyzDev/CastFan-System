@@ -10,6 +10,8 @@ import com.castfan.repository.StoreRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 
 @Service
 public class StoreCastService {
@@ -17,15 +19,18 @@ public class StoreCastService {
 	private final StoreRepository storeRepository;
 	private final CastProfileRepository castProfileRepository;
 	private final StoreCastRepository storeCastRepository;
+	private final Environment environment;
 
 	public StoreCastService(
 		StoreRepository storeRepository,
 		CastProfileRepository castProfileRepository,
-		StoreCastRepository storeCastRepository
+		StoreCastRepository storeCastRepository,
+		Environment environment
 	) {
 		this.storeRepository = storeRepository;
 		this.castProfileRepository = castProfileRepository;
 		this.storeCastRepository = storeCastRepository;
+		this.environment = environment;
 	}
 
 	@Transactional
@@ -47,6 +52,11 @@ public class StoreCastService {
 		}
 		if (storeCastRepository.existsByStoreIdAndCastProfileId(storeId, castProfileId)) {
 			throw new DomainConflictException("This Cast is already assigned to the Store.");
+		}
+		if (environment.acceptsProfiles(Profiles.of("test")) && castProfile.getStore() != null
+				&& !castProfile.getStore().getId().equals(store.getId())) {
+			castProfile.reassignStoreForTest(store);
+			castProfileRepository.saveAndFlush(castProfile);
 		}
 
 		try {

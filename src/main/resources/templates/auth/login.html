@@ -20,11 +20,14 @@
     <section class="auth-panel auth-login-panel" aria-labelledby="login-heading">
         <div class="auth-login-heading">
             <h1 id="login-heading">Welcome to CastFan</h1>
-            <p>Sign in with your email.</p>
+            <p>Sign in with your email or Cast ID.</p>
         </div>
 
         <div class="form-alert success" th:if="${param.registered}" role="status">
             <i class="bi bi-check-circle" aria-hidden="true"></i><span>Your account is ready. Sign in to continue.</span>
+        </div>
+        <div class="form-alert success" th:if="${param.storeRegistered}" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i><span>Your store is active. Sign in as Owner to continue.</span>
         </div>
         <div class="form-alert" th:if="${param.error}" role="alert">
             <i class="bi bi-exclamation-circle" aria-hidden="true"></i><span>Invalid email or password.</span>
@@ -44,10 +47,9 @@
         </div>
 
         <form class="auth-form" th:action="@{/login}" method="post">
-            <label class="form-field" for="email">
-                <span class="field-label">Email</span>
-                <span class="auth-input"><i class="bi bi-envelope" aria-hidden="true"></i><input id="email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" aria-describedby="email-format-error" required autofocus><i class="bi bi-exclamation-circle input-invalid-mark" aria-hidden="true"></i></span>
-                <span id="email-format-error" class="field-error auth-email-error" aria-live="polite" hidden><i class="bi bi-exclamation-circle" aria-hidden="true"></i> Enter a valid email address.</span>
+            <label class="form-field" for="credential">
+                <span class="field-label">Email or Cast ID</span>
+                <span class="auth-input"><i class="bi bi-person" aria-hidden="true"></i><input id="credential" name="email" type="text" autocomplete="username" maxlength="254" placeholder="you@example.com or mina@store" required autofocus></span>
             </label>
             <label class="form-field" for="password">
                 <span class="field-label">Password</span>
@@ -57,6 +59,7 @@
         </form>
 
         <p class="auth-switch">New to CastFan? <a th:href="@{/signup}">Create an account</a></p>
+        <p class="auth-switch">Run a Cast venue? <a th:href="@{/signup/store}">Open your store</a></p>
         <p class="auth-footnote"><i class="bi bi-shield-check" aria-hidden="true"></i><span>Your account and CastFan activity stay protected.</span></p>
     </section>
 </main>

@@ -21,8 +21,11 @@ public class UserAccount {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 254)
+	@Column(unique = true, length = 254)
 	private String email;
+
+	@Column(name = "login_identifier", nullable = false, unique = true, length = 254)
+	private String loginIdentifier;
 
 	@Column(name = "password_hash", nullable = false, length = 100)
 	private String passwordHash;
@@ -38,6 +41,9 @@ public class UserAccount {
 	@Column(nullable = false, length = 20)
 	private UserStatus status;
 
+	@Column(name = "must_change_password", nullable = false)
+	private boolean mustChangePassword;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
@@ -48,11 +54,18 @@ public class UserAccount {
 	}
 
 	public UserAccount(String email, String passwordHash, String displayName, UserRole role, UserStatus status) {
+		this(email, email, passwordHash, displayName, role, status, false);
+	}
+
+	public UserAccount(String email, String loginIdentifier, String passwordHash, String displayName,
+		UserRole role, UserStatus status, boolean mustChangePassword) {
 		this.email = email;
+		this.loginIdentifier = loginIdentifier;
 		this.passwordHash = passwordHash;
 		this.displayName = displayName;
 		this.role = role;
 		this.status = status;
+		this.mustChangePassword = mustChangePassword;
 	}
 
 	@PrePersist
@@ -74,6 +87,24 @@ public class UserAccount {
 	public String getEmail() {
 		return email;
 	}
+
+	public String getLoginIdentifier() { return loginIdentifier; }
+
+	public boolean isMustChangePassword() { return mustChangePassword; }
+
+	public void changePassword(String passwordHash) {
+		this.passwordHash = passwordHash;
+		this.mustChangePassword = false;
+	}
+
+	public void resetTemporaryPassword(String passwordHash) {
+		this.passwordHash = passwordHash;
+		this.mustChangePassword = true;
+	}
+
+	public void suspend() { this.status = UserStatus.SUSPENDED; }
+
+	public void activate() { this.status = UserStatus.ACTIVE; }
 
 	public String getPasswordHash() {
 		return passwordHash;

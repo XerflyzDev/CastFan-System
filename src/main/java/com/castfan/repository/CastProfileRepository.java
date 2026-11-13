@@ -13,7 +13,9 @@ public interface CastProfileRepository extends JpaRepository<CastProfile, Long> 
 
 	Optional<CastProfile> findByUserAccountId(Long userAccountId);
 
-	Optional<CastProfile> findByUserAccountEmailIgnoreCase(String email);
+	Optional<CastProfile> findByUserAccountLoginIdentifierIgnoreCase(String loginIdentifier);
+
+	Optional<CastProfile> findByStoreIdAndStageNameKey(Long storeId, String stageNameKey);
 
 	Optional<CastProfile> findByStageNameKey(String stageNameKey);
 
@@ -22,9 +24,14 @@ public interface CastProfileRepository extends JpaRepository<CastProfile, Long> 
 		Pageable pageable
 	);
 
+	Page<CastProfile> findAllByStoreIdAndUserAccountStatusOrderByStageNameAsc(
+		Long storeId, UserStatus status, Pageable pageable);
+
 	List<CastProfile> findAllByUserAccountStatusOrderByStageNameAsc(UserStatus status);
 
 	boolean existsByUserAccountId(Long userAccountId);
+
+	boolean existsByStoreIdAndStageNameKey(Long storeId, String stageNameKey);
 
 	boolean existsByStageNameKey(String stageNameKey);
 }

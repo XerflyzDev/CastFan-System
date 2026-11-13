@@ -17,7 +17,7 @@
     <div class="screen-content shared-page-content">
     <div class="top-actions">
         <a class="wordmark" th:href="@{/}">CastFan</a>
-        <a class="round-button page-back-button" sec:authorize="hasRole('MEMBER')" th:href="@{/member/following}" aria-label="Back to Following" title="Back to Following"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+        <a class="round-button page-back-button" sec:authorize="hasRole('MEMBER')" th:href="${storeSlug != null} ? @{/s/{slug}/following(slug=${storeSlug})} : @{/member/following}" aria-label="Back to Following" title="Back to Following"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
         <a class="round-button page-back-button" sec:authorize="hasRole('CAST')" th:href="@{/}" aria-label="Back to Home" title="Back to Home"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
     </div>
 
@@ -37,13 +37,13 @@
                 <h2 th:text="${cast.stageName}">Cast name</h2>
                 <p th:text="${cast.bio != null ? cast.bio : 'No profile bio yet.'}">Profile bio</p>
             </div>
-            <form th:if="${!cast.following}" th:action="@{/member/casts/{id}/follow(id=${cast.id})}" method="post">
+            <form th:if="${!cast.following}" th:action="${storeSlug != null} ? @{/s/{slug}/casts/{id}/follow(slug=${storeSlug},id=${cast.id})} : @{/member/casts/{id}/follow(id=${cast.id})}" method="post">
                 <button class="follow-button" type="submit">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i>
                     <span>Follow</span>
                 </button>
             </form>
-            <a class="follow-button is-following" th:if="${cast.following}" th:href="@{/member/following}">
+            <a class="follow-button is-following" th:if="${cast.following}" th:href="${storeSlug != null} ? @{/s/{slug}/following(slug=${storeSlug})} : @{/member/following}">
                 <i class="bi bi-check-lg" aria-hidden="true"></i>
                 <span>Following</span>
             </a>
@@ -57,11 +57,11 @@
     </div>
 
     <nav class="pagination-nav" th:if="${castPage.totalPages > 1}" aria-label="Cast results pages">
-        <a class="secondary-button" th:classappend="${castPage.first} ? ' is-disabled'" th:href="@{/member/casts(page=${castPage.number - 1})}" aria-label="Previous page">
+        <a class="secondary-button" th:classappend="${castPage.first} ? ' is-disabled'" th:href="${storeSlug != null} ? @{/s/{slug}/casts(slug=${storeSlug},page=${castPage.number - 1})} : @{/member/casts(page=${castPage.number - 1})}" aria-label="Previous page">
             <i class="bi bi-chevron-left" aria-hidden="true"></i>
         </a>
         <span>Page <strong th:text="${castPage.number + 1}">1</strong> of <strong th:text="${castPage.totalPages}">1</strong></span>
-        <a class="secondary-button" th:classappend="${castPage.last} ? ' is-disabled'" th:href="@{/member/casts(page=${castPage.number + 1})}" aria-label="Next page">
+        <a class="secondary-button" th:classappend="${castPage.last} ? ' is-disabled'" th:href="${storeSlug != null} ? @{/s/{slug}/casts(slug=${storeSlug},page=${castPage.number + 1})} : @{/member/casts(page=${castPage.number + 1})}" aria-label="Next page">
             <i class="bi bi-chevron-right" aria-hidden="true"></i>
         </a>
     </nav>

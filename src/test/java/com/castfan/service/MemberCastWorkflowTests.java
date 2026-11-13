@@ -116,8 +116,8 @@ class MemberCastWorkflowTests {
 			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
 			.andExpect(content().string(matchesPattern(
 				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
-					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
-					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast</span>"
+					+ ".*?<span>Cast Profile</span>.*?<span>Profile</span>.*?</nav>.*"
 			)));
 		mockMvc.perform(get("/member/casts").with(memberRequest))
 			.andExpect(status().isOk())

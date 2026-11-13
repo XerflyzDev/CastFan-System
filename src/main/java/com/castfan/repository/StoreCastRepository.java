@@ -18,6 +18,8 @@ public interface StoreCastRepository extends JpaRepository<StoreCast, Long> {
 
 	List<StoreCast> findAllByCastProfileIdAndActiveTrue(Long castProfileId);
 
+	List<StoreCast> findAllByStoreIdAndActiveTrueOrderByCastProfileStageNameAsc(Long storeId);
+
 	@Query("""
 		select assignment
 		from StoreCast assignment

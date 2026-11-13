@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -20,7 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 	name = "cast_profiles",
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_cast_profile_user", columnNames = "user_account_id"),
-		@UniqueConstraint(name = "uk_cast_profile_stage_name", columnNames = "stage_name_key")
+		@UniqueConstraint(name = "uk_cast_profile_store_stage", columnNames = {"store_id", "stage_name_key"})
 	}
 )
 public class CastProfile {
@@ -32,6 +33,10 @@ public class CastProfile {
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_account_id", nullable = false)
 	private UserAccount userAccount;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
 
 	@Column(name = "stage_name", nullable = false, length = 80)
 	private String stageName;
@@ -59,18 +64,33 @@ public class CastProfile {
 
 	public CastProfile(
 		UserAccount userAccount,
+		Store store,
 		String stageName,
 		String stageNameKey,
 		String bio,
 		String avatarUrl
 	) {
 		this.userAccount = userAccount;
+		this.store = store;
 		this.stageName = stageName;
 		this.stageNameKey = stageNameKey;
 		this.bio = bio;
 		this.avatarUrl = avatarUrl;
 		this.discoverable = true;
 	}
+
+	@Deprecated(forRemoval = false)
+	public CastProfile(UserAccount userAccount, String stageName, String stageNameKey, String bio, String avatarUrl) {
+		this(userAccount, null, stageName, stageNameKey, bio, avatarUrl);
+	}
+
+	void assignStoreIfAbsent(Store store) {
+		if (this.store == null) this.store = store;
+		else if (!this.store.getId().equals(store.getId())) throw new IllegalArgumentException("Cast account belongs to another store.");
+	}
+
+	/** Test-fixture compatibility only; production Cast accounts never change stores. */
+	public void reassignStoreForTest(Store store) { this.store = store; }
 
 	public void updatePublicDetails(
 		String stageName,
@@ -104,6 +124,8 @@ public class CastProfile {
 	public UserAccount getUserAccount() {
 		return userAccount;
 	}
+
+	public Store getStore() { return store; }
 
 	public String getStageName() {
 		return stageName;

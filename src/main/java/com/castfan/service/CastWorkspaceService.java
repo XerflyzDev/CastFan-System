@@ -38,7 +38,6 @@ public class CastWorkspaceService {
 	private final CastFollowRepository castFollowRepository;
 	private final ShiftScheduleService shiftScheduleService;
 	private final ProfileService profileService;
-	private final SystemStoreService systemStoreService;
 
 	public CastWorkspaceService(
 		UserAccountRepository userAccountRepository,
@@ -47,8 +46,7 @@ public class CastWorkspaceService {
 		ShiftScheduleRepository shiftScheduleRepository,
 		CastFollowRepository castFollowRepository,
 		ShiftScheduleService shiftScheduleService,
-		ProfileService profileService,
-		SystemStoreService systemStoreService
+		ProfileService profileService
 	) {
 		this.userAccountRepository = userAccountRepository;
 		this.castProfileRepository = castProfileRepository;
@@ -57,30 +55,28 @@ public class CastWorkspaceService {
 		this.castFollowRepository = castFollowRepository;
 		this.shiftScheduleService = shiftScheduleService;
 		this.profileService = profileService;
-		this.systemStoreService = systemStoreService;
 	}
 
 	@Transactional(readOnly = true)
 	public CastWorkspaceView load(String email, int shiftLimit) {
 		var profile = requireProfile(email);
-		var systemStore = systemStoreService.findActive();
 		var assignments = storeCastRepository.findAllByCastProfileIdAndActiveTrue(profile.getId()).stream()
-			.filter(assignment -> systemStore.map(store -> assignment.getStore().getId().equals(store.getId())).orElse(false))
 			.map(assignment -> new CastWorkspaceView.Assignment(
-				assignment.getId(), SystemStoreService.DISPLAY_NAME, assignment.getStore().getTimezone()
+				assignment.getId(), assignment.getStore().getName(), assignment.getStore().getTimezone()
 			))
 			.toList();
 		var now = Instant.now();
 		var schedules = shiftScheduleRepository.findUpcomingForCast(
 			email, now.minusSeconds(12 * 60 * 60), PageRequest.of(0, Math.max(1, shiftLimit))
-		).stream().filter(schedule -> systemStore.map(store -> schedule.getStoreCast().getStore().getId().equals(store.getId())).orElse(false)).toList();
+		).stream().filter(schedule -> profile.getStore() != null
+			&& schedule.getStoreCast().getStore().getId().equals(profile.getStore().getId())).toList();
 		var shifts = schedules.stream().map(schedule -> {
 			var zone = safeZone(schedule.getStoreCast().getStore().getTimezone());
 			var startsAt = schedule.getStartsAt().atZone(zone);
 			var endsAt = schedule.getEndsAt().atZone(zone);
 			return new CastWorkspaceView.ShiftItem(
 				schedule.getId(),
-				SystemStoreService.DISPLAY_NAME,
+				schedule.getStoreCast().getStore().getName(),
 				DATE.format(startsAt),
 				DAY.format(startsAt),
 				TIME.format(startsAt) + " - " + TIME.format(endsAt),
@@ -123,12 +119,11 @@ public class CastWorkspaceService {
 
 	@Transactional
 	public void submitShift(String email, CastShiftForm form) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast account not found."));
 		var profile = requireProfile(email);
-		var systemStore = systemStoreService.requireActive();
 		var assignment = storeCastRepository.findAllByCastProfileIdAndActiveTrue(profile.getId()).stream()
-			.filter(value -> value.getStore().getId().equals(systemStore.getId()))
+			.filter(value -> profile.getStore() != null && value.getStore().getId().equals(profile.getStore().getId()))
 			.findFirst()
 			.orElseThrow(() -> new DomainRuleViolationException("Active CastFan roster assignment not found."));
 		var zone = safeZone(assignment.getStore().getTimezone());
@@ -150,7 +145,7 @@ public class CastWorkspaceService {
 
 	@Transactional
 	public void cancelShift(String email, Long shiftId) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast account not found."));
 		shiftScheduleService.cancelShift(account, shiftId);
 	}
@@ -163,7 +158,7 @@ public class CastWorkspaceService {
 	}
 
 	private com.castfan.entity.CastProfile requireProfile(String email) {
-		return castProfileRepository.findByUserAccountEmailIgnoreCase(email)
+		return castProfileRepository.findByUserAccountLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast profile not found."));
 	}
 

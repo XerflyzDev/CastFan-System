@@ -167,7 +167,7 @@ public class HomeService {
 
 	private java.util.Optional<com.castfan.entity.MemberProfile> activeMember(String email) {
 		if (email == null) return java.util.Optional.empty();
-		return userAccountRepository.findByEmailIgnoreCase(email)
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
 				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));
@@ -177,7 +177,7 @@ public class HomeService {
 		if (email == null || profileIds.isEmpty()) {
 			return Set.of();
 		}
-		return userAccountRepository.findByEmailIgnoreCase(email)
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
 				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()))
@@ -189,7 +189,7 @@ public class HomeService {
 		if (email == null) {
 			return "there";
 		}
-		return userAccountRepository.findByEmailIgnoreCase(email)
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(account -> account.getStatus() == UserStatus.ACTIVE)
 			.map(account -> {
 				if (account.getRole() == UserRole.CAST) {

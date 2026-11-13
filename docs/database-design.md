@@ -1,6 +1,6 @@
 # CastFan Database Design
 
-This document is the source of truth for the first CastFan relational schema. The model is designed for Spring Data JPA and must remain compatible with both embedded H2 and Cloud SQL for MySQL.
+This document is the source of truth for the CastFan relational schema. The model is designed for Spring Data JPA and must remain compatible with embedded H2 and the deployed Aiven MySQL 8.4 database.
 
 ## Design Principles
 
@@ -18,13 +18,14 @@ This document is the source of truth for the first CastFan relational schema. Th
 
 Authentication identity shared by every role.
 
-Key fields: `email`, `passwordHash`, `displayName`, `role`, `status`, timestamps.
+Key fields: `email`, `loginIdentifier`, `passwordHash`, `mustChangePassword`, `displayName`, `role`, `status`, timestamps.
 
 Constraints:
 
-- `email` is required, normalized to lowercase, and unique.
+- `loginIdentifier` is required and globally unique. Member and Owner identifiers equal their normalized email; Cast identifiers use the immutable `{stage-key}@{store-slug}` form.
+- `email` is required and unique for Member and Owner accounts, and nullable for Cast accounts.
 - `role` is one of `MEMBER`, `CAST`, or `OWNER`.
-- An Owner-authorized Member-to-Cast promotion updates the account role, retains the existing Member profile, creates one Cast profile, and creates the system-store roster assignment in one transaction.
+- A Cast account is created only by the authenticated Owner of its Store. Temporary passwords are stored only as hashes and require replacement on first sign-in.
 - Passwords are stored only as secure hashes.
 
 ### AccountAvatar
@@ -43,13 +44,21 @@ Constraints:
 
 Member-specific public information. Each user can have at most one Member profile.
 
-Key fields: `bio`, `avatarUrl`, `castUpdateNotifications`, `eventNotifications`, `pointsBalance`.
+Key fields: `bio`, `avatarUrl`.
 
-Constraints: unique `userId`; `pointsBalance >= 0`. Notification preferences default to enabled and the point balance defaults to zero for new Member profiles.
+Constraint: unique `userId`. A Member profile is global and contains no Store balance or tier.
 
-The store-wide points core is implemented as follows:
+### StoreMembership
 
-- Store accumulated purchase points on the Member profile and record every change in an auditable point ledger.
+Connects a global Member profile to one Store.
+
+Key fields: `storeId`, `memberProfileId`, `pointsBalance`, `castUpdateNotifications`, `eventNotifications`, `status`, `joinedAt`, `updatedAt`.
+
+Constraints: unique pair `(storeId, memberProfileId)` and `pointsBalance >= 0`.
+
+The per-Store points core is implemented as follows:
+
+- Store accumulated purchase points and notification preferences on StoreMembership and record every change in an auditable point ledger.
 - New Members start with zero points and no tier.
 - A separate membership number is not required.
 - Only the authenticated Owner records points after checking the bill outside CastFan; no bill, payment, or point-of-sale record is managed by CastFan.
@@ -62,12 +71,12 @@ The store-wide points core is implemented as follows:
 
 An append-only ledger entry for every store-wide point change.
 
-Key fields: `memberProfileId`, `createdByUserId`, `type`, `purchaseAmount`, `pointsDelta`, `receiptReference`, `receiptReferenceKey`, `reason`, `originalTransactionId`, `createdAt`.
+Key fields: `storeId`, `storeMembershipId`, `memberProfileId`, `createdByUserId`, `type`, `purchaseAmount`, `pointsDelta`, `receiptReference`, `receiptReferenceKey`, `reason`, `originalTransactionId`, `createdAt`.
 
 Rules:
 
 - `type` is `EARN`, `CORRECTION`, or `REVERSAL`.
-- An `EARN` entry requires a positive purchase amount and a globally unique normalized receipt reference for the one-cafe release.
+- An `EARN` entry requires a positive purchase amount and a normalized receipt reference unique within that Store.
 - A correction or reversal requires a reason and a link to the original `EARN` entry.
 - An original earned entry can be linked to at most one correction or reversal.
 - Completed entries are never updated or deleted by the membership service.
@@ -76,20 +85,21 @@ Rules:
 
 ### CastProfile
 
-Public profile settings for a Cast. Each active Cast profile is public, and each user can have at most one Cast profile. The legacy `discoverable` column is retained for migration compatibility and is normalized to `TRUE`.
+Public profile settings for one Store-specific Cast account. Each active Cast profile is public in its own Store.
 
 Constraints:
 
 - Unique `userId`.
-- Unique normalized `stageName`.
+- Unique normalized `(storeId, stageName)`.
 
 ### Store
 
-A cafe managed by one Owner account. One Owner may manage multiple stores.
+A cafe managed by one Owner account. One Owner may manage exactly one Store in this release.
 
 Constraints:
 
 - Unique URL-safe `slug`.
+- Unique `ownerUserId`.
 - `ownerUserId` must reference an active `OWNER` account.
 - `timezone` uses an IANA identifier such as `Asia/Bangkok`.
 - Store removal is represented by `active = false`; historical schedules and events are retained.
@@ -123,11 +133,11 @@ Recommended indexes: `(storeCastId, startsAt)`, `(status, startsAt)`.
 
 Records a Member following a Cast.
 
-Constraint: unique pair `(memberProfileId, castProfileId)`.
+Constraint: unique pair `(storeMembershipId, castProfileId)`. Both records must belong to the same Store.
 
 ### CastContent
 
-Content published by a Cast. `minimumStoreTierRank` is the required access field for store-tier content.
+Content published by a Cast. Every record carries `storeId`; `minimumStoreTierRank` is evaluated against the viewer's StoreMembership for that same Store.
 
 Rules:
 
@@ -205,13 +215,15 @@ Rules:
 | UserAccount | one to zero-or-one | MemberProfile |
 | UserAccount | one to zero-or-one | CastProfile |
 | UserAccount | one to zero-or-one | AccountAvatar |
-| UserAccount | one to many | Store |
+| UserAccount | one to zero-or-one | Store as Owner |
 | UserAccount | one to many | MemberPointTransaction as actor |
+| Store | one to many | StoreMembership |
+| MemberProfile | one to many | StoreMembership |
 | Store | one to many | StoreCast |
 | CastProfile | one to many | StoreCast |
 | StoreCast | one to many | ShiftSchedule |
-| MemberProfile | one to many | CastFollow |
-| MemberProfile | one to many | MemberPointTransaction |
+| StoreMembership | one to many | CastFollow |
+| StoreMembership | one to many | MemberPointTransaction |
 | CastProfile | one to many | CastFollow |
 | CastProfile | one to many | CastContent |
 | CastContent | one to zero-or-one | CastContentImage |
@@ -238,5 +250,5 @@ Rules:
 4. `CastFollow` and Member discovery queries.
 5. `MemberPointTransaction`, store-tier derivation, and access checks.
 6. `CastContent`, `StoreEvent`, and `StorePromotion`.
-7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 9.
-8. Run the migration and Hibernate validation against a disposable MySQL database before the next Cloud SQL deployment.
+7. Flyway production migration and automated H2 MySQL-mode schema validation. Completed through schema version 12.
+8. Run the migration and Hibernate validation against a disposable MySQL database before the next Render/Aiven deployment.

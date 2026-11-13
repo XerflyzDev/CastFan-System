@@ -18,8 +18,8 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
 	name = "cast_follows",
 	uniqueConstraints = @UniqueConstraint(
-		name = "uk_cast_follow_member_cast",
-		columnNames = {"member_profile_id", "cast_profile_id"}
+		name = "uk_cast_follow_membership_cast",
+		columnNames = {"store_membership_id", "cast_profile_id"}
 	)
 )
 public class CastFollow {
@@ -31,6 +31,14 @@ public class CastFollow {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "member_profile_id", nullable = false)
 	private MemberProfile memberProfile;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_membership_id")
+	private StoreMembership storeMembership;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "cast_profile_id", nullable = false)
@@ -47,6 +55,16 @@ public class CastFollow {
 		this.castProfile = castProfile;
 	}
 
+	public CastFollow(StoreMembership storeMembership, CastProfile castProfile) {
+		if (!storeMembership.getStore().getId().equals(castProfile.getStore().getId())) {
+			throw new IllegalArgumentException("Cast and Member must belong to the same store.");
+		}
+		this.memberProfile = storeMembership.getMemberProfile();
+		this.storeMembership = storeMembership;
+		this.store = storeMembership.getStore();
+		this.castProfile = castProfile;
+	}
+
 	@PrePersist
 	void onCreate() {
 		createdAt = Instant.now();
@@ -59,6 +77,9 @@ public class CastFollow {
 	public MemberProfile getMemberProfile() {
 		return memberProfile;
 	}
+
+	public StoreMembership getStoreMembership() { return storeMembership; }
+	public Store getStore() { return store; }
 
 	public CastProfile getCastProfile() {
 		return castProfile;

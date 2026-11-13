@@ -190,7 +190,7 @@ class OwnerMemberPointsControllerTests {
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("already been used")));
 
 		assertThat(transactionRepository.count()).isEqualTo(1);
-		assertThat(memberProfileRepository.findById(member.getId()).orElseThrow().getPointsBalance()).isEqualTo(20);
+		assertThat(membershipService.memberPointsForOwner(owner.getEmail(), member.getId()).pointsBalance()).isEqualTo(20);
 	}
 
 	@Test

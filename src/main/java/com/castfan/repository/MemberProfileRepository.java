@@ -18,8 +18,8 @@ public interface MemberProfileRepository extends JpaRepository<MemberProfile, Lo
 
 	Optional<MemberProfile> findByUserAccountId(Long userAccountId);
 
-	@Query("select profile from MemberProfile profile join fetch profile.userAccount account where lower(account.email) = lower(:email)")
-	Optional<MemberProfile> findByUserAccountEmailIgnoreCase(@Param("email") String email);
+	@Query("select profile from MemberProfile profile join fetch profile.userAccount account where lower(account.loginIdentifier) = lower(:identifier)")
+	Optional<MemberProfile> findByUserAccountLoginIdentifierIgnoreCase(@Param("identifier") String identifier);
 
 	@Query(value = """
 		select profile from MemberProfile profile

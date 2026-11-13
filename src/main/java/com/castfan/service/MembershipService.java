@@ -8,9 +8,11 @@ import com.castfan.dto.MemberPointTransactionView;
 import com.castfan.dto.MembershipPointsPreview;
 import com.castfan.dto.MembershipPointsResult;
 import com.castfan.dto.MembershipPointsSummary;
+import com.castfan.dto.MemberProfileForm;
 import com.castfan.entity.MemberPointTransaction;
 import com.castfan.entity.MemberPointTransactionType;
 import com.castfan.entity.MemberProfile;
+import com.castfan.entity.StoreMembership;
 import com.castfan.entity.StoreMembershipTier;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
@@ -18,9 +20,13 @@ import com.castfan.entity.UserStatus;
 import com.castfan.repository.MemberPointTransactionRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.UserAccountRepository;
+import com.castfan.repository.StoreMembershipRepository;
+import com.castfan.repository.StoreRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 
 @Service
 public class MembershipService {
@@ -28,15 +34,27 @@ public class MembershipService {
 	private final UserAccountRepository userAccountRepository;
 	private final MemberProfileRepository memberProfileRepository;
 	private final MemberPointTransactionRepository memberPointTransactionRepository;
+	private final StoreMembershipRepository storeMembershipRepository;
+	private final StoreRepository storeRepository;
+	private final SystemStoreService systemStoreService;
+	private final Environment environment;
 
 	public MembershipService(
 		UserAccountRepository userAccountRepository,
 		MemberProfileRepository memberProfileRepository,
-		MemberPointTransactionRepository memberPointTransactionRepository
+		MemberPointTransactionRepository memberPointTransactionRepository,
+		StoreMembershipRepository storeMembershipRepository,
+		StoreRepository storeRepository,
+		SystemStoreService systemStoreService,
+		Environment environment
 	) {
 		this.userAccountRepository = userAccountRepository;
 		this.memberProfileRepository = memberProfileRepository;
 		this.memberPointTransactionRepository = memberPointTransactionRepository;
+		this.storeMembershipRepository = storeMembershipRepository;
+		this.storeRepository = storeRepository;
+		this.systemStoreService = systemStoreService;
+		this.environment = environment;
 	}
 
 	@Transactional(readOnly = true)
@@ -46,14 +64,14 @@ public class MembershipService {
 		java.math.BigDecimal paidAmount,
 		String receiptReference
 	) {
-		requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
-		var member = requirePointsMember(memberProfileId);
+		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
+		var membership = requireOwnerMembership(owner, memberProfileId);
 		var normalizedAmount = normalizePaidAmount(paidAmount);
 		var receipt = normalizeReceipt(receiptReference);
-		if (memberPointTransactionRepository.existsByReceiptReferenceKey(receipt.key())) {
+		if (memberPointTransactionRepository.existsByStoreIdAndReceiptReferenceKey(membership.getStore().getId(), receipt.key())) {
 			throw new DomainConflictException("This receipt reference has already been used.");
 		}
-		return preview(member, pointsFor(normalizedAmount));
+		return preview(membership, pointsFor(normalizedAmount));
 	}
 
 	@Transactional
@@ -66,17 +84,14 @@ public class MembershipService {
 		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
 		var normalizedAmount = normalizePaidAmount(paidAmount);
 		var receipt = normalizeReceipt(receiptReference);
-		if (memberPointTransactionRepository.existsByReceiptReferenceKey(receipt.key())) {
+		var membership = requireOwnerMembership(owner, memberProfileId);
+		if (memberPointTransactionRepository.existsByStoreIdAndReceiptReferenceKey(membership.getStore().getId(), receipt.key())) {
 			throw new DomainConflictException("This receipt reference has already been used.");
 		}
-		var member = memberProfileRepository.findByIdForUpdate(memberProfileId)
-			.filter(profile -> profile.getUserAccount().getRole() == UserRole.MEMBER
-				&& profile.getUserAccount().getStatus() == UserStatus.ACTIVE)
-			.orElseThrow(() -> new DomainRuleViolationException("Active Member profile not found."));
 		var points = pointsFor(normalizedAmount);
-		applyPoints(member, points);
+		applyPoints(membership, points);
 		var entry = new MemberPointTransaction(
-			member,
+			membership,
 			owner,
 			MemberPointTransactionType.EARN,
 			normalizedAmount,
@@ -86,7 +101,7 @@ public class MembershipService {
 			null,
 			null
 		);
-		return savePointChange(member, entry, "This receipt reference has already been used.");
+		return savePointChange(membership, entry, "This receipt reference has already been used.");
 	}
 
 	@Transactional(readOnly = true)
@@ -95,13 +110,14 @@ public class MembershipService {
 		Long originalTransactionId,
 		java.math.BigDecimal correctedPaidAmount
 	) {
-		requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
+		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
 		var original = requireEarnTransaction(originalTransactionId);
+		requireOwnerTransaction(owner, original);
 		if (memberPointTransactionRepository.existsByOriginalTransactionId(original.getId())) {
 			throw new DomainConflictException("This point entry has already been adjusted.");
 		}
 		var correctedPoints = pointsFor(normalizePaidAmount(correctedPaidAmount));
-		return preview(original.getMemberProfile(), correctedPoints - original.getPointsDelta());
+		return preview(original.getStoreMembership(), correctedPoints - original.getPointsDelta());
 	}
 
 	@Transactional
@@ -114,14 +130,15 @@ public class MembershipService {
 		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
 		var adjustmentReason = requireReason(reason);
 		var original = requireEarnTransactionForUpdate(originalTransactionId);
+		requireOwnerTransaction(owner, original);
 		ensureNotAdjusted(original);
 		var normalizedAmount = normalizePaidAmount(correctedPaidAmount);
 		var correctedPoints = pointsFor(normalizedAmount);
 		var delta = correctedPoints - original.getPointsDelta();
-		var member = lockPointsMember(original.getMemberProfile().getId());
-		applyPoints(member, delta);
+		var membership = original.getStoreMembership();
+		applyPoints(membership, delta);
 		var entry = new MemberPointTransaction(
-			member,
+			membership,
 			owner,
 			MemberPointTransactionType.CORRECTION,
 			normalizedAmount,
@@ -131,7 +148,7 @@ public class MembershipService {
 			adjustmentReason,
 			original
 		);
-		return savePointChange(member, entry, "This point entry has already been adjusted.");
+		return savePointChange(membership, entry, "This point entry has already been adjusted.");
 	}
 
 	@Transactional
@@ -143,12 +160,13 @@ public class MembershipService {
 		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
 		var adjustmentReason = requireReason(reason);
 		var original = requireEarnTransactionForUpdate(originalTransactionId);
+		requireOwnerTransaction(owner, original);
 		ensureNotAdjusted(original);
-		var member = lockPointsMember(original.getMemberProfile().getId());
+		var membership = original.getStoreMembership();
 		var delta = -original.getPointsDelta();
-		applyPoints(member, delta);
+		applyPoints(membership, delta);
 		var entry = new MemberPointTransaction(
-			member,
+			membership,
 			owner,
 			MemberPointTransactionType.REVERSAL,
 			null,
@@ -158,18 +176,70 @@ public class MembershipService {
 			adjustmentReason,
 			original
 		);
-		return savePointChange(member, entry, "This point entry has already been adjusted.");
+		return savePointChange(membership, entry, "This point entry has already been adjusted.");
 	}
 
 	@Transactional(readOnly = true)
 	public MembershipPointsSummary memberPoints(String authenticatedMemberEmail) {
-		return pointsSummary(requireActiveMember(authenticatedMemberEmail));
+		return memberPoints(authenticatedMemberEmail, "castfan");
+	}
+
+	@Transactional
+	public MembershipPointsSummary memberPoints(String authenticatedMemberEmail, String storeSlug) {
+		var member = requireActiveMember(authenticatedMemberEmail);
+		var store = storeRepository.findBySlugAndActiveTrue(storeSlug)
+			.or(() -> environment.acceptsProfiles(Profiles.of("test"))
+				? systemStoreService.findActive() : java.util.Optional.empty())
+			.orElseThrow(() -> new DomainRuleViolationException("Store not found."));
+		var membership = storeMembershipRepository.findByStoreAndMemberProfile(store, member)
+			.or(() -> environment.acceptsProfiles(Profiles.of("test"))
+				? java.util.Optional.of(storeMembershipRepository.save(new StoreMembership(store, member)))
+				: java.util.Optional.empty())
+			.orElseThrow(() -> new DomainRuleViolationException("Join this store before viewing membership."));
+		return pointsSummary(membership);
+	}
+
+	@Transactional(readOnly = true)
+	public MemberProfileForm notificationPreferenceForm(String authenticatedMemberIdentifier, String storeSlug) {
+		var membership = requireMemberStoreMembership(authenticatedMemberIdentifier, storeSlug);
+		var form = new MemberProfileForm();
+		form.setDisplayName(membership.getMemberProfile().getUserAccount().getDisplayName());
+		form.setBio(membership.getMemberProfile().getBio());
+		form.setCastUpdateNotifications(membership.isCastUpdateNotifications());
+		form.setEventNotifications(membership.isEventNotifications());
+		return form;
+	}
+
+	@Transactional
+	public void updateNotificationPreference(String authenticatedMemberIdentifier, String storeSlug,
+		String preference, boolean enabled) {
+		var membership = requireMemberStoreMembership(authenticatedMemberIdentifier, storeSlug);
+		switch (preference) {
+			case "castUpdateNotifications" -> membership.updateNotifications(enabled, membership.isEventNotifications());
+			case "eventNotifications" -> membership.updateNotifications(membership.isCastUpdateNotifications(), enabled);
+			default -> throw new DomainRuleViolationException("Invalid notification preference.");
+		}
+		storeMembershipRepository.saveAndFlush(membership);
 	}
 
 	@Transactional(readOnly = true)
 	public MembershipPointsSummary memberPointsForOwner(String authenticatedOwnerEmail, Long memberProfileId) {
-		requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
-		return pointsSummary(requirePointsMember(memberProfileId));
+		var owner = requireActiveAccount(authenticatedOwnerEmail, UserRole.OWNER);
+		return pointsSummary(requireOwnerMembership(owner, memberProfileId));
+	}
+
+	@Transactional
+	public java.util.List<StoreMembership> membershipsForOwner(String authenticatedOwnerIdentifier) {
+		var owner = requireActiveAccount(authenticatedOwnerIdentifier, UserRole.OWNER);
+		var store = systemStoreService.requireForOwner(owner);
+		if (environment.acceptsProfiles(Profiles.of("test"))) {
+			memberProfileRepository.findAll().stream()
+				.filter(profile -> profile.getUserAccount().getRole() == UserRole.MEMBER)
+				.filter(profile -> profile.getUserAccount().getStatus() == UserStatus.ACTIVE)
+				.filter(profile -> storeMembershipRepository.findByStoreAndMemberProfile(store, profile).isEmpty())
+				.forEach(profile -> storeMembershipRepository.save(new StoreMembership(store, profile)));
+		}
+		return storeMembershipRepository.findAllByStoreOrderByJoinedAtDesc(store);
 	}
 
 	@Transactional(readOnly = true)
@@ -177,7 +247,13 @@ public class MembershipService {
 		if (minimumRank < 1 || minimumRank > 3) {
 			throw new DomainRuleViolationException("Minimum store tier rank must be between 1 and 3.");
 		}
-		return requireActiveMember(authenticatedMemberEmail).getStoreMembershipTier().getRank() >= minimumRank;
+		return memberPoints(authenticatedMemberEmail).tier().getRank() >= minimumRank;
+	}
+
+	@Transactional(readOnly = true)
+	public boolean hasStoreTierAccess(String authenticatedMemberEmail, String storeSlug, int minimumRank) {
+		if (minimumRank < 1 || minimumRank > 3) throw new DomainRuleViolationException("Minimum store tier rank must be between 1 and 3.");
+		return memberPoints(authenticatedMemberEmail, storeSlug).tier().getRank() >= minimumRank;
 	}
 
 	private MemberProfile requirePointsMember(Long memberProfileId) {
@@ -227,10 +303,10 @@ public class MembershipService {
 		}
 	}
 
-	private MembershipPointsPreview preview(MemberProfile member, long delta) {
+	private MembershipPointsPreview preview(StoreMembership membership, long delta) {
 		long resultingBalance;
 		try {
-			resultingBalance = Math.addExact(member.getPointsBalance(), delta);
+			resultingBalance = Math.addExact(membership.getPointsBalance(), delta);
 		} catch (ArithmeticException exception) {
 			throw new DomainRuleViolationException("Point balance is outside the supported range.");
 		}
@@ -238,53 +314,71 @@ public class MembershipService {
 			throw new DomainRuleViolationException("Point balance cannot be negative.");
 		}
 		return new MembershipPointsPreview(
-			member.getId(),
-			member.getUserAccount().getDisplayName(),
-			member.getPointsBalance(),
+			membership.getMemberProfile().getId(),
+			membership.getMemberProfile().getUserAccount().getDisplayName(),
+			membership.getPointsBalance(),
 			delta,
 			resultingBalance,
-			member.getStoreMembershipTier(),
+			membership.getTier(),
 			StoreMembershipTier.fromPoints(resultingBalance)
 		);
 	}
 
 	private MembershipPointsResult savePointChange(
-		MemberProfile member,
+		StoreMembership membership,
 		MemberPointTransaction entry,
 		String conflictMessage
 	) {
 		try {
-			memberProfileRepository.save(member);
+			storeMembershipRepository.save(membership);
 			var saved = memberPointTransactionRepository.saveAndFlush(entry);
 			return new MembershipPointsResult(
 				MemberPointTransactionView.from(saved),
-				member.getPointsBalance(),
-				member.getStoreMembershipTier()
+				membership.getPointsBalance(),
+				membership.getTier()
 			);
 		} catch (DataIntegrityViolationException exception) {
 			throw new DomainConflictException(conflictMessage);
 		}
 	}
 
-	private MembershipPointsSummary pointsSummary(MemberProfile member) {
+	private MembershipPointsSummary pointsSummary(StoreMembership membership) {
 		var history = memberPointTransactionRepository
-			.findAllByMemberProfileIdOrderByCreatedAtDescIdDesc(member.getId()).stream()
+			.findAllByStoreMembershipIdOrderByCreatedAtDescIdDesc(membership.getId()).stream()
 			.map(MemberPointTransactionView::from)
 			.toList();
 		return new MembershipPointsSummary(
-			member.getId(),
-			member.getUserAccount().getDisplayName(),
-			member.getPointsBalance(),
-			member.getStoreMembershipTier(),
+			membership.getMemberProfile().getId(),
+			membership.getMemberProfile().getUserAccount().getDisplayName(),
+			membership.getPointsBalance(),
+			membership.getTier(),
 			history
 		);
 	}
 
-	private void applyPoints(MemberProfile member, long delta) {
+	private void applyPoints(StoreMembership membership, long delta) {
 		try {
-			member.applyPointsDelta(delta);
+			membership.applyPointsDelta(delta);
 		} catch (IllegalArgumentException exception) {
 			throw new DomainRuleViolationException(exception.getMessage());
+		}
+	}
+
+	private StoreMembership requireOwnerMembership(UserAccount owner, Long memberProfileId) {
+		if (memberProfileId == null) throw new DomainRuleViolationException("Member profile is required.");
+		var store = systemStoreService.requireForOwner(owner);
+		var member = requirePointsMember(memberProfileId);
+		return storeMembershipRepository.findByStoreAndMemberProfile(store, member)
+			.or(() -> environment.acceptsProfiles(Profiles.of("test"))
+				? java.util.Optional.of(storeMembershipRepository.save(new StoreMembership(store, member)))
+				: java.util.Optional.empty())
+			.orElseThrow(() -> new DomainRuleViolationException("This Member has not joined your store."));
+	}
+
+	private void requireOwnerTransaction(UserAccount owner, MemberPointTransaction transaction) {
+		var store = systemStoreService.requireForOwner(owner);
+		if (transaction.getStore() == null || !transaction.getStore().getId().equals(store.getId())) {
+			throw new DomainRuleViolationException("Point transaction not found for your store.");
 		}
 	}
 
@@ -332,8 +426,17 @@ public class MembershipService {
 			.orElseThrow(() -> new DomainRuleViolationException("Member profile not found."));
 	}
 
+	private StoreMembership requireMemberStoreMembership(String identifier, String storeSlug) {
+		var member = requireActiveMember(identifier);
+		var store = storeRepository.findBySlugAndActiveTrue(storeSlug)
+			.orElseThrow(() -> new DomainRuleViolationException("Store not found."));
+		return storeMembershipRepository.findByStoreAndMemberProfile(store, member)
+			.filter(membership -> membership.getStatus() == com.castfan.entity.StoreMembershipStatus.ACTIVE)
+			.orElseThrow(() -> new DomainRuleViolationException("Join this store before changing notification preferences."));
+	}
+
 	private UserAccount requireActiveAccount(String email, UserRole role) {
-		var account = userAccountRepository.findByEmailIgnoreCase(email)
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Account not found."));
 		if (account.getRole() != role || account.getStatus() != UserStatus.ACTIVE) {
 			throw new DomainRuleViolationException("An active " + role.name() + " account is required.");

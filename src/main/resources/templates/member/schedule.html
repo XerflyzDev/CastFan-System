@@ -18,7 +18,7 @@
         <div class="screen-content schedule-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
-                <a class="round-button" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                <a class="round-button" th:href="${storeSlug != null} ? @{/s/{slug}/notifications(slug=${storeSlug})} : @{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
             </div>
 
             <header class="schedule-heading">
@@ -32,12 +32,12 @@
             </header>
 
             <div class="schedule-mode" role="group" aria-label="Schedule view">
-                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='day')}" th:classappend="${!schedule.weekView} ? 'active'" th:attr="aria-pressed=${!schedule.weekView}">Day</a>
-                <a th:href="@{/member/schedule(date=${schedule.selectedDate},view='week')}" th:classappend="${schedule.weekView} ? 'active'" th:attr="aria-pressed=${schedule.weekView}">Week</a>
+                <a th:href="${storeSlug != null} ? @{/s/{slug}/schedule(slug=${storeSlug},date=${schedule.selectedDate},view='day')} : @{/member/schedule(date=${schedule.selectedDate},view='day')}" th:classappend="${!schedule.weekView} ? 'active'" th:attr="aria-pressed=${!schedule.weekView}">Day</a>
+                <a th:href="${storeSlug != null} ? @{/s/{slug}/schedule(slug=${storeSlug},date=${schedule.selectedDate},view='week')} : @{/member/schedule(date=${schedule.selectedDate},view='week')}" th:classappend="${schedule.weekView} ? 'active'" th:attr="aria-pressed=${schedule.weekView}">Week</a>
             </div>
 
             <nav class="date-strip" aria-label="Choose a date">
-                <a th:each="day : ${schedule.days}" th:href="@{/member/schedule(date=${day.isoDate},view=${schedule.weekView ? 'week' : 'day'})}"
+                <a th:each="day : ${schedule.days}" th:href="${storeSlug != null} ? @{/s/{slug}/schedule(slug=${storeSlug},date=${day.isoDate},view=${schedule.weekView ? 'week' : 'day'})} : @{/member/schedule(date=${day.isoDate},view=${schedule.weekView ? 'week' : 'day'})}"
                    th:classappend="${day.selected} ? 'active'" th:attr="aria-current=${day.selected ? 'date' : null}">
                     <span th:text="${day.dayLabel}">Tue</span>
                     <strong th:text="${day.dayNumber}">14</strong>
@@ -46,9 +46,9 @@
             </nav>
 
             <nav class="week-navigation" th:if="${schedule.weekView}" aria-label="Change week">
-                <a th:href="@{/member/schedule(date=${schedule.previousWeekDate},view='week')}" aria-label="Previous week"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
+                <a th:href="${storeSlug != null} ? @{/s/{slug}/schedule(slug=${storeSlug},date=${schedule.previousWeekDate},view='week')} : @{/member/schedule(date=${schedule.previousWeekDate},view='week')}" aria-label="Previous week"><i class="bi bi-chevron-left" aria-hidden="true"></i></a>
                 <strong th:text="${schedule.selectedDateLabel}">Sun, 11 Oct - Sat, 17 Oct</strong>
-                <a th:href="@{/member/schedule(date=${schedule.nextWeekDate},view='week')}" aria-label="Next week"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+                <a th:href="${storeSlug != null} ? @{/s/{slug}/schedule(slug=${storeSlug},date=${schedule.nextWeekDate},view='week')} : @{/member/schedule(date=${schedule.nextWeekDate},view='week')}" aria-label="Next week"><i class="bi bi-chevron-right" aria-hidden="true"></i></a>
             </nav>
 
             <section class="schedule-summary" aria-label="Selected day summary">

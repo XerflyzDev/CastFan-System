@@ -14,9 +14,13 @@ public interface MemberPointTransactionRepository extends JpaRepository<MemberPo
 
 	boolean existsByReceiptReferenceKey(String receiptReferenceKey);
 
+	boolean existsByStoreIdAndReceiptReferenceKey(Long storeId, String receiptReferenceKey);
+
 	boolean existsByOriginalTransactionId(Long originalTransactionId);
 
 	List<MemberPointTransaction> findAllByMemberProfileIdOrderByCreatedAtDescIdDesc(Long memberProfileId);
+
+	List<MemberPointTransaction> findAllByStoreMembershipIdOrderByCreatedAtDescIdDesc(Long storeMembershipId);
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select transaction from MemberPointTransaction transaction where transaction.id = :id")

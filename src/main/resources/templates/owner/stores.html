@@ -19,11 +19,25 @@
             <header class="owner-heading"><p>CastFan team</p><h1>Cast roster</h1></header>
             <div class="owner-alert success" th:if="${param.assigned}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Cast added to the roster.</div>
             <div class="owner-alert success" th:if="${param.promoted}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Member promoted to Cast. They can use Cast access after signing in again.</div>
+            <div class="owner-alert success" th:if="${newCredentials}" role="status">
+                <i class="bi bi-key" aria-hidden="true"></i>
+                <div><strong>Copy these credentials now</strong><p>Cast ID: <code th:text="${newCredentials.castId}">cast@store</code></p><p>Temporary password: <code th:text="${newCredentials.temporaryPassword}">password</code></p><small>The password is shown only once. The Cast must replace it on first sign-in.</small></div>
+            </div>
             <div class="owner-alert neutral" th:if="${param.removed}" role="status"><i class="bi bi-person-dash" aria-hidden="true"></i>Cast removed from the active roster.</div>
             <div class="owner-alert success" th:if="${param.restored}" role="status"><i class="bi bi-person-check" aria-hidden="true"></i>Cast restored to the roster.</div>
             <div class="owner-alert error" th:if="${param.error}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:text="${param.error}">Unable to update the roster.</span></div>
 
-            <section class="owner-section owner-form-card" aria-labelledby="assign-heading">
+            <section class="owner-section owner-form-card" aria-labelledby="create-cast-heading">
+                <div class="section-title"><div><small>Store-specific account</small><h2 id="create-cast-heading">Create Cast account</h2></div><i class="bi bi-person-plus" aria-hidden="true"></i></div>
+                <form class="owner-event-form" th:action="@{/owner/cast/create}" th:object="${createForm}" method="post">
+                    <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to create Cast.</span></div>
+                    <label><span>Display name</span><input th:field="*{displayName}" maxlength="80" required><small class="field-error" th:errors="*{displayName}"></small></label>
+                    <label><span>Stage name</span><input th:field="*{stageName}" maxlength="80" required><small class="field-error" th:errors="*{stageName}"></small></label>
+                    <button class="owner-form-submit" type="submit"><i class="bi bi-key" aria-hidden="true"></i>Create and show credentials</button>
+                </form>
+            </section>
+
+            <section class="owner-section owner-form-card" aria-labelledby="assign-heading" th:if="${false}">
                 <div class="section-title"><div><small>Permanent CastFan roster</small><h2 id="assign-heading">Add Cast</h2></div><i class="bi bi-person-plus" aria-hidden="true"></i></div>
                 <form class="owner-event-form" th:action="@{/owner/cast}" th:object="${assignmentForm}" method="post">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to add Cast.</span></div>
@@ -32,7 +46,7 @@
                 </form>
             </section>
 
-            <section class="owner-section owner-form-card" aria-labelledby="promote-heading">
+            <section class="owner-section owner-form-card" aria-labelledby="promote-heading" th:if="${false}">
                 <div class="section-title"><div><small>Use an existing registered account</small><h2 id="promote-heading">Promote member</h2></div><i class="bi bi-person-up" aria-hidden="true"></i></div>
                 <form class="owner-event-form" th:action="@{/owner/cast/promote}" th:object="${promotionForm}" method="post">
                     <div class="owner-form-error" th:if="${#fields.hasGlobalErrors()}" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i><span th:each="error : ${#fields.globalErrors()}" th:text="${error}">Unable to promote Member.</span></div>
@@ -50,6 +64,7 @@
                         <img th:if="${assignment.avatarUrl != null}" th:src="${assignment.avatarUrl}" th:alt="${assignment.castName}">
                         <span class="owner-avatar" th:unless="${assignment.avatarUrl != null}" th:text="${assignment.initials}">MN</span>
                         <div><strong th:text="${assignment.castName}">Mina</strong><small th:text="${assignment.email}">mina@example.com</small><p>CastFan</p></div>
+                        <form th:if="${assignment.active}" th:action="@{/owner/cast/{id}/reset-password(id=${assignment.id})}" method="post" data-confirm="Reset this Cast password?"><button class="roster-action restore" type="submit" aria-label="Reset temporary password" title="Reset password"><i class="bi bi-key" aria-hidden="true"></i></button></form>
                         <form th:if="${assignment.active}" th:action="@{/owner/cast/{id}/deactivate(id=${assignment.id})}" method="post" data-confirm="Remove this Cast from the active roster?"><button class="roster-action remove" type="submit" aria-label="Remove Cast" title="Remove"><i class="bi bi-person-dash" aria-hidden="true"></i></button></form>
                         <form th:unless="${assignment.active}" th:action="@{/owner/cast/{id}/activate(id=${assignment.id})}" method="post"><button class="roster-action restore" type="submit" aria-label="Restore Cast" title="Restore"><i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i></button></form>
                     </article>

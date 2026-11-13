@@ -87,7 +87,7 @@ public class PublicContentService {
 
 	@Transactional(readOnly = true)
 	public PublicCastProfileView ownCastProfile(String authenticatedEmail) {
-		var profile = castProfileRepository.findByUserAccountEmailIgnoreCase(authenticatedEmail)
+		var profile = castProfileRepository.findByUserAccountLoginIdentifierIgnoreCase(authenticatedEmail)
 			.filter(value -> value.getUserAccount().getStatus() == UserStatus.ACTIVE)
 			.orElseThrow(() -> notFound("Cast profile not found"));
 		return castProfileView(profile, authenticatedEmail);
@@ -198,7 +198,7 @@ public class PublicContentService {
 
 	private java.util.Optional<com.castfan.entity.MemberProfile> memberProfile(String email) {
 		if (email == null) return java.util.Optional.empty();
-		return userAccountRepository.findByEmailIgnoreCase(email)
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(email)
 			.filter(account -> (account.getRole() == UserRole.MEMBER || account.getRole() == UserRole.CAST)
 				&& account.getStatus() == UserStatus.ACTIVE)
 			.flatMap(account -> memberProfileRepository.findByUserAccountId(account.getId()));

@@ -21,6 +21,13 @@ Production migrations live in `src/main/resources/db/migration/mysql` and use Fl
 - `V3__add_store_event_images.sql` adds uploaded event image storage linked one-to-one with store events.
 - `V4__add_content_and_promotion_images.sql` adds uploaded Cast content and promotion image storage.
 - `V5__add_cast_audience_profiles.sql` gives existing Cast accounts the audience profile required for schedules and following.
+- `V6__add_store_membership_points.sql` introduces store-wide Member points and the immutable point ledger.
+- `V7__require_store_tier_for_member_content.sql` requires a store tier for membership-only content.
+- `V8__make_all_cast_profiles_public.sql` makes active Cast profiles discoverable.
+- `V9__remove_legacy_cast_memberships.sql` removes the retired Cast-specific tier model.
+- `V10__add_store_promotion_status.sql` introduces the promotion lifecycle status.
+- `V11__remove_store_promotion_active.sql` removes the superseded promotion active flag.
+- `V12__introduce_multi_store_identity_and_memberships.sql` migrates existing data to store-scoped identities, memberships, following, points, and content.
 
 Never edit a versioned migration after it has been applied to a shared database. Add a new migration such as `V6__add_audit_log.sql` for every later schema change.
 
@@ -68,8 +75,8 @@ docker stop castfan-mysql-test
 
 ## MySQL Release Gate
 
-Before the first Cloud SQL deployment, run `DatabaseMySqlMigrationTests` against a new disposable MySQL database. Startup must apply every Flyway migration successfully and Hibernate validation must complete without schema errors. This real-MySQL check is required because H2 compatibility mode cannot reproduce every MySQL behavior.
+Before every migration-bearing Render/Aiven deployment, run `DatabaseMySqlMigrationTests` against a new disposable MySQL database. Startup must apply every Flyway migration successfully and Hibernate validation must complete without schema errors. This real-MySQL check is required because H2 compatibility mode cannot reproduce every MySQL behavior.
 
-Schema versions 1 through 4 passed this gate against MySQL 8.4.11 on 15 October 2026. Repeat the test whenever a migration is added or the production MySQL version changes.
+The GitHub CI workflow runs this gate against MySQL 8.4 for every pull request to `main`. Repeat it whenever a migration is added or the production MySQL version changes.
 
 Production cleanup remains disabled with `spring.flyway.clean-disabled=true`. Do not use Flyway baseline options unless adopting a pre-existing database has been reviewed and documented.

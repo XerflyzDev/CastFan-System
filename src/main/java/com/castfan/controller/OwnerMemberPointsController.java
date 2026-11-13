@@ -54,7 +54,7 @@ public class OwnerMemberPointsController {
 	public String page(Principal principal, @RequestParam(required = false) String q,
 		@RequestParam(required = false) Long memberId, @RequestParam(required = false) String page,
 		@RequestParam(required = false) Long anchor, Model model) {
-		var directory = loadDirectory(q, page);
+		var directory = loadDirectory(principal.getName(), q, page);
 		var state = new OwnerMemberDirectoryState(cleanQuery(q), directory.currentPage(), anchor != null ? anchor : memberId);
 		addDirectory(model, directory, state);
 		var form = new OwnerMemberPointsForm();
@@ -69,7 +69,7 @@ public class OwnerMemberPointsController {
 	public String preview(Principal principal, @Valid @ModelAttribute("form") OwnerMemberPointsForm form,
 		BindingResult result, Model model, @RequestParam(required = false) String q,
 		@RequestParam(required = false) String page, @RequestParam(required = false) Long anchor) {
-		var state = resolveState(q, page, anchor, form.getMemberProfileId());
+		var state = resolveState(principal.getName(), q, page, anchor, form.getMemberProfileId());
 		if (result.hasErrors()) return renderForm(principal, form, state, model);
 		try {
 			var preview = membershipService.previewEarnPoints(principal.getName(), form.getMemberProfileId(),
@@ -88,7 +88,7 @@ public class OwnerMemberPointsController {
 		BindingResult result, Model model, RedirectAttributes redirectAttributes,
 		@RequestParam(required = false) String q, @RequestParam(required = false) String page,
 		@RequestParam(required = false) Long anchor) {
-		var state = resolveState(q, page, anchor, form.getMemberProfileId());
+		var state = resolveState(principal.getName(), q, page, anchor, form.getMemberProfileId());
 		if (result.hasErrors()) return renderForm(principal, form, state, model);
 		try {
 			var outcome = membershipService.recordPurchasePoints(principal.getName(), form.getMemberProfileId(),
@@ -105,7 +105,7 @@ public class OwnerMemberPointsController {
 	public String previewAdjustment(Principal principal, @Valid @ModelAttribute("adjustmentForm") OwnerPointAdjustmentForm form,
 		BindingResult result, Model model, @RequestParam(required = false) String q,
 		@RequestParam(required = false) String page, @RequestParam(required = false) Long anchor) {
-		var state = resolveState(q, page, anchor, form.getMemberProfileId());
+		var state = resolveState(principal.getName(), q, page, anchor, form.getMemberProfileId());
 		if (!result.hasErrors()) {
 			try {
 				model.addAttribute("adjustmentPreview", membershipService.previewCorrection(principal.getName(),
@@ -114,7 +114,7 @@ public class OwnerMemberPointsController {
 				model.addAttribute("error", exception.getMessage());
 			}
 		}
-		addDirectory(model, loadDirectory(state.query(), String.valueOf(state.page())), state);
+		addDirectory(model, loadDirectory(principal.getName(), state.query(), String.valueOf(state.page())), state);
 		prepareSelection(principal, form.getMemberProfileId(), model);
 		model.addAttribute("adjustmentForm", form);
 		return "owner/member-points";
@@ -125,9 +125,9 @@ public class OwnerMemberPointsController {
 		BindingResult result, Model model, RedirectAttributes redirectAttributes,
 		@RequestParam(required = false) String q, @RequestParam(required = false) String page,
 		@RequestParam(required = false) Long anchor) {
-		var state = resolveState(q, page, anchor, form.getMemberProfileId());
+		var state = resolveState(principal.getName(), q, page, anchor, form.getMemberProfileId());
 		if (result.hasErrors()) {
-			addDirectory(model, loadDirectory(state.query(), String.valueOf(state.page())), state);
+			addDirectory(model, loadDirectory(principal.getName(), state.query(), String.valueOf(state.page())), state);
 			prepareSelection(principal, form.getMemberProfileId(), model);
 			model.addAttribute("adjustmentForm", form);
 			return "owner/member-points";
@@ -138,7 +138,7 @@ public class OwnerMemberPointsController {
 			return detailRedirect(form.getMemberProfileId(), state);
 		} catch (DomainConflictException | DomainRuleViolationException exception) {
 			model.addAttribute("error", exception.getMessage());
-			addDirectory(model, loadDirectory(state.query(), String.valueOf(state.page())), state);
+			addDirectory(model, loadDirectory(principal.getName(), state.query(), String.valueOf(state.page())), state);
 			prepareSelection(principal, form.getMemberProfileId(), model);
 			model.addAttribute("adjustmentForm", form);
 			return "owner/member-points";
@@ -150,7 +150,7 @@ public class OwnerMemberPointsController {
 		@RequestParam String reason, @RequestParam(required = false) String q,
 		@RequestParam(required = false) String page, @RequestParam(required = false) Long anchor,
 		RedirectAttributes redirectAttributes) {
-		var state = resolveState(q, page, anchor, memberId);
+		var state = resolveState(principal.getName(), q, page, anchor, memberId);
 		try {
 			redirectAttributes.addFlashAttribute("success", membershipService.reversePurchasePoints(
 				principal.getName(), transactionId, reason));
@@ -161,7 +161,7 @@ public class OwnerMemberPointsController {
 	}
 
 	private String renderForm(Principal principal, OwnerMemberPointsForm form, OwnerMemberDirectoryState state, Model model) {
-		addDirectory(model, loadDirectory(state.query(), String.valueOf(state.page())), state);
+		addDirectory(model, loadDirectory(principal.getName(), state.query(), String.valueOf(state.page())), state);
 		prepareSelection(principal, form.getMemberProfileId(), model);
 		model.addAttribute("form", form);
 		if (!model.containsAttribute("adjustmentForm")) model.addAttribute("adjustmentForm", new OwnerPointAdjustmentForm());
@@ -187,29 +187,35 @@ public class OwnerMemberPointsController {
 		}
 	}
 
-	private OwnerMemberDirectoryPage loadDirectory(String query, String requestedPage) {
+	private OwnerMemberDirectoryPage loadDirectory(String ownerIdentifier, String query, String requestedPage) {
 		var cleaned = cleanQuery(query);
 		var requestedIndex = parsePage(requestedPage);
 		return readTransaction.execute(status -> {
-			var result = memberProfileRepository.searchActiveMembers(cleaned.toLowerCase(Locale.ROOT), UserRole.MEMBER,
-				UserStatus.ACTIVE, PageRequest.of(requestedIndex, PAGE_SIZE, Sort.unsorted()));
-			var lastPage = Math.max(0, result.getTotalPages() - 1);
-			var pageIndex = requestedIndex;
-			if (pageIndex > lastPage) {
-				pageIndex = lastPage;
-				result = memberProfileRepository.searchActiveMembers(cleaned.toLowerCase(Locale.ROOT), UserRole.MEMBER,
-					UserStatus.ACTIVE, PageRequest.of(pageIndex, PAGE_SIZE, Sort.unsorted()));
-			}
-			var members = result.getContent().stream().map(OwnerMemberPointsController::toSearchResult).toList();
-			return new OwnerMemberDirectoryPage(members, result.getTotalElements(), pageIndex,
-				result.getTotalPages(), PAGE_SIZE);
+			var matching = membershipService.membershipsForOwner(ownerIdentifier).stream()
+				.filter(membership -> {
+					var account = membership.getMemberProfile().getUserAccount();
+					var needle = cleaned.toLowerCase(Locale.ROOT);
+					return needle.isBlank() || account.getDisplayName().toLowerCase(Locale.ROOT).contains(needle)
+						|| (account.getEmail() != null && account.getEmail().toLowerCase(Locale.ROOT).contains(needle));
+				})
+				.sorted(java.util.Comparator.comparing(
+					membership -> membership.getMemberProfile().getUserAccount().getDisplayName(),
+					String.CASE_INSENSITIVE_ORDER))
+				.toList();
+			var totalPages = (int) Math.ceil(matching.size() / (double) PAGE_SIZE);
+			var pageIndex = Math.min(requestedIndex, Math.max(0, totalPages - 1));
+			var start = Math.min(pageIndex * PAGE_SIZE, matching.size());
+			var end = Math.min(start + PAGE_SIZE, matching.size());
+			var members = matching.subList(start, end).stream().map(OwnerMemberPointsController::toSearchResult).toList();
+			return new OwnerMemberDirectoryPage(members, matching.size(), pageIndex, totalPages, PAGE_SIZE);
 		});
 	}
 
-	private static OwnerMemberSearchResult toSearchResult(MemberProfile profile) {
+	private static OwnerMemberSearchResult toSearchResult(com.castfan.entity.StoreMembership membership) {
+		var profile = membership.getMemberProfile();
 		var account = profile.getUserAccount();
 		return new OwnerMemberSearchResult(profile.getId(), account.getDisplayName(), account.getEmail(),
-			profile.getPointsBalance(), profile.getStoreMembershipTier().name().replace('_', ' '));
+			membership.getPointsBalance(), membership.getTier().name().replace('_', ' '));
 	}
 
 	private void addDirectory(Model model, OwnerMemberDirectoryPage directory, OwnerMemberDirectoryState state) {
@@ -220,8 +226,8 @@ public class OwnerMemberPointsController {
 		model.addAttribute("directoryReturnUrl", directoryUrl(state));
 	}
 
-	private OwnerMemberDirectoryState resolveState(String query, String page, Long anchor, Long memberId) {
-		var directory = loadDirectory(query, page);
+	private OwnerMemberDirectoryState resolveState(String ownerIdentifier, String query, String page, Long anchor, Long memberId) {
+		var directory = loadDirectory(ownerIdentifier, query, page);
 		return new OwnerMemberDirectoryState(cleanQuery(query), directory.currentPage(), anchor != null ? anchor : memberId);
 	}
 

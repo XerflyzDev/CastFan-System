@@ -10,6 +10,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	Optional<Store> findBySlug(String slug);
 
+	Optional<Store> findBySlugAndActiveTrue(String slug);
+
 	List<Store> findAllByOwnerIdOrderByNameAsc(Long ownerId);
 
 	Optional<Store> findFirstByActiveTrueOrderByIdAsc();
@@ -17,4 +19,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 	Optional<Store> findFirstByOwnerIdAndActiveTrueOrderByIdAsc(Long ownerId);
 
 	boolean existsBySlug(String slug);
+
+	boolean existsByOwnerId(Long ownerId);
 }

@@ -91,8 +91,8 @@ class CastWorkspaceWorkflowTests {
 				org.hamcrest.Matchers.containsString("Manage content"))))
 			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
 				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
-					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
-					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast</span>"
+					+ ".*?<span>Cast Profile</span>.*?<span>Profile</span>.*?</nav>.*"
 			)));
 
 		mockMvc.perform(get("/cast/schedule").with(user(cast.getEmail()).roles("CAST")))
@@ -121,7 +121,7 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("/member/notifications"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/cast/profile\"")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("bi-pencil-square")));
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("bi-person-fill")));
 
 		mockMvc.perform(get("/cast/public-profile").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
@@ -133,7 +133,16 @@ class CastWorkspaceWorkflowTests {
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("New post")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-current=\"page\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("class=\"next-shift\""))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("class=\"profile-no-shift\""))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("<span>Follow</span>"))));
+
+		mockMvc.perform(get("/casts/{id}", requireProfile().getId())
+				.with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"profile-no-shift\"")));
 	}
 
 	@Test

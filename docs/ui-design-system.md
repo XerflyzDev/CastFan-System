@@ -123,6 +123,7 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 - Discovery and membership pages use the shared phone shell, wordmark header, page eyebrow, title, supporting copy, single-column cards, and floating navigation.
 - Member Account and Cast Profile settings use the same identity-card proportions, grouped settings rows, section headings, role pill, and neutral borders.
 - Cast and Owner workspaces may expose different operational cards, metrics, and actions, but use the same white canvas, restrained accent colors, rounded surfaces, and floating navigation treatment.
+- Owner Shift Review uses a bordered operational schedule navigator with previous/next week controls, a tappable week range that opens an in-app Web calendar for longer jumps, a `Today` shortcut, and one-click day selection. It does not use the browser-native date picker or separate Month/Week dropdowns, so the common daily-review flow remains immediate and visually consistent with CastFan.
 - General states such as loading, empty, success, validation, disabled, selected, and error must look consistent across roles.
 
 ### Empty And Feedback States
@@ -237,7 +238,7 @@ Search remains a field within Home and relevant directory pages. It is not dupli
 
 The persistent Owner navigation contains five destinations in this order:
 
-1. `Dashboard` - store health, staffing totals, pending reviews, and upcoming events.
+1. `Dashboard` - non-interactive store health summaries, staffing totals, future pending reviews, upcoming events, and one clearly labelled link to the full shift queue.
 2. `Shifts` - shift approval queue and daily schedule.
 3. `Events` - draft, edit, publish, preview, and archive store events.
 4. `Promos` - promotion and banner scheduling for Member-facing surfaces.
@@ -251,8 +252,9 @@ The persistent Cast navigation contains five destinations in this order:
 
 1. `Home` - the shared public feed, events, promotions, and today's approved shifts.
 2. `Schedule` - the shared approved Cast schedule by day or week.
-3. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
-4. `Profile` - settings for the Cast's public identity, stage name, bio, photo, account email, and sign out. Active Cast profiles are always public.
-5. `Cast` - the private Cast workspace for shift requests and content management.
+3. `Cast` - the private Cast workspace for shift requests and content management, positioned centrally as the primary role action.
+4. `Cast Profile` - the Cast's own public page rendered exactly as Members see it.
+5. `Profile` - settings for the Cast's public identity, stage name, bio, photo, account email, and sign out. It uses the same person icon and `Profile` label as the Member role. Active Cast profiles are always public.
 
 Cast accounts use `/cast/profile` as their single Profile destination. The generic `/account` route redirects Cast accounts there so account and public-profile editing are not presented as separate destinations.
+Owner `Events` uses the calendar-event icon, while the stars icon is reserved for the private Cast workspace so unrelated destinations do not share the same symbol.

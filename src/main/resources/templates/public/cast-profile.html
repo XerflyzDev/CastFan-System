@@ -41,13 +41,13 @@
                     <div><strong th:text="${cast.followerCount}">0</strong><small>Followers</small></div>
                 </section>
 
-                <section class="next-shift" th:if="${cast.nextShift != null}" aria-labelledby="next-shift-heading">
+                <section class="next-shift" th:if="${!ownProfile and cast.nextShift != null}" aria-labelledby="next-shift-heading">
                     <span><i class="bi bi-calendar3" aria-hidden="true"></i></span>
                     <div><small th:text="${cast.nextShift.workingNow ? 'Current shift' : cast.nextShift.dateLabel}">Next shift</small><h2 id="next-shift-heading" th:text="${cast.nextShift.timeLabel}">14:00 - 20:00</h2><p th:text="${cast.storeName}">CastFan</p></div>
                     <a sec:authorize="hasAnyRole('MEMBER','CAST')" th:href="@{/member/schedule}" aria-label="Open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                     <a sec:authorize="isAnonymous()" th:href="@{/login}" aria-label="Sign in to open full schedule"><i class="bi bi-arrow-right" aria-hidden="true"></i></a>
                 </section>
-                <div class="profile-no-shift" th:if="${cast.nextShift == null}"><i class="bi bi-calendar2" aria-hidden="true"></i><span><strong>No upcoming shifts</strong><small>Check back for schedule updates.</small></span></div>
+                <div class="profile-no-shift" th:if="${!ownProfile and cast.nextShift == null}"><i class="bi bi-calendar2" aria-hidden="true"></i><span><strong>No upcoming shifts</strong><small>Check back for schedule updates.</small></span></div>
 
                 <section class="profile-section-block" aria-labelledby="content-title">
                     <div class="section-title"><h2 id="content-title">Latest updates</h2><span th:text="${cast.content.size() + ' posts'}">0 posts</span></div>

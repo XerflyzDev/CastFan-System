@@ -7,6 +7,7 @@ import com.castfan.dto.MemberProfileForm;
 import com.castfan.dto.MemberProfileView;
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.MemberProfile;
+import com.castfan.entity.Store;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -23,15 +24,18 @@ public class ProfileService {
 	private final MemberProfileRepository memberProfileRepository;
 	private final CastProfileRepository castProfileRepository;
 	private final AccountAvatarService accountAvatarService;
+	private final SystemStoreService systemStoreService;
 
 	public ProfileService(
 		MemberProfileRepository memberProfileRepository,
 		CastProfileRepository castProfileRepository,
-		AccountAvatarService accountAvatarService
+		AccountAvatarService accountAvatarService,
+		SystemStoreService systemStoreService
 	) {
 		this.memberProfileRepository = memberProfileRepository;
 		this.castProfileRepository = castProfileRepository;
 		this.accountAvatarService = accountAvatarService;
+		this.systemStoreService = systemStoreService;
 	}
 
 	@Transactional
@@ -92,8 +96,21 @@ public class ProfileService {
 	}
 
 	@Transactional
+	@Deprecated(forRemoval = false)
+	public CastProfile createCastProfile(UserAccount account, String stageName, String bio, String avatarUrl) {
+		requireEligibleAccount(account, UserRole.CAST);
+		var cleanStageName = requireText(stageName, "Stage name", 80);
+		var stageNameKey = normalizeKey(cleanStageName);
+		if (castProfileRepository.existsByStageNameKey(stageNameKey)) throw new DomainConflictException("This stage name is already in use.");
+		var profile = new CastProfile(account, systemStoreService.requireActive(), cleanStageName, stageNameKey,
+			cleanOptionalText(bio, "Bio", 1000), cleanOptionalText(avatarUrl, "Avatar URL", 2048));
+		return castProfileRepository.saveAndFlush(profile);
+	}
+
+	@Transactional
 	public CastProfile createCastProfile(
 		UserAccount account,
+		Store store,
 		String stageName,
 		String bio,
 		String avatarUrl
@@ -105,12 +122,13 @@ public class ProfileService {
 
 		var cleanStageName = requireText(stageName, "Stage name", 80);
 		var stageNameKey = normalizeKey(cleanStageName);
-		if (castProfileRepository.existsByStageNameKey(stageNameKey)) {
+		if (castProfileRepository.existsByStoreIdAndStageNameKey(store.getId(), stageNameKey)) {
 			throw new DomainConflictException("This stage name is already in use.");
 		}
 
 		var profile = new CastProfile(
 			account,
+			store,
 			cleanStageName,
 			stageNameKey,
 			cleanOptionalText(bio, "Bio", 1000),
@@ -132,11 +150,11 @@ public class ProfileService {
 		MultipartFile image,
 		boolean removeImage
 	) {
-		var profile = castProfileRepository.findByUserAccountEmailIgnoreCase(email)
+		var profile = castProfileRepository.findByUserAccountLoginIdentifierIgnoreCase(email)
 			.orElseThrow(() -> new DomainRuleViolationException("Cast profile not found."));
 		var cleanStageName = requireText(stageName, "Stage name", 80);
 		var stageNameKey = normalizeKey(cleanStageName);
-		castProfileRepository.findByStageNameKey(stageNameKey)
+		castProfileRepository.findByStoreIdAndStageNameKey(profile.getStore().getId(), stageNameKey)
 			.filter(existing -> !existing.getId().equals(profile.getId()))
 			.ifPresent(existing -> {
 				throw new DomainConflictException("This stage name is already in use.");
@@ -187,7 +205,7 @@ public class ProfileService {
 	}
 
 	private MemberProfile requireMemberProfile(String email) {
-		return memberProfileRepository.findByUserAccountEmailIgnoreCase(email)
+		return memberProfileRepository.findByUserAccountLoginIdentifierIgnoreCase(email)
 			.filter(profile -> (profile.getUserAccount().getRole() == UserRole.MEMBER
 					|| profile.getUserAccount().getRole() == UserRole.CAST)
 				&& profile.getUserAccount().getStatus() == UserStatus.ACTIVE)

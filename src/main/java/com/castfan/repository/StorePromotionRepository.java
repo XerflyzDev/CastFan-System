@@ -14,6 +14,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface StorePromotionRepository extends JpaRepository<StorePromotion, Long> {
+	List<StorePromotion> findAllByStoreIdAndStatusAndStartsAtLessThanEqualAndEndsAtAfterOrderByStartsAtDesc(
+		Long storeId, PromotionStatus status, Instant startsAt, Instant endsAt, Pageable pageable);
 
 	@Query("""
 		select promotion from StorePromotion promotion

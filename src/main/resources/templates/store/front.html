@@ -1,0 +1,7 @@
+<!doctype html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${storefront.store.name + ' | CastFan'}">Store | CastFan</title><link th:href="@{/css/app.css}" rel="stylesheet"></head>
+<body><main class="phone"><div class="screen-content"><header><a th:href="@{/}">CastFan</a><p>Store</p><h1 th:text="${storefront.store.name}">Store</h1><p th:text="${storefront.store.description}"></p><p th:text="${storefront.store.address}"></p></header>
+<section th:unless="${memberJoined}"><form th:action="@{/s/{slug}/join(slug=${storefront.store.slug})}" method="post"><button class="primary-button" type="submit">Join this store</button></form><a th:href="@{/login(store=${storefront.store.slug})}">Sign in to continue</a></section>
+<section><h2>Cast</h2><p th:if="${#lists.isEmpty(storefront.casts)}">No active Cast yet.</p><ul><li th:each="cast : ${storefront.casts}" th:text="${cast.stageName}">Cast</li></ul></section>
+<section><h2>Upcoming events</h2><p th:if="${#lists.isEmpty(storefront.events)}">No upcoming events.</p><article th:each="event : ${storefront.events}"><h3 th:text="${event.title}"></h3><p th:text="${event.description}"></p></article></section>
+<section><h2>Promotions</h2><p th:if="${#lists.isEmpty(storefront.promotions)}">No current promotions.</p><article th:each="promotion : ${storefront.promotions}"><h3 th:text="${promotion.title}"></h3><p th:text="${promotion.description}"></p></article></section>
+</div></main></body></html>

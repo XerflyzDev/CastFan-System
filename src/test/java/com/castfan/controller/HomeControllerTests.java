@@ -54,7 +54,7 @@ class HomeControllerTests {
 	void castHomeShowsMemberNavigationWithCastWorkspace() throws Exception {
 		mockMvc.perform(get("/").with(user("cast@castfan.test").roles("CAST")))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("href=\"/member/schedule\"")))
+			.andExpect(content().string(containsString("href=\"/cast/schedule\"")))
 			.andExpect(content().string(containsString("href=\"/member/notifications\"")))
 			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
 			.andExpect(content().string(containsString("href=\"/cast/profile\"")))
@@ -64,8 +64,8 @@ class HomeControllerTests {
 			.andExpect(content().string(containsString("aria-label=\"Cast\"")))
 			.andExpect(content().string(matchesPattern(
 				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
-					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast Profile</span>"
-					+ ".*?<span>Profile</span>.*?<span>Cast</span>.*?</nav>.*"
+					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast</span>"
+					+ ".*?<span>Cast Profile</span>.*?<span>Profile</span>.*?</nav>.*"
 			)));
 	}
 

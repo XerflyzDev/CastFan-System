@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
@@ -46,6 +47,7 @@ class MultiStoreWorkflowTests {
 	@Autowired StoreCastRepository assignments;
 	@Autowired CastProfileRepository casts;
 	@Autowired PasswordEncoder passwordEncoder;
+	@Autowired JdbcTemplate jdbcTemplate;
 	@Autowired MockMvc mockMvc;
 
 	@Test
@@ -135,13 +137,22 @@ class MultiStoreWorkflowTests {
 		var store = storeSignupService.register(storeForm("My Stores Owner", "my-stores-owner-" + suffix + "@test.local",
 			"my-stores-" + suffix));
 		var memberAccount = registrationService.registerMember(memberForm("my-stores-member-" + suffix + "@test.local"));
-		storeEntryService.joinAndHome(memberAccount, store.getSlug());
+		var ownerAccountId = store.getOwner().getId();
+		try {
+			storeEntryService.joinAndHome(memberAccount, store.getSlug());
 
-		mockMvc.perform(get("/account/stores")
-				.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
-			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString(store.getName())))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/home")));
+			mockMvc.perform(get("/account/stores")
+					.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
+				.andExpect(status().isOk())
+				.andExpect(content().string(org.hamcrest.Matchers.containsString(store.getName())))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/home")));
+		}
+		finally {
+			jdbcTemplate.update("DELETE FROM store_memberships WHERE member_profile_id IN (SELECT id FROM member_profiles WHERE user_account_id = ?)", memberAccount.getId());
+			jdbcTemplate.update("DELETE FROM member_profiles WHERE user_account_id = ?", memberAccount.getId());
+			jdbcTemplate.update("DELETE FROM stores WHERE id = ?", store.getId());
+			jdbcTemplate.update("DELETE FROM user_accounts WHERE id IN (?, ?)", memberAccount.getId(), ownerAccountId);
+		}
 	}
 
 	private StoreSignupForm storeForm(String owner, String email, String slug) {

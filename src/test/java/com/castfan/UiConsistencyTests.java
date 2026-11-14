@@ -314,6 +314,45 @@ class UiConsistencyTests {
 			.doesNotContain("#806b3f", "rgba(128, 107, 63");
 	}
 
+	@Test
+	void multiStorePagesUseTheSharedThemeAndResponsiveStates() throws IOException {
+		assertThat(resource("templates/auth/store-signup.html"))
+			.contains("store-signup-layout")
+			.contains("data-signup-step=\"1\"")
+			.contains("data-signup-step=\"2\"")
+			.contains("data-step-next")
+			.contains("data-step-back")
+			.contains("/css/multi-store.css")
+			.doesNotContain("style=");
+		assertThat(resource("templates/member/my-stores.html"))
+			.contains("phone shared-page-shell my-stores-page")
+			.contains("class=\"my-store-card\"")
+			.contains("class=\"directory-empty my-stores-empty\"")
+			.doesNotContain("style=");
+		assertThat(resource("templates/store/front.html"))
+			.contains("class=\"phone storefront-phone\"")
+			.contains("class=\"storefront-hero\"")
+			.contains("fragments/navigation :: member('home')")
+			.doesNotContain("style=");
+		assertThat(resource("templates/owner/store-settings.html"))
+			.contains("class=\"phone owner-store-settings-page\"")
+			.contains("page-back-button")
+			.contains("fragments/navigation :: owner('dashboard')")
+			.contains("class=\"store-qr-frame\"")
+			.doesNotContain("style=");
+		assertThat(resource("templates/auth/change-password.html"))
+			.contains("password-change-layout")
+			.contains("password-strength")
+			.contains("Your Store Owner cannot view your password")
+			.doesNotContain("style=");
+
+		assertThat(resource("static/css/multi-store.css"))
+			.contains("@media (max-width: 350px)")
+			.contains("@media (prefers-reduced-motion: reduce)")
+			.contains("calc(126px + env(safe-area-inset-bottom))")
+			.doesNotContain("#806b3f", "#e2bd73", "#c99a67");
+	}
+
 	private String resource(String path) throws IOException {
 		return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
 	}

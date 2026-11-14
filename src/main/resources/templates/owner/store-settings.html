@@ -1,1 +1,80 @@
-<!doctype html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Store settings | CastFan</title><link th:href="@{/css/app.css}" rel="stylesheet"></head><body><main class="phone"><div class="screen-content owner-content"><a th:href="@{/owner}">Back</a><h1>Store settings</h1><div class="form-alert success" th:if="${param.saved}">Store details saved.</div><form class="auth-form" th:action="@{/owner/store/settings}" th:object="${form}" method="post"><label class="form-field"><span class="field-label">Store name</span><input th:field="*{name}" required maxlength="120"><span th:errors="*{name}"></span></label><label class="form-field"><span class="field-label">Description</span><textarea th:field="*{description}" maxlength="1000"></textarea></label><label class="form-field"><span class="field-label">Address</span><textarea th:field="*{address}" maxlength="500" required></textarea></label><label class="form-field"><span class="field-label">Permanent store URL</span><input th:value="${'/s/' + store.slug}" readonly></label><button class="primary-button" type="submit">Save changes</button></form><section><h2>Store QR</h2><img th:src="@{/owner/store/qr}" alt="QR code for this store" width="240" height="240"><p><a class="primary-button" th:href="@{/owner/store/qr(download=true)}">Download QR</a></p></section></div></main></body></html>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Edit store information and download its permanent QR code.">
+    <title>Store Settings | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/owner-workspace.css}" rel="stylesheet">
+    <link th:href="@{/css/multi-store.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone owner-store-settings-page" aria-label="Store settings">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <div class="screen-content owner-content owner-store-settings-content">
+            <div class="top-actions">
+                <a class="wordmark" th:href="@{/owner}">CastFan</a>
+                <a class="round-button page-back-button" th:href="@{/owner}" aria-label="Back to Owner dashboard" title="Back to Owner dashboard"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+            </div>
+
+            <header class="shared-page-heading owner-store-settings-heading">
+                <p class="eyebrow">Your store</p>
+                <h1>Store settings</h1>
+                <p>Keep public store information accurate and share the permanent QR with customers.</p>
+            </header>
+
+            <div class="multi-store-alert" th:if="${param.saved}">
+                <i class="bi bi-check-circle" aria-hidden="true"></i><span>Store details saved.</span>
+            </div>
+
+            <section class="store-settings-card" aria-labelledby="store-information-title">
+                <div class="store-settings-section-heading">
+                    <span><i class="bi bi-shop" aria-hidden="true"></i></span>
+                    <div><small>Public details</small><h2 id="store-information-title">Store information</h2></div>
+                </div>
+                <form class="auth-form store-settings-form" th:action="@{/owner/store/settings}" th:object="${form}" method="post">
+                    <label class="form-field">
+                        <span class="field-label">Store name</span>
+                        <input th:field="*{name}" required maxlength="120" th:classappend="${#fields.hasErrors('name')} ? ' is-invalid'" aria-describedby="storeSettingsName-error">
+                        <span class="field-error" id="storeSettingsName-error" th:errors="*{name}"></span>
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">Description <small>Optional</small></span>
+                        <textarea th:field="*{description}" maxlength="1000" placeholder="Tell customers about your store" th:classappend="${#fields.hasErrors('description')} ? ' is-invalid'" aria-describedby="storeSettingsDescription-error"></textarea>
+                        <span class="field-error" id="storeSettingsDescription-error" th:errors="*{description}"></span>
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">Address</span>
+                        <textarea th:field="*{address}" maxlength="500" required placeholder="Store address" th:classappend="${#fields.hasErrors('address')} ? ' is-invalid'" aria-describedby="storeSettingsAddress-error"></textarea>
+                        <span class="field-error" id="storeSettingsAddress-error" th:errors="*{address}"></span>
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">Permanent store URL</span>
+                        <span class="readonly-store-url"><i class="bi bi-lock" aria-hidden="true"></i><input th:value="${'/s/' + store.slug}" readonly aria-describedby="permanent-url-hint"></span>
+                        <small class="field-hint" id="permanent-url-hint">The URL stays fixed so printed QR codes continue to work.</small>
+                    </label>
+                    <button class="owner-primary store-settings-submit" type="submit"><i class="bi bi-check2" aria-hidden="true"></i>Save changes</button>
+                </form>
+            </section>
+
+            <section class="store-settings-card store-qr-card" aria-labelledby="store-qr-title">
+                <div class="store-settings-section-heading">
+                    <span class="rose"><i class="bi bi-qr-code" aria-hidden="true"></i></span>
+                    <div><small>Customer entry</small><h2 id="store-qr-title">Store QR</h2></div>
+                </div>
+                <div class="store-qr-frame"><img th:src="@{/owner/store/qr}" alt="QR code for this store" width="240" height="240"></div>
+                <p class="store-qr-url"><i class="bi bi-link-45deg" aria-hidden="true"></i><span th:text="${'/s/' + store.slug}">/s/store</span></p>
+                <p class="store-qr-help">Display this QR at the store so customers can open the storefront and join its membership.</p>
+                <a class="owner-primary" th:href="@{/owner/store/qr(download=true)}" download><i class="bi bi-download" aria-hidden="true"></i>Download QR</a>
+            </section>
+        </div>
+        <nav th:replace="~{fragments/navigation :: owner('dashboard')}"></nav>
+    </section>
+</main>
+</body>
+</html>

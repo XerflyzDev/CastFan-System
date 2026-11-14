@@ -1,6 +1,6 @@
 # Final QA Checklist
 
-Review date: 29 October 2026
+Review date: 14 November 2026
 
 This checklist records the final local verification for the one-cafe, store-wide points release. It does not replace the production Cloud Run and Cloud SQL release gates in `docs/google-cloud-deployment.md`.
 
@@ -18,6 +18,7 @@ The following authenticated routes were reviewed with seeded development data at
 - Member: Home, Schedule, Following, Account, and Membership points.
 - Cast: Dashboard, shared Schedule, public Cast Profile, Profile editor, shift requests, and content composer.
 - Owner: Dashboard, shift review, Member points, events, promotions, and Account.
+- Multi-store entry: Open Your Store, My Stores, public Storefront, Owner Store Settings and QR, and first-login password replacement.
 
 Checks performed:
 
@@ -26,6 +27,8 @@ Checks performed:
 - Visible controls expose accessible names; hidden date/time helpers and CSRF inputs are excluded from the visible-control check.
 - Reviewed images provide alternate text.
 - Fixed bottom navigation does not cover the final actionable content.
+- The two-step Store signup keeps one final server submission, returns validation to the relevant step, and remains usable as a single form without JavaScript.
+- Public Storefront pages omit persistent navigation for Visitors and use Store-aware Member navigation after the Member joins.
 
 ## Intentionally Separate Production Gates
 

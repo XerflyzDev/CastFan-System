@@ -1,22 +1,106 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open your store | CastFan</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Create an Owner account and open a CastFan store.">
+    <title>Open Your Store | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link th:href="@{/css/multi-store.css}" rel="stylesheet">
     <script th:src="@{/js/auth.js}" defer></script>
 </head>
-<body class="auth-page"><main class="auth-layout"><header class="auth-topbar auth-topbar-centered"><a class="auth-wordmark" th:href="@{/}">CastFan</a></header>
-<section class="auth-panel"><h1>Open your store</h1><p>Create one Owner account and one store. Your store URL cannot be changed after setup.</p>
-<form class="auth-form" th:action="@{/signup/store}" th:object="${form}" method="post">
-    <div class="form-alert" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
-    <label class="form-field"><span class="field-label">Owner name</span><input th:field="*{ownerName}" required maxlength="80"><span class="field-error" th:errors="*{ownerName}"></span></label>
-    <label class="form-field"><span class="field-label">Owner email</span><input th:field="*{email}" type="email" required maxlength="254"><span class="field-error" th:errors="*{email}"></span></label>
-    <label class="form-field"><span class="field-label">Password</span><input th:field="*{password}" type="password" required autocomplete="new-password"><span class="field-error" th:errors="*{password}"></span></label>
-    <label class="form-field"><span class="field-label">Confirm password</span><input th:field="*{confirmPassword}" type="password" required autocomplete="new-password"><span class="field-error" th:errors="*{confirmPassword}"></span></label>
-    <label class="form-field"><span class="field-label">Store name</span><input th:field="*{storeName}" required maxlength="120"><span class="field-error" th:errors="*{storeName}"></span></label>
-    <label class="form-field"><span class="field-label">Description</span><textarea th:field="*{description}" maxlength="1000"></textarea><span class="field-error" th:errors="*{description}"></span></label>
-    <label class="form-field"><span class="field-label">Address</span><textarea th:field="*{address}" required maxlength="500"></textarea><span class="field-error" th:errors="*{address}"></span></label>
-    <label class="form-field"><span class="field-label">Store URL</span><span class="auth-input"><span>/s/</span><input th:field="*{slug}" required maxlength="100" placeholder="moonlight-cafe"></span><small>This URL is permanent after creation.</small><span class="field-error" th:errors="*{slug}"></span></label>
-    <button class="primary-button auth-submit" type="submit">Create store</button>
-</form><p class="auth-switch">Already registered? <a th:href="@{/login}">Sign in</a></p></section></main></body></html>
+<body class="auth-page">
+<main class="auth-layout auth-layout-signup store-signup-layout">
+    <div class="auth-atmosphere" aria-hidden="true"></div>
+    <header class="auth-topbar">
+        <a class="auth-wordmark" th:href="@{/}">CastFan</a>
+        <a class="auth-home-link" th:href="@{/login}" aria-label="Back to sign in" title="Back to sign in">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        </a>
+    </header>
+
+    <section class="store-signup-intro">
+        <span class="auth-hero-icon rose" aria-hidden="true"><i class="bi bi-shop"></i></span>
+        <p class="eyebrow">Owner onboarding</p>
+        <h1>Open your store</h1>
+        <p>Create your Owner account first, then add the public information customers will see.</p>
+    </section>
+
+    <section class="auth-panel store-signup-panel">
+        <div class="signup-progress" aria-label="Store signup progress">
+            <div>
+                <span data-step-label th:text="${activeStep == 2 ? 'Step 2 of 2' : 'Step 1 of 2'}">Step 1 of 2</span>
+                <strong data-step-title th:text="${activeStep == 2 ? 'Store information' : 'Owner account'}">Owner account</strong>
+            </div>
+            <div class="signup-progress-track" aria-hidden="true"><span th:classappend="${activeStep == 2} ? ' is-complete'"></span></div>
+        </div>
+
+        <form class="auth-form store-signup-form" th:action="@{/signup/store}" th:object="${form}" method="post"
+              th:attr="data-active-step=${activeStep}">
+            <fieldset class="signup-step" data-signup-step="1">
+                <legend class="sr-only">Owner account</legend>
+                <label class="form-field">
+                    <span class="field-label">Owner name</span>
+                    <span class="auth-input"><i class="bi bi-person" aria-hidden="true"></i><input th:field="*{ownerName}" required maxlength="80" autocomplete="name" placeholder="Your name" th:classappend="${#fields.hasErrors('ownerName')} ? ' is-invalid'" aria-describedby="ownerName-error"></span>
+                    <span class="field-error" id="ownerName-error" th:errors="*{ownerName}"></span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Owner email</span>
+                    <span class="auth-input"><i class="bi bi-envelope" aria-hidden="true"></i><input th:field="*{email}" type="email" required maxlength="254" autocomplete="email" placeholder="name@example.com" th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'" aria-describedby="ownerEmail-error"></span>
+                    <span class="field-error" id="ownerEmail-error" th:errors="*{email}"></span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Password</span>
+                    <span class="auth-input"><i class="bi bi-lock" aria-hidden="true"></i><input th:field="*{password}" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="8–72 characters" th:classappend="${#fields.hasErrors('password')} ? ' is-invalid'" aria-describedby="ownerPassword-error"></span>
+                    <span class="field-error" id="ownerPassword-error" th:errors="*{password}"></span>
+                    <span class="password-strength" data-password-strength hidden>
+                        <span class="password-strength-heading"><span data-password-strength-help>Use 8 to 72 characters.</span><strong data-password-strength-label>Not rated</strong></span>
+                        <span class="password-strength-meter" aria-hidden="true"><span></span><span></span><span></span></span>
+                    </span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Confirm password</span>
+                    <span class="auth-input"><i class="bi bi-shield-check" aria-hidden="true"></i><input th:field="*{confirmPassword}" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Enter the password again" th:classappend="${#fields.hasErrors('confirmPassword')} ? ' is-invalid'" aria-describedby="confirmPassword-error"></span>
+                    <span class="field-error" id="confirmPassword-error" th:errors="*{confirmPassword}"></span>
+                </label>
+                <button class="primary-button auth-submit" type="button" data-step-next>
+                    <span>Continue</span><i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+            </fieldset>
+
+            <fieldset class="signup-step" data-signup-step="2">
+                <legend class="sr-only">Store information</legend>
+                <label class="form-field">
+                    <span class="field-label">Store name</span>
+                    <span class="auth-input"><i class="bi bi-shop" aria-hidden="true"></i><input th:field="*{storeName}" required maxlength="120" autocomplete="organization" placeholder="Moonlight Cafe" th:classappend="${#fields.hasErrors('storeName')} ? ' is-invalid'" aria-describedby="storeName-error"></span>
+                    <span class="field-error" id="storeName-error" th:errors="*{storeName}"></span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Description <small>Optional</small></span>
+                    <textarea th:field="*{description}" maxlength="1000" placeholder="Tell customers what makes your store special" th:classappend="${#fields.hasErrors('description')} ? ' is-invalid'" aria-describedby="description-error"></textarea>
+                    <span class="field-error" id="description-error" th:errors="*{description}"></span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Address</span>
+                    <textarea th:field="*{address}" required maxlength="500" autocomplete="street-address" placeholder="Store address" th:classappend="${#fields.hasErrors('address')} ? ' is-invalid'" aria-describedby="address-error"></textarea>
+                    <span class="field-error" id="address-error" th:errors="*{address}"></span>
+                </label>
+                <label class="form-field">
+                    <span class="field-label">Store URL</span>
+                    <span class="store-url-input"><span>castfan.app/s/</span><input th:field="*{slug}" required maxlength="100" placeholder="moonlight-cafe" th:classappend="${#fields.hasErrors('slug')} ? ' is-invalid'" aria-describedby="slug-hint slug-error"></span>
+                    <small class="field-hint" id="slug-hint"><i class="bi bi-lock" aria-hidden="true"></i>This URL is permanent after creation.</small>
+                    <span class="field-error" id="slug-error" th:errors="*{slug}"></span>
+                </label>
+                <div class="signup-actions">
+                    <button class="secondary-button" type="button" data-step-back><i class="bi bi-arrow-left" aria-hidden="true"></i>Back</button>
+                    <button class="primary-button" type="submit">Create store<i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                </div>
+            </fieldset>
+        </form>
+        <p class="auth-switch">Already registered? <a th:href="@{/login}">Sign in</a></p>
+    </section>
+</main>
+</body>
+</html>

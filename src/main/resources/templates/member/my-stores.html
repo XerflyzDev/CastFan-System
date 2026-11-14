@@ -1,1 +1,58 @@
-<!doctype html><html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>My Stores | CastFan</title><link th:href="@{/css/app.css}" rel="stylesheet"></head><body><main class="phone"><div class="screen-content"><h1>My Stores</h1><p th:if="${#lists.isEmpty(memberships)}">You have not joined a store yet. Scan a store's CastFan QR code to begin.</p><a class="store-card" th:each="membership : ${memberships}" th:href="@{'/s/' + ${membership.store.slug} + '/home'}"><strong th:text="${membership.store.name}">Store</strong><span th:text="${membership.pointsBalance + ' points'}">0 points</span></a></div></main></body></html>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Choose one of your CastFan store memberships.">
+    <title>My Stores | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+    <link th:href="@{/css/member-home.css}" rel="stylesheet">
+    <link th:href="@{/css/multi-store.css}" rel="stylesheet">
+</head>
+<body>
+<main class="concept-stage">
+    <section class="phone shared-page-shell my-stores-page" aria-label="My stores">
+        <div class="ambient-top" aria-hidden="true"></div>
+        <div class="screen-content my-stores-content">
+            <div class="top-actions">
+                <a class="wordmark" th:href="@{/account/stores}">CastFan</a>
+                <a class="round-button" th:href="@{/account}" aria-label="Open Profile" title="Profile"><i class="bi bi-person" aria-hidden="true"></i></a>
+            </div>
+
+            <header class="shared-page-heading my-stores-heading">
+                <p class="eyebrow">Your memberships</p>
+                <h1>My stores</h1>
+                <p>Select a store to view its Cast, schedules, events, promotions, and membership points.</p>
+            </header>
+
+            <div class="multi-store-alert" th:if="${param.passwordChanged}">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                <span>Your password has been updated.</span>
+            </div>
+
+            <section class="my-store-list" th:unless="${#lists.isEmpty(memberships)}" aria-label="Joined stores">
+                <a class="my-store-card" th:each="membership : ${memberships}" th:href="@{/s/{slug}/home(slug=${membership.store.slug})}">
+                    <span class="my-store-icon" aria-hidden="true"><i class="bi bi-shop"></i></span>
+                    <span class="my-store-copy">
+                        <small>Store membership</small>
+                        <strong th:text="${membership.store.name}">Store</strong>
+                        <span><i class="bi bi-award" aria-hidden="true"></i><span th:text="${membership.pointsBalance + ' points'}">0 points</span></span>
+                    </span>
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+            </section>
+
+            <section class="directory-empty my-stores-empty" th:if="${#lists.isEmpty(memberships)}">
+                <i class="bi bi-qr-code-scan" aria-hidden="true"></i>
+                <h2>No stores yet</h2>
+                <p>Scan a store's CastFan QR code or open its direct link to join.</p>
+            </section>
+
+            <p class="my-stores-help"><i class="bi bi-info-circle" aria-hidden="true"></i>Your account works across stores, while points and memberships stay separate.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

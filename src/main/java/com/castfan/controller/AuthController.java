@@ -60,25 +60,42 @@ public class AuthController {
 			}
 			model.addAttribute("form", form);
 		}
+		model.addAttribute("activeStep", 1);
 		return "auth/store-signup";
 	}
 
 	@PostMapping("/signup/store")
-	public String registerStore(@Valid @ModelAttribute("form") StoreSignupForm form, BindingResult bindingResult) {
-		if (!form.getPassword().equals(form.getConfirmPassword())) {
+	public String registerStore(@Valid @ModelAttribute("form") StoreSignupForm form, BindingResult bindingResult,
+		Model model) {
+		if (form.getPassword() != null && !form.getPassword().equals(form.getConfirmPassword())) {
 			bindingResult.rejectValue("confirmPassword", "password.mismatch", "Passwords do not match");
 		}
-		if (form.getPassword().getBytes(StandardCharsets.UTF_8).length > 72) {
+		if (form.getPassword() != null && form.getPassword().getBytes(StandardCharsets.UTF_8).length > 72) {
 			bindingResult.rejectValue("password", "password.tooLong", "Password must not exceed 72 bytes");
 		}
-		if (bindingResult.hasErrors()) return "auth/store-signup";
+		if (bindingResult.hasErrors()) {
+			model.addAttribute("activeStep", storeSignupStep(bindingResult));
+			return "auth/store-signup";
+		}
 		try {
 			storeSignupService.register(form);
 		} catch (IllegalArgumentException exception) {
-			bindingResult.reject("store.duplicate", exception.getMessage());
+			if (exception.getMessage().toLowerCase().contains("email")) {
+				bindingResult.rejectValue("email", "email.duplicate", exception.getMessage());
+				model.addAttribute("activeStep", 1);
+			}
+			else {
+				bindingResult.rejectValue("slug", "store.duplicate", exception.getMessage());
+				model.addAttribute("activeStep", 2);
+			}
 			return "auth/store-signup";
 		}
 		return "redirect:/login?storeRegistered";
+	}
+
+	private int storeSignupStep(BindingResult bindingResult) {
+		return bindingResult.hasFieldErrors("ownerName") || bindingResult.hasFieldErrors("email")
+			|| bindingResult.hasFieldErrors("password") || bindingResult.hasFieldErrors("confirmPassword") ? 1 : 2;
 	}
 
 	@GetMapping("/signup")

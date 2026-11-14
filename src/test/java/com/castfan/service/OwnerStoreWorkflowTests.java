@@ -75,6 +75,29 @@ class OwnerStoreWorkflowTests {
 	}
 
 	@Test
+	void ownerStoreSettingsUsesTheSharedOwnerThemeAndKeepsTheSlugReadOnly() throws Exception {
+		mockMvc.perform(get("/owner/store/settings").with(ownerUser()))
+			.andExpect(status().isOk())
+			.andExpect(view().name("owner/store-settings"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("owner-store-settings-page")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Owner navigation")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Permanent store URL")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("readonly")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Download QR")));
+
+		mockMvc.perform(post("/owner/store/settings").with(ownerUser()).with(csrf())
+				.param("name", "Updated Cast Cafe")
+				.param("description", "Updated public description")
+				.param("address", "Chiang Mai"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/owner/store/settings?saved"));
+
+		var updated = storeRepository.findById(store.getId()).orElseThrow();
+		assertThat(updated.getName()).isEqualTo("Updated Cast Cafe");
+		assertThat(updated.getSlug()).isEqualTo(store.getSlug());
+	}
+
+	@Test
 	void ownerCanManageRosterWithoutSendingAStoreId() throws Exception {
 		mockMvc.perform(post("/owner/cast/create").with(ownerUser()).with(csrf())
 				.param("displayName", "New Cast Account")

@@ -35,6 +35,7 @@ public class StorefrontController {
 	public String storefront(@PathVariable String slug, Principal principal, Model model, HttpSession session) {
 		var view = load(slug);
 		model.addAttribute("storefront", view);
+		model.addAttribute("storeSlug", slug);
 		model.addAttribute("memberJoined", isJoined(principal, view.store().id()));
 		if (principal == null) session.setAttribute(StoreEntryService.SESSION_STORE_SLUG, slug);
 		return "store/front";
@@ -45,6 +46,7 @@ public class StorefrontController {
 		var view = load(slug);
 		if (!isJoined(principal, view.store().id())) return "redirect:/s/" + slug;
 		model.addAttribute("storefront", view);
+		model.addAttribute("storeSlug", slug);
 		model.addAttribute("memberJoined", true);
 		return "store/front";
 	}

@@ -26,7 +26,7 @@ The previous pink-led visual theme and the older full-width desktop application 
 - Use a centered phone-style application surface on tablet and desktop, with a maximum width of approximately `390px` and a maximum working height of approximately `844px`.
 - At viewports up to `470px`, the application surface becomes full-width and full-height with no outer border, radius, or desktop shadow.
 - Use a white content canvas over a `#F5F5F5` page background.
-- Use the `CastFan` wordmark at the upper left with the shared `1.22rem`, extra-bold treatment and safe-area-aware top spacing. Do not reduce its size for individual roles or account pages.
+- Use the `CastFan` wordmark at the upper left with the shared `1.22rem`, Bold (`700`) treatment and safe-area-aware top spacing. Do not change its size or weight for individual roles, authentication, or account pages.
 - Non-root workflow pages place a circular arrow-back action at the upper right. Its accessible label names the destination (`Back to Home`, `Back to Profile`, `Back to Cast workspace`, or `Back to Owner dashboard`) and it returns to the documented parent page. Other contextual actions may remain beside it.
 - Keep the main content independently scrollable and reserve bottom space for persistent navigation.
 - Use the same shell, spacing rhythm, heading hierarchy, card treatment, and navigation behavior for Member, Cast, and Owner pages.
@@ -62,6 +62,9 @@ Page backgrounds blend white, light grey, and soft charcoal-grey tones. Blue, mi
 - Primary font: `LINE Seed Sans TH`.
 - The official WOFF2 files are self-hosted so the interface does not depend on a third-party font CDN.
 - System fallback: `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, and `sans-serif`.
+- Every full-page template loads `ui-foundation.css` before page-level styles. Page styles must inherit the interface font instead of declaring a separate font stack.
+- The shared type scale is `1.73rem` for page titles, `0.88rem` for section titles, `0.82rem` for body text, `0.75rem` for supporting body text, `0.72rem` for labels and actions, and `0.68rem` for captions and metadata.
+- Important instructions, controls, validation messages, and empty-state explanations must not use the compact metadata sizes previously used by prototype-only screens.
 - Headings use semi-bold or bold weights with compact line height.
 - Body text remains clean and readable.
 - Captions and metadata use secondary grey with smaller sizing.
@@ -157,6 +160,8 @@ LINE Seed is provided by LY Corporation under the SIL Open Font License 1.1. The
 
 The design tokens and shared component styles are implemented in:
 
+`src/main/resources/static/css/ui-foundation.css`
+
 `src/main/resources/static/css/app.css`
 
 The approved mobile Member shell and Home components are implemented in:
@@ -176,6 +181,8 @@ Shared discovery and membership pages reuse the same shell through:
 Multi-store entry, Store selection, Store settings, and first-login pages share their focused responsive styles through:
 
 `src/main/resources/static/css/multi-store.css`
+
+Sign in, Member registration, Owner/Store registration, and first-login password replacement use the same centered wordmark and one elevated form card. Owner registration keeps its two-step progressive form inside that card; its different business fields do not create a separate visual shell.
 
 The production Member Schedule extensions are implemented in:
 

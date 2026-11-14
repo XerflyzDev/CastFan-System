@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -57,10 +59,51 @@ class UiConsistencyTests {
 		var sharedStyles = resource("static/css/member-home.css");
 
 		assertThat(sharedStyles)
-			.contains("@media (max-width: 350px)")
-			.contains(".cast-nav .nav-button span")
-			.contains(".owner-nav .nav-button span")
-			.contains("font-size: 0.5rem");
+			.contains(".nav-button span")
+			.contains("font-size: var(--type-label)")
+			.doesNotContain(".cast-nav .nav-button span");
+	}
+
+	@Test
+	void everyFullPageTemplateLoadsTheSharedUiFoundationFirst() throws IOException {
+		var templates = Path.of("src/main/resources/templates");
+		try (var paths = Files.walk(templates)) {
+			for (var template : paths.filter(path -> path.toString().endsWith(".html"))
+				.filter(path -> !path.toString().contains("fragments"))
+				.toList()) {
+				var html = Files.readString(template, StandardCharsets.UTF_8);
+				var foundation = html.indexOf("/css/ui-foundation.css");
+				var firstStylesheet = html.indexOf("th:href=\"@{/css/");
+				assertThat(foundation).as(template.toString()).isGreaterThanOrEqualTo(0);
+				assertThat(foundation).as(template.toString()).isEqualTo(firstStylesheet + "th:href=\"@{".length());
+			}
+		}
+	}
+
+	@Test
+	void pageStylesInheritTheSingleSelfHostedInterfaceFont() throws IOException {
+		var foundation = resource("static/css/ui-foundation.css");
+		assertThat(foundation)
+			.contains("LINESeedSansTH_W_Th.woff2")
+			.contains("LINESeedSansTH_W_Rg.woff2")
+			.contains("LINESeedSansTH_W_Bd.woff2")
+			.contains("LINESeedSansTH_W_XBd.woff2")
+			.contains("LINESeedSansTH_W_He.woff2")
+			.contains("--type-page-title: 1.73rem")
+			.contains("--type-caption: 0.68rem")
+			.contains("select,")
+			.contains("option { font: inherit; }");
+
+		var styles = Path.of("src/main/resources/static/css");
+		try (var paths = Files.walk(styles)) {
+			for (var stylesheet : paths.filter(path -> path.toString().endsWith(".css"))
+				.filter(path -> !path.getFileName().toString().equals("ui-foundation.css"))
+				.toList()) {
+				assertThat(Files.readString(stylesheet, StandardCharsets.UTF_8))
+					.as(stylesheet.toString())
+					.doesNotContain("font-family: \"LINE Seed Sans TH\"", "font-family: Arial");
+			}
+		}
 	}
 
 	@Test
@@ -254,14 +297,23 @@ class UiConsistencyTests {
 
 	@Test
 	void sharedWordmarkUsesOneProminentSafeAreaAwareTreatment() throws IOException {
+		var foundationStyles = resource("static/css/ui-foundation.css");
+		var applicationStyles = resource("static/css/app.css");
 		var sharedStyles = resource("static/css/member-home.css");
 		var profileStyles = resource("static/css/member-profile.css");
 
+		assertThat(foundationStyles)
+			.contains("--wordmark-font-weight: 700;");
+		assertThat(applicationStyles)
+			.contains(".auth-wordmark")
+			.contains("font-weight: var(--wordmark-font-weight)")
+			.doesNotContain(".auth-wordmark { color: var(--ink); font-size: 1.22rem; font-weight: 800");
 		assertThat(sharedStyles)
 			.contains("padding: calc(17px + env(safe-area-inset-top)) 15px")
 			.contains(".wordmark { display: inline-flex; min-height: 38px;")
 			.contains("font-size: 1.22rem")
-			.contains("font-weight: 800");
+			.contains("font-weight: var(--wordmark-font-weight)")
+			.doesNotContain(".wordmark { display: inline-flex; min-height: 38px; align-items: center; color: var(--ink); font-size: 1.22rem; line-height: 1; font-weight: 800");
 		assertThat(profileStyles)
 			.contains(".account-prototype .wordmark { color: var(--profile-ink); }")
 			.doesNotContain(".account-prototype .wordmark { color: var(--profile-ink); font-size:");
@@ -318,11 +370,14 @@ class UiConsistencyTests {
 	void multiStorePagesUseTheSharedThemeAndResponsiveStates() throws IOException {
 		assertThat(resource("templates/auth/store-signup.html"))
 			.contains("store-signup-layout")
+			.contains("auth-topbar auth-topbar-centered auth-topbar-with-action")
+			.contains("auth-panel auth-login-panel auth-signup-panel store-signup-panel")
 			.contains("data-signup-step=\"1\"")
 			.contains("data-signup-step=\"2\"")
 			.contains("data-step-next")
 			.contains("data-step-back")
 			.contains("/css/multi-store.css")
+			.doesNotContain("store-signup-intro")
 			.doesNotContain("style=");
 		assertThat(resource("templates/member/my-stores.html"))
 			.contains("phone shared-page-shell my-stores-page")
@@ -342,8 +397,10 @@ class UiConsistencyTests {
 			.doesNotContain("style=");
 		assertThat(resource("templates/auth/change-password.html"))
 			.contains("password-change-layout")
+			.contains("auth-panel auth-login-panel auth-signup-panel password-change-panel")
 			.contains("password-strength")
 			.contains("Your Store Owner cannot view your password")
+			.doesNotContain("password-change-intro")
 			.doesNotContain("style=");
 
 		assertThat(resource("static/css/multi-store.css"))

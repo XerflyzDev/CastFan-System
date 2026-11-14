@@ -1,0 +1,92 @@
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_Th.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_Rg.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_Bd.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_XBd.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 800;
+}
+
+@font-face {
+    font-family: "LINE Seed Sans TH";
+    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_He.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 900;
+}
+
+:root {
+    --font-interface: "LINE Seed Sans TH", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --wordmark-font-weight: 700;
+    --type-page-title: 1.73rem;
+    --type-section-title: 0.88rem;
+    --type-body: 0.82rem;
+    --type-body-small: 0.75rem;
+    --type-label: 0.72rem;
+    --type-caption: 0.68rem;
+    --line-compact: 1.2;
+    --line-body: 1.5;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+    min-width: 320px;
+    margin: 0;
+    font-family: var(--font-interface);
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea,
+option { font: inherit; }
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+    outline: 3px solid rgba(17, 19, 24, 0.2);
+    outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p { overflow-wrap: anywhere; }
+
+@media (max-width: 470px) {
+    body { min-height: 100vh; min-height: 100dvh; }
+}

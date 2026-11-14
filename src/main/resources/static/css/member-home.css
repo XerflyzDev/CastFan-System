@@ -1,17 +1,3 @@
-@font-face {
-    font-family: "LINE Seed Sans TH";
-    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_Rg.woff2") format("woff2");
-    font-display: swap;
-    font-weight: 400;
-}
-
-@font-face {
-    font-family: "LINE Seed Sans TH";
-    src: url("../fonts/line-seed-sans-th/LINESeedSansTH_W_Bd.woff2") format("woff2");
-    font-display: swap;
-    font-weight: 700;
-}
-
 :root {
     --canvas: #f5f5f5;
     --screen: #ffffff;
@@ -27,33 +13,15 @@
     --shadow: inset 0 0 0 1px #ebebeb, 0 1px 2px rgba(17, 17, 17, 0.025);
 }
 
-* { box-sizing: border-box; }
-
 body {
-    min-width: 320px;
-    margin: 0;
     color: var(--ink);
     background: var(--canvas);
-    font-family: "LINE Seed Sans TH", sans-serif;
-    letter-spacing: 0;
 }
-
-button,
-input { font: inherit; }
 
 a { color: inherit; }
 
 button { -webkit-tap-highlight-color: transparent; }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-summary:focus-visible {
-    outline: 3px solid rgba(17, 17, 17, 0.16);
-    outline-offset: 2px;
-}
 
 .concept-stage {
     display: grid;
@@ -123,7 +91,7 @@ summary:focus-visible {
 	text-decoration: none;
 }
 
-.wordmark { display: inline-flex; min-height: 38px; align-items: center; color: var(--ink); font-size: 1.22rem; line-height: 1; font-weight: 800; text-decoration: none; }
+.wordmark { display: inline-flex; min-height: 38px; align-items: center; color: var(--ink); font-size: 1.22rem; line-height: 1; font-weight: var(--wordmark-font-weight); text-decoration: none; }
 .page-back-button { flex: 0 0 38px; }
 
 .confirmation-dialog { width: min(326px, calc(100vw - 36px)); max-width: none; padding: 0; border: 0; border-radius: 18px; color: var(--ink); background: transparent; box-shadow: 0 24px 70px rgba(30, 32, 38, 0.24); }
@@ -217,9 +185,8 @@ summary:focus-visible {
 .discover-cast-page .wordmark {
     min-height: 38px;
     color: var(--ink);
-    font-family: "LINE Seed Sans TH", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 1.22rem;
-    font-weight: 800;
+    font-weight: var(--wordmark-font-weight);
     line-height: 1;
     letter-spacing: 0;
 }
@@ -581,7 +548,7 @@ summary:focus-visible {
 
 .nav-button { display: grid; min-width: 0; height: 52px; flex: 1 1 0; place-items: center; align-content: center; gap: 2px; padding: 3px 2px; border: 0; border-radius: 999px; color: #737373; background: transparent; text-decoration: none; cursor: pointer; }
 .nav-button i { font-size: 0.92rem; }
-.nav-button span { max-width: 100%; overflow: hidden; font-size: 0.62rem; text-overflow: ellipsis; white-space: nowrap; }
+.nav-button span { max-width: 100%; overflow: hidden; font-size: var(--type-label); letter-spacing: -0.02em; text-overflow: ellipsis; white-space: nowrap; }
 .nav-button:hover { color: var(--ink); background: rgba(255, 255, 255, 0.44); }
 .nav-button.active {
     color: var(--ink);
@@ -598,11 +565,6 @@ summary:focus-visible {
     .phone { width: 100%; height: 100vh; height: 100dvh; min-height: min(640px, 100dvh); border: 0; border-radius: 0; box-shadow: none; }
     .floating-nav,
     .concept-toast { position: fixed; }
-}
-
-@media (max-width: 350px) {
-    .cast-nav .nav-button span,
-    .owner-nav .nav-button span { font-size: 0.5rem; letter-spacing: -0.015em; }
 }
 
 @media (prefers-reduced-motion: reduce) {

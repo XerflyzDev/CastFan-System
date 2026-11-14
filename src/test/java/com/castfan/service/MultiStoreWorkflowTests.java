@@ -127,7 +127,25 @@ class MultiStoreWorkflowTests {
 		mockMvc.perform(get("/s/{slug}", store.getSlug()))
 			.andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Join this store")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"storefront-hero\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Member navigation"))))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/join")));
+	}
+
+	@Test
+	void joinedMemberStoreHomeUsesTheStoreAwareMemberShell() throws Exception {
+		var suffix = String.valueOf(System.nanoTime());
+		var store = storeSignupService.register(storeForm("Home Owner", "home-owner-" + suffix + "@test.local",
+			"home-" + suffix));
+		var memberAccount = registrationService.registerMember(memberForm("home-member-" + suffix + "@test.local"));
+		storeEntryService.joinAndHome(memberAccount, store.getSlug());
+
+		mockMvc.perform(get("/s/{slug}/home", store.getSlug())
+				.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
+			.andExpect(status().isOk())
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Member navigation")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/schedule")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("You are viewing your store home")));
 	}
 
 	@Test
@@ -144,6 +162,7 @@ class MultiStoreWorkflowTests {
 			mockMvc.perform(get("/account/stores")
 					.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
 				.andExpect(status().isOk())
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"phone shared-page-shell my-stores-page\"")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString(store.getName())))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/home")));
 		}

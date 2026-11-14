@@ -19,6 +19,7 @@ import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.AccountAvatarRepository;
 import com.castfan.repository.MemberProfileRepository;
+import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import com.castfan.repository.StoreMembershipRepository;
 import jakarta.servlet.http.HttpSession;
@@ -55,6 +56,9 @@ class AuthFlowTests {
 	@Autowired
 	private StoreMembershipRepository storeMembershipRepository;
 
+	@Autowired
+	private StoreRepository storeRepository;
+
 	@BeforeEach
 	void clearAccounts() {
 		accountAvatarRepository.deleteAll();
@@ -75,6 +79,79 @@ class AuthFlowTests {
 			.andExpect(status().isOk())
 			.andExpect(view().name("auth/signup"))
 			.andExpect(model().attributeExists("form"));
+
+		mockMvc.perform(get("/signup/store"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/store-signup"))
+			.andExpect(model().attribute("activeStep", 1))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-signup-step=\"1\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("data-signup-step=\"2\"")));
+	}
+
+	@Test
+	void storeSignupReturnsToTheStepContainingValidationErrors() throws Exception {
+		mockMvc.perform(post("/signup/store").with(csrf())
+				.param("ownerName", "A")
+				.param("email", "invalid-email")
+				.param("password", "secure-owner-pass-123")
+				.param("confirmPassword", "secure-owner-pass-123")
+				.param("storeName", "Valid Store")
+				.param("address", "Bangkok")
+				.param("slug", "valid-store"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/store-signup"))
+			.andExpect(model().attribute("activeStep", 1))
+			.andExpect(model().attributeHasFieldErrors("form", "ownerName", "email"));
+
+		mockMvc.perform(post("/signup/store").with(csrf())
+				.param("ownerName", "Valid Owner")
+				.param("email", "valid-owner@example.com")
+				.param("password", "secure-owner-pass-123")
+				.param("confirmPassword", "secure-owner-pass-123")
+				.param("storeName", "")
+				.param("address", "")
+				.param("slug", "invalid slug"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/store-signup"))
+			.andExpect(model().attribute("activeStep", 2))
+			.andExpect(model().attributeHasFieldErrors("form", "storeName", "address", "slug"));
+
+		assertThat(userAccountRepository.count()).isZero();
+		assertThat(storeRepository.count()).isZero();
+	}
+
+	@Test
+	void storeSignupCreatesOwnerAndStoreOnlyOnFinalSubmitAndRoutesDuplicateErrors() throws Exception {
+		mockMvc.perform(post("/signup/store").with(csrf())
+				.param("ownerName", "First Owner")
+				.param("email", "store-owner@example.com")
+				.param("password", "secure-owner-pass-123")
+				.param("confirmPassword", "secure-owner-pass-123")
+				.param("storeName", "First Store")
+				.param("description", "A Cast cafe")
+				.param("address", "Bangkok")
+				.param("slug", "first-store"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(redirectedUrl("/login?storeRegistered"));
+
+		assertThat(userAccountRepository.findByEmailIgnoreCase("store-owner@example.com")).isPresent();
+		assertThat(storeRepository.findBySlug("first-store")).isPresent();
+
+		mockMvc.perform(post("/signup/store").with(csrf())
+				.param("ownerName", "Duplicate Owner")
+				.param("email", "STORE-OWNER@example.com")
+				.param("password", "secure-owner-pass-456")
+				.param("confirmPassword", "secure-owner-pass-456")
+				.param("storeName", "Second Store")
+				.param("address", "Bangkok")
+				.param("slug", "second-store"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("auth/store-signup"))
+			.andExpect(model().attribute("activeStep", 1))
+			.andExpect(model().attributeHasFieldErrors("form", "email"));
+
+		assertThat(userAccountRepository.count()).isEqualTo(1);
+		assertThat(storeRepository.count()).isEqualTo(1);
 	}
 
 	@Test

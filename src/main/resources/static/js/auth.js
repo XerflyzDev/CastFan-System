@@ -94,4 +94,61 @@
             .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")
             .replace(/^-|-$/g, "").slice(0, 100);
     });
+
+    const storeSignupForm = document.querySelector(".store-signup-form");
+    if (storeSignupForm) {
+        const steps = [...storeSignupForm.querySelectorAll("[data-signup-step]")];
+        const nextButton = storeSignupForm.querySelector("[data-step-next]");
+        const backButton = storeSignupForm.querySelector("[data-step-back]");
+        const stepLabel = document.querySelector("[data-step-label]");
+        const stepTitle = document.querySelector("[data-step-title]");
+        const progress = document.querySelector(".signup-progress-track > span");
+        const confirmation = storeSignupForm.querySelector("#confirmPassword");
+        let currentStep = Number(storeSignupForm.dataset.activeStep || "1") === 2 ? 2 : 1;
+
+        const setStep = (stepNumber, moveFocus = false) => {
+            currentStep = stepNumber;
+            steps.forEach((step) => {
+                const active = Number(step.dataset.signupStep) === currentStep;
+                step.classList.toggle("is-active", active);
+                step.setAttribute("aria-hidden", String(!active));
+            });
+            if (stepLabel) stepLabel.textContent = `Step ${currentStep} of 2`;
+            if (stepTitle) stepTitle.textContent = currentStep === 1 ? "Owner account" : "Store information";
+            progress?.classList.toggle("is-complete", currentStep === 2);
+            if (moveFocus) {
+                steps[currentStep - 1]?.querySelector("input, textarea")?.focus({preventScroll: true});
+                document.querySelector(".store-signup-panel")?.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        };
+
+        const validateOwnerStep = () => {
+            const ownerStep = steps[0];
+            const ownerFields = [...ownerStep.querySelectorAll("input")];
+            if (password && confirmation) {
+                confirmation.setCustomValidity(password.value === confirmation.value ? "" : "Passwords do not match");
+            }
+            const firstInvalid = ownerFields.find((input) => !input.checkValidity());
+            if (firstInvalid) {
+                firstInvalid.reportValidity();
+                return false;
+            }
+            return true;
+        };
+
+        confirmation?.addEventListener("input", () => confirmation.setCustomValidity(""));
+        nextButton?.addEventListener("click", () => {
+            if (validateOwnerStep()) setStep(2, true);
+        });
+        backButton?.addEventListener("click", () => setStep(1, true));
+        storeSignupForm.addEventListener("submit", (event) => {
+            if (currentStep === 1) {
+                event.preventDefault();
+                if (validateOwnerStep()) setStep(2, true);
+            }
+        });
+
+        storeSignupForm.classList.add("is-enhanced");
+        setStep(currentStep);
+    }
 })();

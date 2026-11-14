@@ -173,6 +173,10 @@ Shared discovery and membership pages reuse the same shell through:
 
 `src/main/resources/templates/member/memberships.html`
 
+Multi-store entry, Store selection, Store settings, and first-login pages share their focused responsive styles through:
+
+`src/main/resources/static/css/multi-store.css`
+
 The production Member Schedule extensions are implemented in:
 
 `src/main/resources/static/css/member-schedule.css`
@@ -222,6 +226,9 @@ When adding a new page, reuse the existing tokens and component classes before i
 - [x] Responsive mobile and desktop behavior
 - [x] Shared application shell and neutral navigation treatment across roles
 - [x] Shared identity-card and grouped-settings language for Member Account and Cast Profile
+- [x] Two-step Owner and Store registration using one atomic submission
+- [x] Shared phone-shell treatment for My Stores, public Storefront, and Owner Store Settings
+- [x] First-login password replacement aligned with the authentication theme
 
 ## Approved Member Information Architecture
 

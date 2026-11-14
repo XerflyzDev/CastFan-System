@@ -81,6 +81,24 @@ class UiConsistencyTests {
 	}
 
 	@Test
+	void welcomePageUsesTheSharedThemeAndStartsAtAuthentication() throws IOException {
+		assertThat(resource("templates/welcome.html"))
+			.contains("class=\"welcome-shell\"")
+			.contains("class=\"welcome-orbit\"")
+			.contains("Welcome to CastFan")
+			.contains("Meet. Follow. Visit.")
+			.contains("th:href=\"@{/login}\"")
+			.contains("Get Started")
+			.doesNotContain("member-home.css", "fragments/navigation");
+		assertThat(resource("static/css/welcome.css"))
+			.contains("font-weight: var(--wordmark-font-weight)")
+			.contains("font-weight: 700")
+			.contains("@media (max-width: 470px)")
+			.contains("@media (max-width: 350px)")
+			.contains("@media (prefers-reduced-motion: reduce)");
+	}
+
+	@Test
 	void pageStylesInheritTheSingleSelfHostedInterfaceFont() throws IOException {
 		var foundation = resource("static/css/ui-foundation.css");
 		assertThat(foundation)

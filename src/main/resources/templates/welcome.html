@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Welcome to CastFan, the mobile-first Cast cafe companion.">
+    <title>Welcome | CastFan</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/ui-foundation.css}" rel="stylesheet">
+    <link th:href="@{/css/welcome.css}" rel="stylesheet">
+</head>
+<body class="welcome-page">
+<main class="welcome-shell">
+    <div class="welcome-atmosphere" aria-hidden="true"></div>
+
+    <header class="welcome-header">
+        <a class="welcome-wordmark" th:href="@{/}" aria-label="CastFan welcome">CastFan</a>
+        <span class="welcome-kicker">Your Cast cafe companion</span>
+    </header>
+
+    <section class="welcome-content" aria-labelledby="welcome-heading">
+        <div class="welcome-orbit" aria-hidden="true">
+            <span class="orbit-line orbit-line-outer"></span>
+            <span class="orbit-line orbit-line-inner"></span>
+            <span class="orbit-center"><i class="bi bi-stars"></i></span>
+
+            <span class="orbit-node orbit-node-profile"><i class="bi bi-person-heart"></i></span>
+            <span class="orbit-node orbit-node-calendar"><i class="bi bi-calendar-heart"></i></span>
+            <span class="orbit-node orbit-node-chat"><i class="bi bi-chat-heart"></i></span>
+            <span class="orbit-node orbit-node-coffee"><i class="bi bi-cup-hot"></i></span>
+            <span class="orbit-node orbit-node-event"><i class="bi bi-ticket-perforated"></i></span>
+            <span class="orbit-node orbit-node-follow"><i class="bi bi-heart"></i></span>
+
+            <span class="orbit-spark orbit-spark-one"><i class="bi bi-stars"></i></span>
+            <span class="orbit-spark orbit-spark-two"><i class="bi bi-star-fill"></i></span>
+        </div>
+
+        <div class="welcome-copy">
+            <h1 id="welcome-heading">Welcome to CastFan<br><span>Meet. Follow. Visit.</span></h1>
+            <p>See who is working, follow the Cast you love, and keep up with store events and promotions.</p>
+        </div>
+    </section>
+
+    <footer class="welcome-actions">
+        <a class="welcome-primary" th:href="@{/login}">
+            <span>Get Started</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+        <p>Sign in, create a Member account, or open your store.</p>
+    </footer>
+</main>
+</body>
+</html>

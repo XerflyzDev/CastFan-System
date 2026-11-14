@@ -17,8 +17,11 @@ public class HomeController {
 
 	@GetMapping("/")
 	public String home(Principal principal, Model model) {
+		if (principal == null) {
+			return "welcome";
+		}
 		model.addAttribute("pageTitle", "CastFan");
-		model.addAttribute("home", homeService.load(principal == null ? null : principal.getName()));
+		model.addAttribute("home", homeService.load(principal.getName()));
 		return "index";
 	}
 }

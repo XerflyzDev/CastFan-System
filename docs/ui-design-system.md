@@ -32,6 +32,7 @@ The previous pink-led visual theme and the older full-width desktop application 
 - Use the same shell, spacing rhythm, heading hierarchy, card treatment, and navigation behavior for Member, Cast, and Owner pages.
 - Role differences belong in information, permissions, actions, and navigation destinations—not in a separate visual theme.
 - Authentication and public-detail pages may omit persistent navigation, but must retain the same typography, colors, radii, border treatment, and accessibility behavior.
+- The anonymous root route uses a focused Welcome surface that introduces Cast discovery, schedules, events, and promotions before a single `Get Started` action opens authentication. Authenticated users keep their role-specific Home experience at the same route.
 - Authentication pages use the same `390px × 844px` maximum shell and `470px` full-screen breakpoint as the role workspaces, with a centered wordmark, generous breathing room, one elevated form card, thin page heading, full-width dark pill action, and plain-language security note. The `dev` profile may show a clearly labeled, non-functional Google sign-in or sign-up mockup for design review; it must not render in production until a reviewed OAuth flow exists. Public registration must clearly identify itself as Member registration and must not expose privileged role choices.
 - Create-account feedback is progressive: display names require at least three non-space characters, email format feedback appears while typing, and password strength is reported as Weak, Fair, or Strong without implying requirements beyond the enforced 8-to-72-character rule.
 
@@ -220,6 +221,7 @@ When adding a new page, reuse the existing tokens and component classes before i
 - [x] Event Detail concept and JPA-backed production route
 - [x] Member followed-Cast content feed and access-controlled Content Detail
 - [x] Authentication and account pages
+- [x] Anonymous Welcome page with a single authentication entry point
 - [x] Cast discovery and following pages
 - [x] Member membership pages
 - [x] JPA-backed Cast Dashboard, Schedule, Profile, and store-tier content access

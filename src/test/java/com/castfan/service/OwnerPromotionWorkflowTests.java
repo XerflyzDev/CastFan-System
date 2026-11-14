@@ -80,7 +80,7 @@ class OwnerPromotionWorkflowTests {
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/promotions?published=true"));
 		assertThat(promotionRepository.findById(promotion.getId()).orElseThrow().getStatus())
 			.isEqualTo(PromotionStatus.ACTIVE);
-		mockMvc.perform(get("/")).andExpect(status().isOk())
+		mockMvc.perform(get("/promotions")).andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("Welcome members")))
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("MEMBER15")));
 		mockMvc.perform(post("/owner/promotions/{id}/archive", promotion.getId()).with(ownerUser()).with(csrf()))
@@ -91,7 +91,8 @@ class OwnerPromotionWorkflowTests {
 			.andExpect(status().isNotFound());
 		mockMvc.perform(post("/owner/promotions/{id}/publish", promotion.getId()).with(ownerUser()).with(csrf()))
 			.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/owner/promotions?error=Only+draft+promotions+can+be+published."));
-		mockMvc.perform(get("/")).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Welcome members"))));
+		mockMvc.perform(get("/promotions"))
+			.andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Welcome members"))));
 	}
 
 	@Test

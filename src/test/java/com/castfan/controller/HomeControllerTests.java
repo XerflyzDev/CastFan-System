@@ -23,14 +23,15 @@ class HomeControllerTests {
 	private MockMvc mockMvc;
 
 	@Test
-	void homePageIsPublicAndRendersTheMainView() throws Exception {
+	void anonymousHomePageRendersTheWelcomeExperience() throws Exception {
 		mockMvc.perform(get("/"))
 			.andExpect(status().isOk())
-			.andExpect(view().name("index"))
-			.andExpect(model().attribute("pageTitle", "CastFan"))
-			.andExpect(model().attributeExists("home"))
-			.andExpect(content().string(containsString("Working Today")))
-			.andExpect(content().string(containsString("No approved shifts today")));
+			.andExpect(view().name("welcome"))
+			.andExpect(model().attributeDoesNotExist("home"))
+			.andExpect(content().string(containsString("Welcome to CastFan")))
+			.andExpect(content().string(containsString("Meet. Follow. Visit.")))
+			.andExpect(content().string(containsString("href=\"/login\"")))
+			.andExpect(content().string(containsString("Get Started")));
 	}
 
 	@Test

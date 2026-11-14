@@ -14,6 +14,16 @@ This project is being built from scratch for three courses: **Web Application De
 | 6831503082 | Areenee Hayiuma | niririniiii |
 | 6831503118 | Sirimanee Jakip | 6831503118-SirimaneeJakip |
 
+### Member Responsibilities
+
+| Student ID | Name | Primary responsibilities |
+| :---: | --- | --- |
+| 6831503057 | Parinya Tanunti | Core architecture, multi-store implementation, UI integration, security, CI/CD, and deployment |
+| 6831503053 | Nonnaphat Thirawatthanakamchon | Owner Member Points directory, pagination, and point history |
+| 6831503035 | Kunpriya Anwisat | Member Schedule day selection and schedule interaction |
+| 6831503082 | Areenee Hayiuma | Store Promotion lifecycle, promotion discovery, and Owner promotion UI |
+| 6831503118 | Sirimanee Jakip | Owner Shift Review, validation, schedule-conflict handling, and responsive UI tests |
+
 ## Project Language
 
 English is the primary language for the user interface, system messages, documentation, source-code identifiers, and future project content. Localized languages may be added later as optional translations.
@@ -150,7 +160,7 @@ The approved visual language, color tokens, components, and responsive UI rules 
 
 The consolidated product requirements, scope, stakeholder context, and current decisions are documented in [PROJECT.md](PROJECT.md). Coding agents should follow [AGENTS.md](AGENTS.md). The recovered original synthesis remains available as historical reference in [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md).
 
-## Development Roadmap
+## Implementation Status And Future Work
 
 - [ ] Finalize functional requirements and acceptance criteria.
 - [x] Design the Member Home, Schedule, Following, Profile, Cast Profile, and Event Detail interfaces.
@@ -232,6 +242,16 @@ Open [http://localhost:8080](http://localhost:8080).
 Application health is available at [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health). The public response exposes only the aggregate status.
 
 The development H2 Console is available at [http://localhost:8080/h2-console](http://localhost:8080/h2-console). Use JDBC URL `jdbc:h2:mem:castfan`, username `sa`, and an empty password.
+
+### Development Test Accounts
+
+The default `dev` profile creates only the minimum records required to exercise each role. These local H2 accounts are not production credentials, and no profile images, shifts, points, events, or promotions are seeded.
+
+| Role | Login | Password |
+| --- | --- | --- |
+| Owner | `owner@castfan.local` | `dev-only-password` |
+| Member | `member@castfan.local` | `dev-only-password` |
+| Cast | `mina@castfan.local` | `dev-only-password` |
 
 ### Run Tests
 

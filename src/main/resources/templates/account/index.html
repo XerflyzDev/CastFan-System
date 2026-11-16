@@ -90,7 +90,7 @@
                 </form>
             </dialog>
 
-            <section class="profile-section" th:if="${account.role == 'MEMBER'}" aria-labelledby="membership-heading">
+            <section class="profile-section" th:if="${account.role == 'MEMBER' and memberPoints != null}" aria-labelledby="membership-heading">
                 <div class="profile-section-title">
                     <div><small>Member access</small><h2 id="membership-heading">Membership points</h2></div>
                     <a th:href="@{/member/memberships}">View</a>
@@ -113,6 +113,35 @@
                         </span>
                         <span class="membership-card-points">
                             <strong th:text="${#numbers.formatInteger(memberPoints.pointsBalance, 1, 'COMMA')}">0</strong>
+                            <small>POINTS</small>
+                        </span>
+                    </span>
+                </a>
+            </section>
+
+            <section class="profile-section" th:if="${account.role == 'MEMBER' and memberPoints == null}" aria-labelledby="membership-empty-heading">
+                <div class="profile-section-title">
+                    <div><small>Member access</small><h2 id="membership-empty-heading">Membership points</h2></div>
+                    <a th:href="@{/account/stores}">My stores</a>
+                </div>
+                <a class="membership-card" th:href="@{/account/stores}" aria-label="Join a store to start earning membership points">
+                    <span class="membership-card-glow membership-card-glow-rose" aria-hidden="true"></span>
+                    <span class="membership-card-glow membership-card-glow-amber" aria-hidden="true"></span>
+                    <span class="membership-card-grid" aria-hidden="true"></span>
+                    <span class="membership-card-topline">
+                        <span>CASTFAN MEMBERSHIP</span>
+                    </span>
+                    <span class="membership-card-tier">
+                        <small>No store yet</small>
+                        <strong>JOIN A STORE</strong>
+                    </span>
+                    <span class="membership-card-footer">
+                        <span class="membership-card-member">
+                            <small>Member</small>
+                            <strong th:text="${account.displayName}">Member name</strong>
+                        </span>
+                        <span class="membership-card-points">
+                            <strong>&mdash;</strong>
                             <small>POINTS</small>
                         </span>
                     </span>

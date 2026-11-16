@@ -73,9 +73,13 @@ public class MemberCastService {
 		return castPage.map(profile -> MemberCastView.from(profile, followedIds.contains(profile.getId())));
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public List<MemberCastView> following(String authenticatedEmail) {
-		return following(authenticatedEmail, "castfan");
+		var memberProfile = requireActiveMember(authenticatedEmail);
+		return castFollowRepository.findVisibleFollowing(memberProfile.getId(), UserStatus.ACTIVE).stream()
+			.map(CastFollow::getCastProfile)
+			.map(profile -> MemberCastView.from(profile, true))
+			.toList();
 	}
 
 	@Transactional
@@ -90,7 +94,9 @@ public class MemberCastService {
 
 	@Transactional
 	public void follow(String authenticatedEmail, Long castProfileId) {
-		follow(authenticatedEmail, "castfan", castProfileId);
+		var castProfile = castProfileRepository.findById(castProfileId)
+			.orElseThrow(() -> new DomainRuleViolationException("Cast profile is not available."));
+		follow(authenticatedEmail, castProfile.getStore().getSlug(), castProfileId);
 	}
 
 	@Transactional
@@ -115,7 +121,8 @@ public class MemberCastService {
 
 	@Transactional
 	public void unfollow(String authenticatedEmail, Long castProfileId) {
-		unfollow(authenticatedEmail, "castfan", castProfileId);
+		var memberProfile = requireActiveMember(authenticatedEmail);
+		castFollowRepository.deleteByMemberProfileIdAndCastProfileId(memberProfile.getId(), castProfileId);
 	}
 
 	@Transactional

@@ -59,6 +59,7 @@ class CastWorkspaceWorkflowTests {
 
 	private UserAccount cast;
 	private StoreCast assignment;
+	private String storeSlug;
 
 	@BeforeEach
 	void setUp() {
@@ -72,6 +73,7 @@ class CastWorkspaceWorkflowTests {
 		var store = storeService.createStore(
 			owner, "Hoshi Test Cafe", "hoshi-test-" + suffix, null, "Bangkok", "Asia/Bangkok"
 		);
+		storeSlug = store.getSlug();
 		assignment = storeCastService.assignCast(owner, store.getId(), requireProfile().getId());
 	}
 
@@ -89,6 +91,8 @@ class CastWorkspaceWorkflowTests {
 			)))
 			.andExpect(content().string(org.hamcrest.Matchers.not(
 				org.hamcrest.Matchers.containsString("Manage content"))))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(
+				"href=\"/s/" + storeSlug + "/schedule\"")))
 			.andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
 				"(?s).*<nav class=\"floating-nav cast-nav\" aria-label=\"Cast navigation\">"
 					+ ".*?<span>Home</span>.*?<span>Schedule</span>.*?<span>Cast</span>"
@@ -143,6 +147,21 @@ class CastWorkspaceWorkflowTests {
 				.with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"profile-no-shift\"")));
+	}
+
+	@Test
+	void castScheduleTabOpensTheApprovedMemberScheduleForItsStore() throws Exception {
+		mockMvc.perform(get("/s/{slug}/schedule", storeSlug)
+				.with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/schedule"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Approved Shifts")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Hoshi Test Cafe")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(
+				"href=\"/s/" + storeSlug + "/schedule\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("aria-current=\"page\"")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("Submit a shift"))));
 	}
 
 	@Test

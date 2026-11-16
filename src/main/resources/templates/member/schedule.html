@@ -19,7 +19,7 @@
         <div class="screen-content schedule-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
-                <a class="round-button" th:href="${storeSlug != null} ? @{/s/{slug}/notifications(slug=${storeSlug})} : @{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                <a class="round-button" sec:authorize="hasRole('MEMBER')" th:href="${storeSlug != null} ? @{/s/{slug}/notifications(slug=${storeSlug})} : @{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
             </div>
 
             <header class="schedule-heading">

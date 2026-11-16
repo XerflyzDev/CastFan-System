@@ -15,10 +15,14 @@ import static org.hamcrest.Matchers.matchesPattern;
 
 import com.castfan.entity.CastProfile;
 import com.castfan.entity.MemberProfile;
+import com.castfan.entity.Store;
+import com.castfan.entity.StoreMembership;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.CastFollowRepository;
+import com.castfan.repository.StoreMembershipRepository;
+import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +50,12 @@ class MemberCastWorkflowTests {
 
 	@Autowired
 	private CastFollowRepository castFollowRepository;
+
+	@Autowired
+	private StoreRepository storeRepository;
+
+	@Autowired
+	private StoreMembershipRepository storeMembershipRepository;
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -94,6 +104,48 @@ class MemberCastWorkflowTests {
 			.isInstanceOf(DomainRuleViolationException.class);
 		assertThatThrownBy(() -> memberCastService.discover(ownerAccount.getEmail(), PageRequest.of(0, 12)))
 			.isInstanceOf(DomainRuleViolationException.class);
+	}
+
+	@Test
+	void memberWithoutStoreCanOpenFollowingAndAccount() throws Exception {
+		var member = createMember("no-store-member@castfan.test");
+		var memberRequest = user(member.getUserAccount().getEmail()).roles("MEMBER");
+
+		mockMvc.perform(get("/member/following").with(memberRequest))
+			.andExpect(status().isOk())
+			.andExpect(view().name("member/following"))
+			.andExpect(content().string(containsString("No followed Cast yet")));
+
+		mockMvc.perform(get("/account").with(memberRequest))
+			.andExpect(status().isOk())
+			.andExpect(view().name("account/index"))
+			.andExpect(content().string(containsString("No store yet")))
+			.andExpect(content().string(containsString("JOIN A STORE")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(containsString("No tier yet"))));
+	}
+
+	@Test
+	void followingAndAccountSupportMemberOfNonLegacyStore() throws Exception {
+		var member = createMember("custom-store-member@castfan.test");
+		var owner = saveAccount("custom-store-owner@castfan.test", UserRole.OWNER);
+		var store = storeRepository.saveAndFlush(new Store(
+			owner, "Custom Store", "custom-store", null, null, "Asia/Bangkok", true
+		));
+		storeMembershipRepository.save(new StoreMembership(store, member));
+		var cast = profileService.createCastProfile(
+			saveAccount("custom-store-cast@castfan.test", UserRole.CAST), store, "Custom Cast", null, null
+		);
+
+		memberCastService.follow(member.getUserAccount().getEmail(), cast.getId());
+
+		assertThat(memberCastService.following(member.getUserAccount().getEmail()))
+			.extracting(view -> view.stageName())
+			.containsExactly("Custom Cast");
+		mockMvc.perform(get("/account").with(user(member.getUserAccount().getEmail()).roles("MEMBER")))
+			.andExpect(status().isOk())
+			.andExpect(view().name("account/index"))
+			.andExpect(content().string(containsString("No tier yet")))
+			.andExpect(content().string(containsString("<strong>0</strong>")));
 	}
 
 	@Test

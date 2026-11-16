@@ -55,7 +55,7 @@ class HomeControllerTests {
 	void castHomeShowsMemberNavigationWithCastWorkspace() throws Exception {
 		mockMvc.perform(get("/").with(user("cast@castfan.test").roles("CAST")))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("href=\"/cast/schedule\"")))
+			.andExpect(content().string(containsString("href=\"/member/schedule\"")))
 			.andExpect(content().string(containsString("href=\"/member/notifications\"")))
 			.andExpect(content().string(containsString("href=\"/cast/public-profile\"")))
 			.andExpect(content().string(containsString("href=\"/cast/profile\"")))

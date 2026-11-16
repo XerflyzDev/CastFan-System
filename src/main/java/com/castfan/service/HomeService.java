@@ -12,11 +12,13 @@ import java.util.stream.Collectors;
 
 import com.castfan.dto.HomeViewModel;
 import com.castfan.entity.CastContent;
+import com.castfan.entity.CastProfile;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
 import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.ShiftStatus;
 import com.castfan.entity.Store;
+import com.castfan.entity.StoreMembership;
 import com.castfan.entity.StoreMembershipStatus;
 import com.castfan.entity.PromotionStatus;
 import com.castfan.entity.UserRole;
@@ -93,7 +95,36 @@ public class HomeService {
 
 	@Transactional(readOnly = true)
 	public HomeViewModel load(String authenticatedEmail) {
-		return load(authenticatedEmail, storeRepository.findFirstByActiveTrueOrderByIdAsc().orElse(null), false);
+		return load(authenticatedEmail, resolveHomeStore(authenticatedEmail), false);
+	}
+
+	private Store resolveHomeStore(String authenticatedEmail) {
+		var fallback = storeRepository.findFirstByActiveTrueOrderByIdAsc();
+		if (authenticatedEmail == null) {
+			return fallback.orElse(null);
+		}
+		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(authenticatedEmail).orElse(null);
+		if (account == null) {
+			return fallback.orElse(null);
+		}
+		return switch (account.getRole()) {
+			case CAST -> castProfileRepository.findByUserAccountLoginIdentifierIgnoreCase(authenticatedEmail)
+				.map(CastProfile::getStore)
+				.filter(store -> store != null && store.isActive())
+				.or(() -> fallback)
+				.orElse(null);
+			case OWNER -> storeRepository.findFirstByOwnerIdAndActiveTrueOrderByIdAsc(account.getId())
+				.or(() -> fallback)
+				.orElse(null);
+			case MEMBER -> memberProfileRepository.findByUserAccountId(account.getId())
+				.flatMap(profile -> storeMembershipRepository.findAllByMemberProfileOrderByJoinedAtAsc(profile).stream()
+					.filter(membership -> membership.getStatus() == StoreMembershipStatus.ACTIVE
+						&& membership.getStore().isActive())
+					.findFirst()
+					.map(StoreMembership::getStore))
+				.or(() -> fallback)
+				.orElse(null);
+		};
 	}
 
 	@Transactional(readOnly = true)

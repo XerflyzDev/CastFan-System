@@ -144,6 +144,35 @@ class HomeServiceTests {
 	}
 
 	@Test
+	void castHomeUsesTheCastAssignedStore() {
+		var store = store("Cast Home Cafe", "cast-home");
+		var castAccount = account("cast-home-rei@test.local", "Rei", UserRole.CAST);
+		var castProfile = castProfileRepository.save(new CastProfile(
+			castAccount, store, "Rei", "rei-cast-home", null, null
+		));
+		var assignment = storeCastRepository.save(new StoreCast(store, castProfile, true));
+		var today = LocalDate.now(STORE_ZONE);
+		var shift = new ShiftSchedule(
+			assignment,
+			today.atTime(14, 0).atZone(STORE_ZONE).toInstant(),
+			today.atTime(20, 0).atZone(STORE_ZONE).toInstant()
+		);
+		shift.approve(store.getOwner(), null);
+		shiftScheduleRepository.save(shift);
+		var startsAt = today.plusDays(2).atTime(16, 0).atZone(STORE_ZONE).toInstant();
+		storeEventRepository.save(new StoreEvent(
+			store, store.getOwner(), "Cast Home Event", "Event", null,
+			startsAt, startsAt.plusSeconds(3600), EventStatus.PUBLISHED
+		));
+
+		var home = homeService.load(castAccount.getEmail());
+
+		assertThat(home.storeName()).isEqualTo("Cast Home Cafe");
+		assertThat(home.workingToday()).extracting(cast -> cast.name()).containsExactly("Rei");
+		assertThat(home.featuredEvents()).extracting(event -> event.title()).contains("Cast Home Event");
+	}
+
+	@Test
 	void homeGreetingUsesLatestMemberDisplayName() {
 		var member = account("member-greeting@test.local", "Original Member", UserRole.MEMBER);
 		memberProfileRepository.save(new MemberProfile(member, null, null));

@@ -17,8 +17,8 @@
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content profile-content">
             <div class="top-actions">
-                <a class="wordmark" th:href="@{/}">CastFan</a>
-                <a class="round-button" th:if="${account.role == 'MEMBER'}" th:href="@{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
+                <a class="wordmark" th:href="${storeSlug != null} ? @{/s/{slug}/home(slug=${storeSlug})} : @{/}">CastFan</a>
+                <a class="round-button" th:if="${account.role == 'MEMBER'}" th:href="${storeSlug != null} ? @{/s/{slug}/notifications(slug=${storeSlug})} : @{/member/notifications}" aria-label="Notifications" title="Notifications"><i class="bi bi-bell" aria-hidden="true"></i></a>
             </div>
 
             <header class="profile-heading">
@@ -34,7 +34,7 @@
                         <img class="member-avatar member-avatar-photo" th:if="${account.hasAvatar}" th:src="@{/account/avatar}" th:alt="${account.displayName}">
                         <img class="member-avatar member-avatar-photo" th:if="${!account.hasAvatar and memberProfile != null and memberProfile.avatarUrl != null}" th:src="${memberProfile.avatarUrl}" th:alt="${account.displayName}">
                         <span class="member-avatar" th:if="${!account.hasAvatar and (memberProfile == null or memberProfile.avatarUrl == null)}" th:text="${account.initials}">AR</span>
-                        <form class="profile-avatar-upload" th:action="@{/account/avatar}" method="post" enctype="multipart/form-data" data-avatar-form>
+                        <form class="profile-avatar-upload" th:action="${storeSlug != null} ? @{/account/avatar(store=${storeSlug})} : @{/account/avatar}" method="post" enctype="multipart/form-data" data-avatar-form>
                             <input id="avatar-upload" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-input>
                             <label for="avatar-upload" aria-label="Change profile photo" title="Change profile photo"><i class="bi bi-camera" aria-hidden="true"></i></label>
                         </form>
@@ -44,7 +44,7 @@
                             <h2 id="member-name" th:text="${account.displayName}">Member</h2>
                             <details class="profile-name-editor" th:open="${nameError != null}">
                                 <summary aria-label="Edit name" title="Edit name"><i class="bi bi-pencil-fill" aria-hidden="true"></i></summary>
-                                <form th:action="@{/account/name}" method="post">
+                                <form th:action="${storeSlug != null} ? @{/account/name(store=${storeSlug})} : @{/account/name}" method="post">
                                     <label class="visually-hidden" for="display-name">Account name</label>
                                     <input id="display-name" name="displayName" type="text" minlength="2" maxlength="80" required th:value="${attemptedName != null ? attemptedName : account.displayName}" autocomplete="name">
                                     <button type="submit" aria-label="Save account name" title="Save">Save</button>
@@ -92,10 +92,10 @@
 
             <section class="profile-section" th:if="${account.role == 'MEMBER' and memberPoints != null}" aria-labelledby="membership-heading">
                 <div class="profile-section-title">
-                    <div><small>Member access</small><h2 id="membership-heading">Membership points</h2></div>
-                    <a th:href="@{/member/memberships}">View</a>
+                    <div><small th:text="${memberPoints.storeName != null ? memberPoints.storeName : 'Member access'}">Member access</small><h2 id="membership-heading">Membership points</h2></div>
+                    <a th:href="${storeSlug != null} ? @{/s/{slug}/membership(slug=${storeSlug})} : @{/member/memberships}">View</a>
                 </div>
-                <a class="membership-card" th:href="@{/member/memberships}" aria-label="View membership points and tier">
+                <a class="membership-card" th:href="${storeSlug != null} ? @{/s/{slug}/membership(slug=${storeSlug})} : @{/member/memberships}" aria-label="View membership points and tier">
                     <span class="membership-card-glow membership-card-glow-rose" aria-hidden="true"></span>
                     <span class="membership-card-glow membership-card-glow-amber" aria-hidden="true"></span>
                     <span class="membership-card-grid" aria-hidden="true"></span>
@@ -167,7 +167,7 @@
             <section class="profile-section" aria-labelledby="account-details-heading">
                 <div class="profile-section-title compact-title">
                     <div><small>Personal information</small><h2 id="account-details-heading">Account details</h2></div>
-                    <a th:if="${account.role == 'MEMBER'}" th:href="@{/member/profile}">Edit</a>
+                    <a th:if="${account.role == 'MEMBER'}" th:href="${storeSlug != null} ? @{/member/profile(store=${storeSlug})} : @{/member/profile}">Edit</a>
                 </div>
                 <div class="profile-list">
                     <div class="setting-row">
@@ -175,12 +175,12 @@
                         <span><strong>Email</strong><small th:text="${account.email}">member@example.com</small></span>
                         <i class="bi bi-check-circle" aria-label="Verified"></i>
                     </div>
-                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/following}">
+                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="${storeSlug != null} ? @{/s/{slug}/following(slug=${storeSlug})} : @{/member/following}">
                         <span><i class="bi bi-heart" aria-hidden="true"></i></span>
                         <span><strong>Following</strong><small>Manage followed Cast profiles</small></span>
                         <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </a>
-                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="@{/member/notification-settings}">
+                    <a class="setting-row" th:if="${account.role == 'MEMBER'}" th:href="${storeSlug != null} ? @{/s/{slug}/notification-settings(slug=${storeSlug})} : @{/member/notification-settings}">
                         <span><i class="bi bi-bell" aria-hidden="true"></i></span>
                         <span><strong>Notifications</strong><small th:text="${memberProfile.castUpdateNotifications or memberProfile.eventNotifications ? 'Choose Cast updates and event reminders' : 'All notifications are paused'}">Choose notification preferences</small></span>
                         <i class="bi bi-chevron-right" aria-hidden="true"></i>

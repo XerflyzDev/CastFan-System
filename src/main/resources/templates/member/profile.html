@@ -16,13 +16,13 @@
     <section class="phone member-edit-page" aria-label="Member profile settings">
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content profile-content">
-            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/account}" aria-label="Back to Profile" title="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
+            <div class="top-actions"><a class="wordmark" th:href="${storeSlug != null} ? @{/s/{slug}/home(slug=${storeSlug})} : @{/}">CastFan</a><a class="round-button page-back-button" th:href="${storeSlug != null} ? @{/s/{slug}/account(slug=${storeSlug})} : @{/account}" aria-label="Back to Profile" title="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="profile-heading"><p>Profile settings</p><h1>Edit profile</h1></header>
 
             <div class="profile-alert success" th:if="${param.saved}" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i>Profile saved.</div>
 
             <section class="profile-form-card" aria-labelledby="member-profile-form-heading">
-                <form class="member-profile-form" th:action="@{/member/profile}" th:object="${form}" method="post" enctype="multipart/form-data">
+                <form class="member-profile-form" th:action="${storeSlug != null} ? @{/member/profile(store=${storeSlug})} : @{/member/profile}" th:object="${form}" method="post" enctype="multipart/form-data">
                     <div class="edit-profile-summary">
                         <img class="member-avatar member-avatar-photo" th:if="${profile.avatarUrl != null}" th:src="${profile.avatarUrl}" th:alt="${profile.displayName}">
                         <span class="member-avatar" th:unless="${profile.avatarUrl != null}" th:text="${profile.initials}">AR</span>

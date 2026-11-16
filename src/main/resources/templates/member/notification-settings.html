@@ -16,7 +16,7 @@
     <section class="phone member-edit-page notification-settings-page" aria-label="Member notification settings">
         <div class="ambient-top" aria-hidden="true"></div>
         <div class="screen-content profile-content">
-            <div class="top-actions"><a class="wordmark" th:href="@{/}">CastFan</a><a class="round-button page-back-button" th:href="@{/account}" aria-label="Back to Account" title="Back to Account"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
+            <div class="top-actions"><a class="wordmark" th:href="${storeSlug != null} ? @{/s/{slug}/home(slug=${storeSlug})} : @{/}">CastFan</a><a class="round-button page-back-button" th:href="${storeSlug != null} ? @{/s/{slug}/account(slug=${storeSlug})} : @{/account}" aria-label="Back to Account" title="Back to Account"><i class="bi bi-arrow-left" aria-hidden="true"></i></a></div>
             <header class="profile-heading"><p>Preferences</p><h1>Notifications</h1></header>
 
             <section class="profile-form-card notification-settings-card" aria-labelledby="notification-settings-heading">

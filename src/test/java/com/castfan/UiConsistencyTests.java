@@ -168,7 +168,8 @@ class UiConsistencyTests {
 
 		assertThat(notificationRow)
 			.startsWith("<a class=\"setting-row\"")
-			.contains("th:href=\"@{/member/notification-settings}\"")
+			.contains("@{/s/{slug}/notification-settings(slug=${storeSlug})}")
+			.contains("@{/member/notification-settings}")
 			.contains("Choose Cast updates and event reminders");
 		assertThat(resource("templates/member/notification-settings.html"))
 			.contains("Choose your updates")
@@ -286,9 +287,9 @@ class UiConsistencyTests {
 	void workflowPagesExposeAConsistentBackActionToTheirParent() throws IOException {
 		var workflowParents = Map.ofEntries(
 			Map.entry("templates/member/notifications.html", "th:href=\"@{/}\" aria-label=\"Back to Home\""),
-			Map.entry("templates/member/profile.html", "th:href=\"@{/account}\" aria-label=\"Back to Profile\""),
+			Map.entry("templates/member/profile.html", "@{/s/{slug}/account(slug=${storeSlug})}"),
 			Map.entry("templates/member/casts.html", "@{/s/{slug}/following(slug=${storeSlug})}"),
-			Map.entry("templates/member/memberships.html", "th:href=\"@{/account}\" aria-label=\"Back to Profile\""),
+			Map.entry("templates/member/memberships.html", "@{/s/{slug}/account(slug=${storeSlug})}"),
 			Map.entry("templates/cast/schedule.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
 			Map.entry("templates/cast/content.html", "th:href=\"@{/cast}\" aria-label=\"Back to Cast workspace\""),
 			Map.entry("templates/owner/shifts.html", "th:href=\"@{/owner}\" aria-label=\"Back to Owner dashboard\""),

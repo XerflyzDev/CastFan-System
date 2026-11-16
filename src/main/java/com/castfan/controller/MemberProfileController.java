@@ -40,11 +40,13 @@ public class MemberProfileController {
 	}
 
 	@GetMapping("/member/profile")
-	public String profile(Principal principal, Model model) {
+	public String profile(Principal principal, @RequestParam(name = "store", required = false) String store,
+		Model model) {
 		if (!model.containsAttribute("form")) {
 			model.addAttribute("form", profileService.memberProfileForm(principal.getName()));
 		}
 		model.addAttribute("profile", profileService.memberProfile(principal.getName()));
+		addStoreContext(principal.getName(), store, model);
 		return "member/profile";
 	}
 
@@ -57,17 +59,34 @@ public class MemberProfileController {
 
 	@PostMapping("/member/profile")
 	public String updateProfile(Principal principal, @Valid @ModelAttribute("form") MemberProfileForm form,
-		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image, Model model) {
+		BindingResult bindingResult, @RequestParam(name = "image", required = false) MultipartFile image,
+		@RequestParam(name = "store", required = false) String store, Model model) {
 		if (!bindingResult.hasErrors()) {
 			try {
 				profileService.updateMemberProfile(principal.getName(), form, image);
-				return "redirect:/member/profile?saved";
+				var redirect = "redirect:/member/profile?saved";
+				if (hasStoreMembership(principal.getName(), store)) {
+					redirect += "&store=" + store;
+				}
+				return redirect;
 			} catch (DomainRuleViolationException exception) {
 				bindingResult.reject("profile.invalid", exception.getMessage());
 			}
 		}
 		model.addAttribute("profile", profileService.memberProfile(principal.getName()));
+		addStoreContext(principal.getName(), store, model);
 		return "member/profile";
+	}
+
+	private void addStoreContext(String email, String store, Model model) {
+		if (hasStoreMembership(email, store)) {
+			model.addAttribute("storeSlug", store);
+		}
+	}
+
+	private boolean hasStoreMembership(String email, String store) {
+		return store != null && !store.isBlank()
+			&& membershipService.findMemberPoints(email, store).isPresent();
 	}
 
 	@PostMapping("/member/profile/notification-preferences")

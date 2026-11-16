@@ -5,14 +5,19 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.castfan.dto.HomeViewModel;
+import com.castfan.entity.CastContent;
 import com.castfan.entity.ContentStatus;
 import com.castfan.entity.EventStatus;
+import com.castfan.entity.ShiftSchedule;
 import com.castfan.entity.ShiftStatus;
+import com.castfan.entity.Store;
+import com.castfan.entity.StoreMembershipStatus;
 import com.castfan.entity.PromotionStatus;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
@@ -22,6 +27,7 @@ import com.castfan.repository.CastProfileRepository;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.ShiftScheduleRepository;
 import com.castfan.repository.StoreEventRepository;
+import com.castfan.repository.StoreMembershipRepository;
 import com.castfan.repository.StorePromotionRepository;
 import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
@@ -42,6 +48,7 @@ public class HomeService {
 	private final ShiftScheduleRepository shiftScheduleRepository;
 	private final StoreEventRepository storeEventRepository;
 	private final StorePromotionRepository storePromotionRepository;
+	private final StoreMembershipRepository storeMembershipRepository;
 	private final UserAccountRepository userAccountRepository;
 	private final CastProfileRepository castProfileRepository;
 	private final MemberProfileRepository memberProfileRepository;
@@ -57,6 +64,7 @@ public class HomeService {
 		ShiftScheduleRepository shiftScheduleRepository,
 		StoreEventRepository storeEventRepository,
 		StorePromotionRepository storePromotionRepository,
+		StoreMembershipRepository storeMembershipRepository,
 		UserAccountRepository userAccountRepository,
 		CastProfileRepository castProfileRepository,
 		MemberProfileRepository memberProfileRepository,
@@ -71,6 +79,7 @@ public class HomeService {
 		this.shiftScheduleRepository = shiftScheduleRepository;
 		this.storeEventRepository = storeEventRepository;
 		this.storePromotionRepository = storePromotionRepository;
+		this.storeMembershipRepository = storeMembershipRepository;
 		this.userAccountRepository = userAccountRepository;
 		this.castProfileRepository = castProfileRepository;
 		this.memberProfileRepository = memberProfileRepository;
@@ -84,16 +93,28 @@ public class HomeService {
 
 	@Transactional(readOnly = true)
 	public HomeViewModel load(String authenticatedEmail) {
+		return load(authenticatedEmail, storeRepository.findFirstByActiveTrueOrderByIdAsc().orElse(null), false);
+	}
+
+	@Transactional(readOnly = true)
+	public HomeViewModel load(String authenticatedEmail, String storeSlug) {
+		var store = storeRepository.findBySlugAndActiveTrue(storeSlug)
+			.orElseThrow(() -> new DomainRuleViolationException("Store not found."));
+		return load(authenticatedEmail, store, true);
+	}
+
+	private HomeViewModel load(String authenticatedEmail, Store store, boolean scopedToStore) {
 		var now = Instant.now();
-		var store = storeRepository.findFirstByActiveTrueOrderByIdAsc();
-		var zone = store.map(value -> safeZone(value.getTimezone())).orElse(DEFAULT_ZONE);
+		var zone = store == null ? DEFAULT_ZONE : safeZone(store.getTimezone());
 		var today = LocalDate.ofInstant(now, zone);
 		var dayStartsAt = today.atStartOfDay(zone).toInstant();
 		var dayEndsAt = today.plusDays(1).atStartOfDay(zone).toInstant();
 
-		var schedules = store.map(value -> shiftScheduleRepository.findPublicShiftsInRange(
-			value.getId(), ShiftStatus.APPROVED, UserStatus.ACTIVE, dayStartsAt, dayEndsAt
-		)).orElseGet(java.util.List::of);
+		var schedules = store == null
+			? List.<ShiftSchedule>of()
+			: shiftScheduleRepository.findPublicShiftsInRange(
+				store.getId(), ShiftStatus.APPROVED, UserStatus.ACTIVE, dayStartsAt, dayEndsAt
+			);
 		var profileIds = schedules.stream()
 			.map(schedule -> schedule.getStoreCast().getCastProfile().getId())
 			.distinct()
@@ -115,11 +136,12 @@ public class HomeService {
 			})
 			.toList();
 
-		var events = storeEventRepository.findUpcomingPublicEvents(
-			EventStatus.PUBLISHED,
-			now,
-			PageRequest.of(0, 3)
-		).stream()
+		var eventEntities = store == null
+			? storeEventRepository.findUpcomingPublicEvents(
+				EventStatus.PUBLISHED, now, PageRequest.of(0, 3))
+			: storeEventRepository.findAllByStoreIdAndStatusAndEndsAtAfterOrderByStartsAtAsc(
+				store.getId(), EventStatus.PUBLISHED, now, PageRequest.of(0, 3));
+		var events = eventEntities.stream()
 			.map(event -> new HomeViewModel.FeaturedEvent(
 				event.getId(),
 				event.getTitle(),
@@ -129,40 +151,60 @@ public class HomeService {
 				storeEventImageService.publicImageUrl(event)
 			))
 			.toList();
-		var promotions = storePromotionRepository.findCurrentPublicPromotions(
-			now, PromotionStatus.ACTIVE, PageRequest.of(0, 3)).stream()
+
+		var promotionEntities = store == null
+			? storePromotionRepository.findCurrentPublicPromotions(
+				now, PromotionStatus.ACTIVE, PageRequest.of(0, 3))
+			: storePromotionRepository.findAllByStoreIdAndStatusAndStartsAtLessThanEqualAndEndsAtAfterOrderByStartsAtDesc(
+				store.getId(), PromotionStatus.ACTIVE, now, now, PageRequest.of(0, 3));
+		var promotions = promotionEntities.stream()
 			.map(promotion -> {
 				var promotionZone = safeZone(promotion.getStore().getTimezone());
 				return new HomeViewModel.FeaturedPromotion(
 					promotion.getId(), promotion.getTitle(), promotion.getDescription(), promotion.getCode(),
-					storePromotionImageService.publicUrl(promotion), SystemStoreService.DISPLAY_NAME,
+					storePromotionImageService.publicUrl(promotion), promotion.getStore().getName(),
 					"Ends " + EVENT_DATE_FORMAT.format(promotion.getEndsAt().atZone(promotionZone))
 				);
 			})
 			.toList();
-		var member = activeMember(authenticatedEmail);
-		var feed = member.map(profile -> castContentRepository.findFeedForMember(
-			profile.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE, PageRequest.of(0, 6)
-		).stream().map(content -> {
-			var access = contentAccessService.access(content, authenticatedEmail);
-			var castProfile = content.getCastProfile();
-			return new HomeViewModel.FeedItem(
-				content.getId(), castProfile.getId(), castProfile.getStageName(), initials(castProfile.getStageName()),
-				castProfile.getAvatarUrl(), content.getTitle(), access.accessible() ? preview(content.getBody()) : null,
-				access.accessible() ? castContentImageService.publicUrl(content) : null, contentAccessService.audienceLabel(content),
-				EVENT_DATE_FORMAT.format(content.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
-			);
-		}).toList()).orElseGet(java.util.List::of);
 
 		return new HomeViewModel(
 			memberName(authenticatedEmail),
 			DAY_FORMAT.format(today),
-			SystemStoreService.DISPLAY_NAME,
+			store == null ? SystemStoreService.DISPLAY_NAME : store.getName(),
 			promotions,
 			cast,
 			events,
-			feed
+			feed(authenticatedEmail, store, scopedToStore)
 		);
+	}
+
+	private List<HomeViewModel.FeedItem> feed(String authenticatedEmail, Store store, boolean scopedToStore) {
+		var member = activeMember(authenticatedEmail);
+		if (member.isEmpty()) {
+			return List.of();
+		}
+		var profile = member.get();
+		var content = scopedToStore && store != null
+			? storeMembershipRepository.findByStoreAndMemberProfile(store, profile)
+				.filter(membership -> membership.getStatus() == StoreMembershipStatus.ACTIVE)
+				.map(membership -> castContentRepository.findFeedForStoreMembership(
+					store.getId(), membership.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE,
+					PageRequest.of(0, 6)))
+				.orElseGet(List::of)
+			: castContentRepository.findFeedForMember(
+				profile.getId(), ContentStatus.PUBLISHED, UserStatus.ACTIVE, PageRequest.of(0, 6));
+		return content.stream().map(item -> {
+			var access = contentAccessService.access(item, authenticatedEmail);
+			var castProfile = item.getCastProfile();
+			return new HomeViewModel.FeedItem(
+				item.getId(), castProfile.getId(), castProfile.getStageName(), initials(castProfile.getStageName()),
+				castProfile.getAvatarUrl(), item.getTitle(), access.accessible() ? preview(item.getBody()) : null,
+				access.accessible() ? castContentImageService.publicUrl(item) : null,
+				contentAccessService.audienceLabel(item),
+				EVENT_DATE_FORMAT.format(item.getPublishedAt().atZone(DEFAULT_ZONE)), access.accessible()
+			);
+		}).toList();
 	}
 
 	private java.util.Optional<com.castfan.entity.MemberProfile> activeMember(String email) {

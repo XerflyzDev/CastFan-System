@@ -104,7 +104,7 @@ class HomeServiceTests {
 		var home = homeService.load(member.getEmail());
 
 		assertThat(home.memberName()).isEqualTo("Aruna");
-		assertThat(home.storeName()).isEqualTo("CastFan");
+		assertThat(home.storeName()).isEqualTo("Hoshi Cafe");
 		assertThat(home.workingToday()).singleElement().satisfies(cast -> {
 			assertThat(cast.name()).isEqualTo("Mina");
 			assertThat(cast.followed()).isTrue();
@@ -118,6 +118,29 @@ class HomeServiceTests {
 			assertThat(item.bodyPreview()).contains("following Mina");
 			assertThat(item.accessible()).isTrue();
 		});
+	}
+
+	@Test
+	void storeScopedHomeOnlyUsesTheSelectedStoreEvents() {
+		var member = account("member-scoped@test.local", "Scoped Member", UserRole.MEMBER);
+		memberProfileRepository.save(new MemberProfile(member, null, null));
+		var firstStore = store("First Scope Cafe", "first-scope");
+		var secondStore = store("Second Scope Cafe", "second-scope");
+		var startsAt = LocalDate.now(STORE_ZONE).plusDays(3).atTime(16, 0).atZone(STORE_ZONE).toInstant();
+		storeEventRepository.save(new StoreEvent(
+			firstStore, firstStore.getOwner(), "First Scope Event", "First event", null,
+			startsAt, startsAt.plusSeconds(3600), EventStatus.PUBLISHED
+		));
+		storeEventRepository.save(new StoreEvent(
+			secondStore, secondStore.getOwner(), "Second Scope Event", "Second event", null,
+			startsAt, startsAt.plusSeconds(3600), EventStatus.PUBLISHED
+		));
+
+		var home = homeService.load(member.getEmail(), firstStore.getSlug());
+
+		assertThat(home.storeName()).isEqualTo("First Scope Cafe");
+		assertThat(home.featuredEvents()).extracting(event -> event.title())
+			.containsExactly("First Scope Event");
 	}
 
 	@Test
@@ -143,6 +166,11 @@ class HomeServiceTests {
 		var home = homeService.load(castAccount.getEmail());
 
 		assertThat(home.memberName()).isEqualTo("New Stage Name");
+	}
+
+	private Store store(String name, String slug) {
+		var owner = account(slug + "-owner@test.local", name + " Owner", UserRole.OWNER);
+		return storeRepository.save(new Store(owner, name, slug, null, null, STORE_ZONE.getId(), true));
 	}
 
 	private UserAccount account(String email, String name, UserRole role) {

@@ -6,6 +6,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.math.BigDecimal;
 
@@ -143,9 +144,22 @@ class MultiStoreWorkflowTests {
 		mockMvc.perform(get("/s/{slug}/home", store.getSlug())
 				.with(user(memberAccount.getLoginIdentifier()).roles("MEMBER")))
 			.andExpect(status().isOk())
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("Member navigation")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("/s/" + store.getSlug() + "/schedule")))
-			.andExpect(content().string(org.hamcrest.Matchers.containsString("You are viewing your store home")));
+			.andExpect(view().name("index"))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Good morning,")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Offers for you")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Working Today")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString("Following updates")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(store.getName())))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(
+				"/s/" + store.getSlug() + "/schedule")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(
+				"/s/" + store.getSlug() + "/following")))
+			.andExpect(content().string(org.hamcrest.Matchers.containsString(
+				"/s/" + store.getSlug() + "/account")))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("storefront-hero"))))
+			.andExpect(content().string(org.hamcrest.Matchers.not(
+				org.hamcrest.Matchers.containsString("You are viewing your store home"))));
 	}
 
 	@Test

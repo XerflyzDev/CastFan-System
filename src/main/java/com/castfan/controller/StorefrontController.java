@@ -6,6 +6,7 @@ import com.castfan.entity.UserRole;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.StoreMembershipRepository;
 import com.castfan.repository.UserAccountRepository;
+import com.castfan.service.HomeService;
 import com.castfan.service.StoreEntryService;
 import com.castfan.service.StorefrontService;
 import jakarta.servlet.http.HttpSession;
@@ -21,14 +22,15 @@ import org.springframework.web.server.ResponseStatusException;
 public class StorefrontController {
 	private final StorefrontService storefronts;
 	private final StoreEntryService entries;
+	private final HomeService homeService;
 	private final UserAccountRepository accounts;
 	private final MemberProfileRepository members;
 	private final StoreMembershipRepository memberships;
 
-	public StorefrontController(StorefrontService storefronts, StoreEntryService entries,
+	public StorefrontController(StorefrontService storefronts, StoreEntryService entries, HomeService homeService,
 		UserAccountRepository accounts, MemberProfileRepository members, StoreMembershipRepository memberships) {
-		this.storefronts = storefronts; this.entries = entries; this.accounts = accounts;
-		this.members = members; this.memberships = memberships;
+		this.storefronts = storefronts; this.entries = entries; this.homeService = homeService;
+		this.accounts = accounts; this.members = members; this.memberships = memberships;
 	}
 
 	@GetMapping("/s/{slug}")
@@ -45,10 +47,10 @@ public class StorefrontController {
 	public String memberHome(@PathVariable String slug, Principal principal, Model model) {
 		var view = load(slug);
 		if (!isJoined(principal, view.store().id())) return "redirect:/s/" + slug;
-		model.addAttribute("storefront", view);
+		model.addAttribute("pageTitle", view.store().name());
 		model.addAttribute("storeSlug", slug);
-		model.addAttribute("memberJoined", true);
-		return "store/front";
+		model.addAttribute("home", homeService.load(principal.getName(), slug));
+		return "index";
 	}
 
 	@PostMapping("/s/{slug}/join")

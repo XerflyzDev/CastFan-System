@@ -50,7 +50,7 @@ flowchart LR
 - `/signup/store` — Owner and Store registration in one transaction.
 - `/s/{slug}` — public Store landing page and POST-only Member join.
 - `/account/stores` — Member's joined Stores; QR guidance when empty.
-- `/s/{slug}/home`, `/schedule`, `/casts`, `/following`, `/membership`, `/notifications` — Store-scoped Member experience.
+- `/s/{slug}/home`, `/schedule`, `/casts`, `/following`, `/membership`, `/notifications`, `/account` — Store-scoped Member experience.
 - `/owner/store/settings` — editable Store name, description, and address; immutable slug.
 - `/owner/store/qr` — view or download permanent Store QR.
 - `/owner/cast` — create, reset, activate, or deactivate Store-specific Cast accounts.

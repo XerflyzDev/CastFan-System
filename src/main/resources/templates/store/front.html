@@ -19,7 +19,7 @@
         <div class="screen-content storefront-content">
             <div class="top-actions">
                 <a class="wordmark" th:href="@{/}">CastFan</a>
-                <a class="round-button" th:href="${memberJoined} ? @{/account} : @{/login(store=${storefront.store.slug})}"
+                <a class="round-button" th:href="${memberJoined} ? @{/s/{slug}/account(slug=${storefront.store.slug})} : @{/login(store=${storefront.store.slug})}"
                    th:attr="aria-label=${memberJoined ? 'Open Profile' : 'Sign in'},title=${memberJoined ? 'Profile' : 'Sign in'}">
                     <i class="bi" th:classappend="${memberJoined ? 'bi-person' : 'bi-box-arrow-in-right'}" aria-hidden="true"></i>
                 </a>

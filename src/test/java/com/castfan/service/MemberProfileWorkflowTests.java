@@ -13,12 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.castfan.entity.MemberProfile;
+import com.castfan.entity.Store;
 import com.castfan.entity.StoreMembership;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.MemberProfileRepository;
 import com.castfan.repository.StoreMembershipRepository;
+import com.castfan.repository.StoreRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,7 @@ class MemberProfileWorkflowTests {
 	@Autowired private UserAccountRepository userAccountRepository;
 	@Autowired private MemberProfileRepository memberProfileRepository;
 	@Autowired private StoreMembershipRepository storeMembershipRepository;
+	@Autowired private StoreRepository storeRepository;
 	@Autowired private SystemStoreService systemStoreService;
 	@Autowired private ProfileService profileService;
 
@@ -57,6 +60,44 @@ class MemberProfileWorkflowTests {
 		memberProfile = profileService.createMemberProfile(member);
 		var store = systemStoreService.findActive().orElseThrow();
 		storeMembershipRepository.save(new StoreMembership(store, memberProfile));
+	}
+
+	@Test
+	void memberAccountCanStayScopedToTheStoreTheyAreViewing() throws Exception {
+		var store = createStoreMembership(250);
+
+		mockMvc.perform(get("/s/{slug}/account", store.getSlug()).with(memberUser()))
+			.andExpect(status().isOk())
+			.andExpect(view().name("account/index"))
+			.andExpect(content().string(containsString(store.getName())))
+			.andExpect(content().string(containsString("<strong>250</strong>")))
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/account\"")))
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/home\"")))
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/schedule\"")))
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/following\"")))
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/membership\"")))
+			.andExpect(content().string(containsString(
+				"href=\"/s/" + store.getSlug() + "/notification-settings\"")));
+	}
+
+	@Test
+	void storefrontProfileLinkKeepsTheStoreContext() throws Exception {
+		var store = createStoreMembership(0);
+
+		mockMvc.perform(get("/s/{slug}/home", store.getSlug()).with(memberUser()))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/account\"")));
+	}
+
+	@Test
+	void memberProfileEditKeepsTheStoreContext() throws Exception {
+		var store = createStoreMembership(0);
+
+		mockMvc.perform(get("/member/profile").param("store", store.getSlug()).with(memberUser()))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("href=\"/s/" + store.getSlug() + "/account\"")))
+			.andExpect(content().string(containsString(
+				"action=\"/member/profile?store=" + store.getSlug() + "\"")));
 	}
 
 	@Test
@@ -178,6 +219,21 @@ class MemberProfileWorkflowTests {
 				.param("preference", "eventNotifications")
 				.param("enabled", "false"))
 			.andExpect(status().isForbidden());
+	}
+
+	private Store createStoreMembership(long points) {
+		var suffix = Long.toString(System.nanoTime());
+		var owner = userAccountRepository.saveAndFlush(new UserAccount(
+			"store-owner-" + suffix + "@castfan.test", "encoded", "Store Owner",
+			UserRole.OWNER, UserStatus.ACTIVE
+		));
+		var store = storeRepository.saveAndFlush(new Store(
+			owner, "Aizen Test Cafe " + suffix, "aizen-test-" + suffix, null, null, "Asia/Bangkok", true
+		));
+		var membership = new StoreMembership(store, memberProfile);
+		membership.applyPointsDelta(points);
+		storeMembershipRepository.saveAndFlush(membership);
+		return store;
 	}
 
 	private UserRequestPostProcessor memberUser() {

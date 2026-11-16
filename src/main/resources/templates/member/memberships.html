@@ -17,8 +17,8 @@
     <div class="ambient-top" aria-hidden="true"></div>
     <div class="screen-content shared-page-content">
     <div class="top-actions">
-        <a class="wordmark" th:href="@{/}">CastFan</a>
-        <a class="round-button page-back-button" th:href="@{/account}" aria-label="Back to Profile" title="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
+        <a class="wordmark" th:href="${storeSlug != null} ? @{/s/{slug}/home(slug=${storeSlug})} : @{/}">CastFan</a>
+        <a class="round-button page-back-button" th:href="${storeSlug != null} ? @{/s/{slug}/account(slug=${storeSlug})} : @{/account}" aria-label="Back to Profile" title="Back to Profile"><i class="bi bi-arrow-left" aria-hidden="true"></i></a>
     </div>
 
     <header class="shared-page-heading">

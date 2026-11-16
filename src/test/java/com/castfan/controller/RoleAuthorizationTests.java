@@ -98,6 +98,8 @@ class RoleAuthorizationTests {
 		mockMvc.perform(get("/member/following").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isOk())
 			.andExpect(view().name("member/following"));
+		mockMvc.perform(get("/s/castfan/account").with(user(cast.getEmail()).roles("CAST")))
+			.andExpect(status().isForbidden());
 		mockMvc.perform(get("/owner").with(user(cast.getEmail()).roles("CAST")))
 			.andExpect(status().isForbidden());
 	}

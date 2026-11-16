@@ -191,6 +191,18 @@ public class MembershipService {
 	}
 
 	@Transactional(readOnly = true)
+	public Optional<MembershipPointsSummary> findMemberPoints(String authenticatedMemberEmail, String storeSlug) {
+		var member = requireActiveMember(authenticatedMemberEmail);
+		if (storeSlug == null || storeSlug.isBlank()) {
+			return Optional.empty();
+		}
+		return storeRepository.findBySlugAndActiveTrue(storeSlug)
+			.flatMap(store -> storeMembershipRepository.findByStoreAndMemberProfile(store, member))
+			.filter(membership -> membership.getStatus() == StoreMembershipStatus.ACTIVE)
+			.map(this::pointsSummary);
+	}
+
+	@Transactional(readOnly = true)
 	public MembershipPointsSummary memberPoints(String authenticatedMemberEmail) {
 		return findMemberPoints(authenticatedMemberEmail)
 			.orElseThrow(() -> new DomainRuleViolationException("Join a store before viewing membership."));
@@ -362,6 +374,7 @@ public class MembershipService {
 		return new MembershipPointsSummary(
 			membership.getMemberProfile().getId(),
 			membership.getMemberProfile().getUserAccount().getDisplayName(),
+			membership.getStore().getName(),
 			membership.getPointsBalance(),
 			membership.getTier(),
 			history

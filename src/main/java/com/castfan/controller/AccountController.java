@@ -3,6 +3,8 @@ package com.castfan.controller;
 import java.security.Principal;
 
 import com.castfan.dto.AccountView;
+import com.castfan.dto.MembershipPointsSummary;
+import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.repository.UserAccountRepository;
 import com.castfan.service.AccountService;
@@ -10,6 +12,7 @@ import com.castfan.service.AccountAvatarService;
 import com.castfan.service.DomainRuleViolationException;
 import com.castfan.service.MembershipService;
 import com.castfan.service.ProfileService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.http.CacheControl;
@@ -43,23 +46,25 @@ public class AccountController {
 
 	@GetMapping("/account")
 	public String account(Principal principal, Model model) {
-		var account = userAccountRepository.findByLoginIdentifierIgnoreCase(principal.getName())
-			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+		var account = requireAccount(principal);
 		if (account.getRole() == UserRole.CAST) {
 			return "redirect:/cast/profile";
 		}
-		model.addAttribute("account", AccountView.from(account, accountAvatarService.hasAvatar(account.getEmail())));
-		model.addAttribute(
-			"memberPoints",
-			account.getRole() == UserRole.MEMBER
-				? membershipService.findMemberPoints(account.getEmail()).orElse(null)
-				: null
-		);
-		model.addAttribute(
-			"memberProfile",
-			account.getRole() == UserRole.MEMBER ? profileService.memberProfile(account.getEmail()) : null
-		);
-		return "account/index";
+		var memberPoints = account.getRole() == UserRole.MEMBER
+			? membershipService.findMemberPoints(account.getEmail()).orElse(null)
+			: null;
+		return renderAccount(account, null, memberPoints, model);
+	}
+
+	@GetMapping("/s/{slug}/account")
+	@PreAuthorize("hasRole('MEMBER')")
+	public String storeAccount(@PathVariable String slug, Principal principal, Model model) {
+		var account = requireAccount(principal);
+		var memberPoints = membershipService.findMemberPoints(account.getEmail(), slug).orElse(null);
+		if (memberPoints == null) {
+			return "redirect:/s/" + slug;
+		}
+		return renderAccount(account, slug, memberPoints, model);
 	}
 
 	@GetMapping("/account/avatar")
@@ -83,33 +88,62 @@ public class AccountController {
 	}
 
 	@PostMapping("/account/avatar")
-	public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar, Principal principal,
+	public String uploadAvatar(@RequestParam("avatar") MultipartFile avatar,
+		@RequestParam(name = "store", required = false) String store, Principal principal,
 		RedirectAttributes redirectAttributes) {
 		try {
 			accountAvatarService.upload(principal.getName(), avatar);
-			return "redirect:/account?photoSaved";
+			return accountRedirect(principal.getName(), store, "?photoSaved");
 		} catch (DomainRuleViolationException exception) {
 			redirectAttributes.addFlashAttribute("photoError", exception.getMessage());
-			return "redirect:/account";
+			return accountRedirect(principal.getName(), store, "");
 		}
 	}
 
 	@PostMapping("/account/avatar/remove")
-	public String removeAvatar(Principal principal) {
+	public String removeAvatar(@RequestParam(name = "store", required = false) String store, Principal principal) {
 		accountAvatarService.remove(principal.getName());
-		return "redirect:/account?photoRemoved";
+		return accountRedirect(principal.getName(), store, "?photoRemoved");
 	}
 
 	@PostMapping("/account/name")
-	public String updateDisplayName(@RequestParam("displayName") String displayName, Principal principal,
+	public String updateDisplayName(@RequestParam("displayName") String displayName,
+		@RequestParam(name = "store", required = false) String store, Principal principal,
 		RedirectAttributes redirectAttributes) {
 		try {
 			accountService.updateDisplayName(principal.getName(), displayName);
-			return "redirect:/account?nameSaved";
+			return accountRedirect(principal.getName(), store, "?nameSaved");
 		} catch (DomainRuleViolationException exception) {
 			redirectAttributes.addFlashAttribute("nameError", exception.getMessage());
 			redirectAttributes.addFlashAttribute("attemptedName", displayName);
-			return "redirect:/account";
+			return accountRedirect(principal.getName(), store, "");
 		}
+	}
+
+	private String renderAccount(UserAccount account, String storeSlug, MembershipPointsSummary memberPoints, Model model) {
+		model.addAttribute("account", AccountView.from(account, accountAvatarService.hasAvatar(account.getEmail())));
+		model.addAttribute("memberPoints", memberPoints);
+		model.addAttribute("memberProfile",
+			account.getRole() == UserRole.MEMBER ? profileService.memberProfile(account.getEmail()) : null);
+		model.addAttribute("storeSlug", storeSlug);
+		return "account/index";
+	}
+
+	private String accountRedirect(String email, String store, String query) {
+		if (store != null && !store.isBlank()) {
+			try {
+				if (membershipService.findMemberPoints(email, store).isPresent()) {
+					return "redirect:/s/" + store + "/account" + query;
+				}
+			} catch (DomainRuleViolationException ignored) {
+				// Fall back to the global account page for non-Member or invalid store context.
+			}
+		}
+		return "redirect:/account" + query;
+	}
+
+	private UserAccount requireAccount(Principal principal) {
+		return userAccountRepository.findByLoginIdentifierIgnoreCase(principal.getName())
+			.orElseThrow(() -> new UsernameNotFoundException("Account not found"));
 	}
 }

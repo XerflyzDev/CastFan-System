@@ -39,7 +39,7 @@ class UiConsistencyTests {
 				"<span>Cast Profile</span>",
 				"<span>Profile</span>"
 			)
-			.contains("th:href=\"@{/cast/schedule}\"")
+			.contains("th:href=\"${castStoreSlug != null} ? @{/s/{slug}/schedule(slug=${castStoreSlug})} : @{/member/schedule}\"")
 			.contains("th:href=\"@{/cast/public-profile}\"")
 			.contains("th:href=\"@{/cast/profile}\"")
 			.contains("th:href=\"@{/cast}\"")

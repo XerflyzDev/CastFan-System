@@ -12,10 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.castfan.entity.MemberProfile;
+import com.castfan.entity.StoreMembership;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
 import com.castfan.entity.UserStatus;
 import com.castfan.repository.MemberProfileRepository;
+import com.castfan.repository.StoreMembershipRepository;
 import com.castfan.repository.UserAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,9 +40,12 @@ class MemberProfileWorkflowTests {
 	@Autowired private MockMvc mockMvc;
 	@Autowired private UserAccountRepository userAccountRepository;
 	@Autowired private MemberProfileRepository memberProfileRepository;
+	@Autowired private StoreMembershipRepository storeMembershipRepository;
+	@Autowired private SystemStoreService systemStoreService;
 	@Autowired private ProfileService profileService;
 
 	private UserAccount member;
+	private MemberProfile memberProfile;
 
 	@BeforeEach
 	void setUp() {
@@ -48,7 +54,9 @@ class MemberProfileWorkflowTests {
 			"profile-member-" + suffix + "@castfan.test", "encoded", "Original Member",
 			UserRole.MEMBER, UserStatus.ACTIVE
 		));
-		profileService.createMemberProfile(member);
+		memberProfile = profileService.createMemberProfile(member);
+		var store = systemStoreService.findActive().orElseThrow();
+		storeMembershipRepository.save(new StoreMembership(store, memberProfile));
 	}
 
 	@Test

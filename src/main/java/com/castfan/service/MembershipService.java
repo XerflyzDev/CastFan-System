@@ -3,6 +3,7 @@ package com.castfan.service;
 import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.Optional;
 
 import com.castfan.dto.MemberPointTransactionView;
 import com.castfan.dto.MembershipPointsPreview;
@@ -13,6 +14,7 @@ import com.castfan.entity.MemberPointTransaction;
 import com.castfan.entity.MemberPointTransactionType;
 import com.castfan.entity.MemberProfile;
 import com.castfan.entity.StoreMembership;
+import com.castfan.entity.StoreMembershipStatus;
 import com.castfan.entity.StoreMembershipTier;
 import com.castfan.entity.UserAccount;
 import com.castfan.entity.UserRole;
@@ -180,8 +182,18 @@ public class MembershipService {
 	}
 
 	@Transactional(readOnly = true)
+	public Optional<MembershipPointsSummary> findMemberPoints(String authenticatedMemberEmail) {
+		var member = requireActiveMember(authenticatedMemberEmail);
+		return storeMembershipRepository.findAllByMemberProfileOrderByJoinedAtAsc(member).stream()
+			.filter(membership -> membership.getStatus() == StoreMembershipStatus.ACTIVE)
+			.findFirst()
+			.map(this::pointsSummary);
+	}
+
+	@Transactional(readOnly = true)
 	public MembershipPointsSummary memberPoints(String authenticatedMemberEmail) {
-		return memberPoints(authenticatedMemberEmail, "castfan");
+		return findMemberPoints(authenticatedMemberEmail)
+			.orElseThrow(() -> new DomainRuleViolationException("Join a store before viewing membership."));
 	}
 
 	@Transactional
